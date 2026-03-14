@@ -1,0 +1,24 @@
+{
+  "name": "joyshop-web",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@vant/use": "^1.6.0",
+    "nuxt": "^4.4.2",
+    "vant": "^4.9.22",
+    "vue": "^3.5.30",
+    "vue-router": "^5.0.3"
+  },
+  "devDependencies": {
+    "@vant/auto-import-resolver": "^1.3.0",
+    "@vite-pwa/nuxt": "^1.1.1",
+    "unplugin-vue-components": "^31.0.0"
+  }
+}
