@@ -3,7 +3,7 @@
     <div class="layout-content">
       <slot />
     </div>
-    <van-tabbar v-model="activeTab" route>
+    <van-tabbar v-model="activeTab" route class="app-tabbar">
       <van-tabbar-item icon="home-o" to="/">首页</van-tabbar-item>
       <van-tabbar-item icon="apps-o" to="/category">分类</van-tabbar-item>
       <van-tabbar-item icon="shopping-cart-o" to="/cart">购物车</van-tabbar-item>
@@ -27,5 +27,13 @@ const activeTab = ref(0)
 .layout-content {
   flex: 1;
   padding-bottom: 50px;
+}
+
+/* PC 端限制 tabbar 宽度居中 */
+.app-tabbar :deep(.van-tabbar) {
+  max-width: 480px;
+  left: 50% !important;
+  transform: translateX(-50%);
+  right: auto !important;
 }
 </style>

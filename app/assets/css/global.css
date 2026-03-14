@@ -22,3 +22,11 @@ html, body {
   position: relative;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
 }
+
+/* 固定定位元素（tabbar等）限制在手机宽度内 */
+.van-tabbar {
+  max-width: 480px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  right: auto !important;
+}
