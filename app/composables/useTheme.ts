@@ -1,11 +1,6 @@
-type ThemeMode = 'system' | 'light' | 'dark'
+export type ThemeMode = 'system' | 'light' | 'dark'
 
 const STORAGE_KEY = 'joyshop-theme'
-
-const themeMode = ref<ThemeMode>('system')
-const isDark = ref(false)
-
-let initialized = false
 
 function getSystemDark(): boolean {
   if (import.meta.server) return false
@@ -29,7 +24,11 @@ function applyTheme(dark: boolean) {
 }
 
 export function useTheme() {
-  if (!initialized && import.meta.client) {
+  const themeMode = useState<ThemeMode>('theme-mode', () => 'system')
+  const isDark = useState<boolean>('theme-dark', () => false)
+
+  if (import.meta.client) {
+    // Read from localStorage on first client load
     const saved = localStorage.getItem(STORAGE_KEY) as ThemeMode | null
     if (saved && ['system', 'light', 'dark'].includes(saved)) {
       themeMode.value = saved
@@ -45,8 +44,6 @@ export function useTheme() {
         applyTheme(isDark.value)
       }
     })
-
-    initialized = true
   }
 
   function setTheme(mode: ThemeMode) {
