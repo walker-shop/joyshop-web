@@ -32,6 +32,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://adminshop.walker-learn.xyz/api',
+      tenantCode: process.env.NUXT_PUBLIC_TENANT_CODE || 'joyshop',
+      tenantId: process.env.NUXT_PUBLIC_TENANT_ID || '3',
     },
   },
 

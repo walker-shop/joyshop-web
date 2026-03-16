@@ -56,6 +56,7 @@
 
 <script setup lang="ts">
 const config = useRuntimeConfig()
+const { tenantId } = useTenant()
 const searchValue = ref('')
 const refreshing = ref(false)
 
@@ -72,6 +73,7 @@ async function fetchBanners() {
   try {
     const res = await $fetch<{ code: number; data: { data: Banner[] } }>(
       `${config.public.apiBase}/v1/banners`,
+      { params: { tenant_id: tenantId } },
     )
     if (res.code === 200 && res.data?.data) {
       banners.value = res.data.data
