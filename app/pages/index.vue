@@ -12,7 +12,7 @@
       <van-swipe-item v-for="item in banners" :key="item.id">
         <van-image
           width="100%"
-          height="150"
+          height="200"
           fit="cover"
           :src="item.image"
           @click="item.url && navigateTo(item.url)"
