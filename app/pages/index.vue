@@ -8,11 +8,15 @@
       @click="navigateTo('/search')"
     />
 
-    <van-swipe :autoplay="3000" lazy-render class="home-swiper">
+    <van-swipe v-if="banners.length" :autoplay="3000" lazy-render class="home-swiper">
       <van-swipe-item v-for="item in banners" :key="item.id">
-        <div class="swipe-item" :style="{ backgroundColor: item.color }">
-          {{ item.text }}
-        </div>
+        <van-image
+          width="100%"
+          height="150"
+          fit="cover"
+          :src="item.image"
+          @click="item.url && navigateTo(item.url)"
+        />
       </van-swipe-item>
     </van-swipe>
 
@@ -51,14 +55,33 @@
 </template>
 
 <script setup lang="ts">
+const config = useRuntimeConfig()
 const searchValue = ref('')
 const refreshing = ref(false)
 
-const banners = ref([
-  { id: 1, color: '#0ea5a0', text: '新品上市' },
-  { id: 2, color: '#f44336', text: '限时特惠' },
-  { id: 3, color: '#ff9800', text: '品牌精选' },
-])
+interface Banner {
+  id: number
+  image: string
+  url: string
+  index: number
+}
+
+const banners = ref<Banner[]>([])
+
+async function fetchBanners() {
+  try {
+    const res = await $fetch<{ code: number; data: { data: Banner[] } }>(
+      `${config.public.apiBase}/v1/banners`,
+    )
+    if (res.code === 200 && res.data?.data) {
+      banners.value = res.data.data
+    }
+  } catch (e) {
+    console.warn('Failed to fetch banners:', e)
+  }
+}
+
+await fetchBanners()
 
 const categories = ref([
   { name: '手机', icon: 'phone-o' },
@@ -73,10 +96,9 @@ const categories = ref([
 
 const products = ref<any[]>([])
 
-function onRefresh() {
-  setTimeout(() => {
-    refreshing.value = false
-  }, 1000)
+async function onRefresh() {
+  await fetchBanners()
+  refreshing.value = false
 }
 </script>
 
@@ -90,16 +112,6 @@ function onRefresh() {
   margin: 8px 12px;
   border-radius: 8px;
   overflow: hidden;
-}
-
-.swipe-item {
-  height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 20px;
-  font-weight: bold;
 }
 
 .category-grid {

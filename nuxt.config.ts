@@ -29,12 +29,26 @@ export default defineNuxtConfig({
     transpile: ['vant'],
   },
 
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://adminshop.walker-learn.xyz/api',
+    },
+  },
+
   vite: {
     plugins: [
       Components({
         resolvers: [VantResolver()],
       }),
     ],
+    server: {
+      proxy: {
+        '/api': {
+          target: 'https://adminshop.walker-learn.xyz',
+          changeOrigin: true,
+        },
+      },
+    },
   },
 
   pwa: {
