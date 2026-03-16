@@ -82,7 +82,8 @@ function onRefresh() {
 
 <style scoped>
 .home-page {
-  background-color: #f7f8fa;
+  background-color: var(--color-bg-page);
+  transition: var(--theme-transition);
 }
 
 .home-swiper {
@@ -103,7 +104,8 @@ function onRefresh() {
 
 .category-grid {
   margin: 8px 0;
-  background-color: #fff;
+  background-color: var(--color-bg-card);
+  transition: var(--theme-transition);
 }
 
 .section-header {
@@ -113,7 +115,7 @@ function onRefresh() {
 .section-title {
   font-size: 16px;
   font-weight: bold;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .product-list {

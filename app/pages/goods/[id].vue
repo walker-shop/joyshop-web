@@ -86,9 +86,10 @@ function onBuyNow() {
 
 <style scoped>
 .goods-detail {
-  background-color: #fff;
+  background-color: var(--color-bg-card);
   min-height: 100vh;
   padding-bottom: 60px;
+  transition: var(--theme-transition);
 }
 
 .goods-swiper {
@@ -102,7 +103,7 @@ function onBuyNow() {
 .goods-price {
   display: flex;
   align-items: baseline;
-  color: #ee0a24;
+  color: var(--color-price);
   margin-bottom: 8px;
 }
 
@@ -118,21 +119,21 @@ function onBuyNow() {
 .price-original {
   margin-left: 8px;
   font-size: 14px;
-  color: #999;
+  color: var(--color-text-tertiary);
   text-decoration: line-through;
 }
 
 .goods-name {
   font-size: 16px;
   font-weight: bold;
-  color: #333;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
   line-height: 1.4;
 }
 
 .goods-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
   line-height: 1.6;
 }
 </style>

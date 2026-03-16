@@ -21,7 +21,8 @@ const activeTab = ref(0)
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f7f8fa;
+  background-color: var(--color-bg-page);
+  transition: var(--theme-transition);
 }
 
 .layout-content {

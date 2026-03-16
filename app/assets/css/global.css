@@ -4,23 +4,87 @@
   box-sizing: border-box;
 }
 
+/* ========== Theme Variables ========== */
+:root {
+  /* Primary */
+  --color-primary: #0ea5a0;
+  --color-primary-dark: #0d8f8b;
+
+  /* Background */
+  --color-bg-page: #f7f8fa;
+  --color-bg-card: #ffffff;
+  --color-bg-sidebar: #f7f8fa;
+  --color-bg-viewport: #e8e8ed;
+
+  /* Text */
+  --color-text-primary: #333333;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #999999;
+  --color-text-inverse: #ffffff;
+
+  /* Border & Divider */
+  --color-border: #ebedf0;
+
+  /* Component specific */
+  --color-price: #ee0a24;
+  --color-header-gradient-start: #0ea5a0;
+  --color-header-gradient-end: #0d8f8b;
+  --color-navbar-bg: #ffffff;
+  --color-tabbar-bg: #ffffff;
+  --color-search-bg: #f7f8fa;
+
+  /* Shadow */
+  --shadow-app: 0 0 40px rgba(0, 0, 0, 0.15);
+
+  /* Transition */
+  --theme-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+html.dark {
+  --color-primary: #2dd4bf;
+  --color-primary-dark: #14b8a6;
+
+  --color-bg-page: #0a0a1a;
+  --color-bg-card: #1a1a2e;
+  --color-bg-sidebar: #12121f;
+  --color-bg-viewport: #000000;
+
+  --color-text-primary: #e5e5e5;
+  --color-text-secondary: #a3a3a3;
+  --color-text-tertiary: #737373;
+  --color-text-inverse: #0a0a1a;
+
+  --color-border: #2a2a3e;
+
+  --color-price: #ff6b6b;
+  --color-header-gradient-start: #1a3a4a;
+  --color-header-gradient-end: #0f2a35;
+  --color-navbar-bg: #16162a;
+  --color-tabbar-bg: #16162a;
+  --color-search-bg: #1a1a2e;
+
+  --shadow-app: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
 html, body {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial,
     'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  background-color: #0a0a1a;
+  background-color: var(--color-bg-viewport);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: var(--theme-transition);
 }
 
 #__nuxt {
   max-width: 480px;
   margin: 0 auto;
-  background-color: #f7f8fa;
+  background-color: var(--color-bg-page);
   min-height: 100vh;
   position: relative;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-app);
+  transition: var(--theme-transition);
 }
 
 /* 固定定位元素（tabbar等）限制在手机宽度内 */
@@ -29,4 +93,124 @@ html, body {
   left: 50% !important;
   transform: translateX(-50%) !important;
   right: auto !important;
+}
+
+/* ========== Vant Dark Mode Overrides ========== */
+html.dark .van-tabbar {
+  background-color: var(--color-tabbar-bg) !important;
+  border-top-color: var(--color-border) !important;
+}
+
+html.dark .van-tabbar-item {
+  color: var(--color-text-tertiary);
+}
+
+html.dark .van-tabbar-item--active {
+  color: var(--color-primary);
+}
+
+html.dark .van-nav-bar {
+  background-color: var(--color-navbar-bg);
+  border-bottom-color: var(--color-border);
+}
+
+html.dark .van-nav-bar__title {
+  color: var(--color-text-primary);
+}
+
+html.dark .van-nav-bar__arrow {
+  color: var(--color-text-primary);
+}
+
+html.dark .van-cell {
+  background-color: var(--color-bg-card);
+  color: var(--color-text-primary);
+}
+
+html.dark .van-cell::after {
+  border-color: var(--color-border);
+}
+
+html.dark .van-cell__title {
+  color: var(--color-text-primary);
+}
+
+html.dark .van-cell__right-icon {
+  color: var(--color-text-tertiary);
+}
+
+html.dark .van-cell-group--inset {
+  background-color: var(--color-bg-card);
+}
+
+html.dark .van-search {
+  background-color: var(--color-bg-page);
+}
+
+html.dark .van-search__content {
+  background-color: var(--color-search-bg);
+}
+
+html.dark .van-search__field .van-field__control {
+  color: var(--color-text-primary);
+}
+
+html.dark .van-grid-item__content {
+  background-color: var(--color-bg-card);
+}
+
+html.dark .van-grid-item__text {
+  color: var(--color-text-primary);
+}
+
+html.dark .van-grid-item__icon {
+  color: var(--color-text-secondary);
+}
+
+html.dark .van-sidebar {
+  background-color: var(--color-bg-sidebar);
+}
+
+html.dark .van-sidebar-item {
+  background-color: var(--color-bg-sidebar);
+  color: var(--color-text-secondary);
+}
+
+html.dark .van-sidebar-item--select {
+  background-color: var(--color-bg-card);
+  color: var(--color-primary);
+}
+
+html.dark .van-sidebar-item--select::before {
+  background-color: var(--color-primary);
+}
+
+html.dark .van-empty__description {
+  color: var(--color-text-tertiary);
+}
+
+html.dark .van-card {
+  background-color: var(--color-bg-card);
+  color: var(--color-text-primary);
+}
+
+html.dark .van-card__title {
+  color: var(--color-text-primary);
+}
+
+html.dark .van-action-bar {
+  background-color: var(--color-bg-card);
+  border-top-color: var(--color-border);
+}
+
+html.dark .van-action-bar-icon {
+  color: var(--color-text-secondary);
+}
+
+html.dark .van-pull-refresh {
+  color: var(--color-text-secondary);
+}
+
+html.dark .van-cell__label {
+  color: var(--color-text-tertiary);
 }

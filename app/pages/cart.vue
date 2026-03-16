@@ -17,8 +17,9 @@
 
 <style scoped>
 .cart-page {
-  background-color: #fff;
+  background-color: var(--color-bg-card);
   min-height: 100vh;
+  transition: var(--theme-transition);
 }
 
 .go-shop-btn {

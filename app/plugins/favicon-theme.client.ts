@@ -1,4 +1,6 @@
 export default defineNuxtPlugin(() => {
+  const { isDark } = useTheme()
+
   const setFavicon = (dark: boolean) => {
     const theme = dark ? 'dark' : 'light'
     const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
@@ -23,7 +25,6 @@ export default defineNuxtPlugin(() => {
     if (!apple.parentNode) document.head.appendChild(apple)
   }
 
-  const mq = window.matchMedia('(prefers-color-scheme: dark)')
-  setFavicon(mq.matches)
-  mq.addEventListener('change', (e) => setFavicon(e.matches))
+  // Sync favicon with app theme (not just system preference)
+  watch(isDark, (dark) => setFavicon(dark), { immediate: true })
 })

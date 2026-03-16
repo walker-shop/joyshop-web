@@ -100,8 +100,9 @@ const currentSubCategories = computed(() => {
 
 <style scoped>
 .category-page {
-  background-color: #fff;
+  background-color: var(--color-bg-card);
   min-height: 100vh;
+  transition: var(--theme-transition);
 }
 
 .category-body {
@@ -119,6 +120,7 @@ const currentSubCategories = computed(() => {
   flex: 1;
   overflow-y: auto;
   padding: 8px;
-  background-color: #f7f8fa;
+  background-color: var(--color-bg-page);
+  transition: var(--theme-transition);
 }
 </style>
