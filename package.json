@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@phosphor-icons/vue": "^2.2.1",
     "@vant/use": "^1.6.0",
     "nuxt": "^4.4.2",
     "vant": "^4.9.22",
