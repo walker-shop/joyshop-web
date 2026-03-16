@@ -98,15 +98,25 @@ html, body {
 /* ========== Vant Dark Mode Overrides ========== */
 html.dark .van-tabbar {
   background-color: var(--color-tabbar-bg) !important;
-  border-top-color: var(--color-border) !important;
+  border-top: 1px solid var(--color-border) !important;
 }
 
 html.dark .van-tabbar-item {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-tertiary) !important;
+  background-color: transparent !important;
 }
 
 html.dark .van-tabbar-item--active {
-  color: var(--color-primary);
+  color: var(--color-primary) !important;
+  background-color: transparent !important;
+}
+
+html.dark .van-tabbar-item__icon {
+  color: inherit !important;
+}
+
+html.dark .van-tabbar-item__text {
+  color: inherit !important;
 }
 
 html.dark .van-nav-bar {
