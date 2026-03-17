@@ -95,10 +95,10 @@ interface Category {
   icon?: string
 }
 
-const S3_ICON = 'https://blog-zwalker-bucket.s3.ap-southeast-1.amazonaws.com/joyshop/cat-icons'
+const { getIconSvg } = useCategoryIcon()
 
 function getCatIcon(name: string): string {
-  return `${S3_ICON}/cat-${encodeURIComponent(name)}.png`
+  return getIconSvg(name)
 }
 
 const allCategories = ref<Category[]>([])
@@ -180,9 +180,10 @@ async function onRefresh() {
 }
 
 .cat-icon {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
+  border-radius: 14px;
 }
 
 .section-header {

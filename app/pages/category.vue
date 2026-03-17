@@ -60,10 +60,11 @@ const categoryProducts = ref<any[]>([])
 const loadingProducts = ref(false)
 const selectedSubId = ref<number | null>(null)
 
-const S3_ICON = 'https://blog-zwalker-bucket.s3.ap-southeast-1.amazonaws.com/joyshop/cat-icons'
+const { getIconSvg } = useCategoryIcon()
 
 function getSubIcon(sub: Category): string {
-  return `${S3_ICON}/cat-${encodeURIComponent(sub.name)}.png`
+  const parent = parentCategories.value[activeIndex.value]
+  return getIconSvg(sub.name, parent?.name)
 }
 
 // Parent categories (level 1)
@@ -177,9 +178,10 @@ if (parentCategories.value.length) {
 }
 
 .sub-cat-icon {
-  width: 36px;
-  height: 36px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
+  border-radius: 14px;
 }
 
 .loading {
