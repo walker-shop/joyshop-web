@@ -116,10 +116,9 @@ async function onRefresh() {
 
 .banner-img {
   width: 100%;
-  max-height: 220px;
+  aspect-ratio: 16 / 9;
   display: block;
-  object-fit: contain;
-  background: var(--color-bg-card, #1a1a2e);
+  object-fit: cover;
 }
 
 .category-grid {
