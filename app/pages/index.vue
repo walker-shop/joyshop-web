@@ -116,8 +116,9 @@ async function onRefresh() {
 
 .banner-img {
   width: 100%;
+  aspect-ratio: 75 / 28;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .category-grid {
