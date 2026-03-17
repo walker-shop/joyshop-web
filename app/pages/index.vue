@@ -95,28 +95,18 @@ interface Category {
   icon?: string
 }
 
-const ICON_MAP: Record<string, string> = {
-  '手机通讯': 'https://img.icons8.com/3d-fluency/94/iphone.png',
-  '电脑办公': 'https://img.icons8.com/3d-fluency/94/laptop.png',
-  '服饰鞋包': 'https://img.icons8.com/3d-fluency/94/t-shirt.png',
-  '家用电器': 'https://img.icons8.com/3d-fluency/94/washing-machine.png',
-  '美妆护肤': 'https://img.icons8.com/3d-fluency/94/lipstick.png',
-  '食品饮料': 'https://img.icons8.com/3d-fluency/94/restaurant.png',
-  '运动户外': 'https://img.icons8.com/3d-fluency/94/basketball.png',
-  '数码配件': 'https://img.icons8.com/3d-fluency/94/headphones.png',
-  '家居家装': 'https://img.icons8.com/3d-fluency/94/sofa.png',
-  '母婴玩具': 'https://img.icons8.com/3d-fluency/94/teddy-bear.png',
+const S3_ICON = 'https://blog-zwalker-bucket.s3.ap-southeast-1.amazonaws.com/joyshop/cat-icons'
+
+function getCatIcon(name: string): string {
+  return `${S3_ICON}/cat-${encodeURIComponent(name)}.png`
 }
 
 const allCategories = ref<Category[]>([])
 const topCategories = computed(() => {
-  const tops = allCategories.value
+  return allCategories.value
     .filter(c => !c.parentId || c.parentId === 0)
     .slice(0, 8)
-  return tops.map(c => ({
-    ...c,
-    icon: ICON_MAP[c.name] || 'apps-o',
-  }))
+    .map(c => ({ ...c, icon: getCatIcon(c.name) }))
 })
 
 async function fetchCategories() {

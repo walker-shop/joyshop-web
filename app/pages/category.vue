@@ -60,46 +60,10 @@ const categoryProducts = ref<any[]>([])
 const loadingProducts = ref(false)
 const selectedSubId = ref<number | null>(null)
 
-const SUB_ICON_MAP: Record<string, string> = {
-  '手机': 'https://img.icons8.com/3d-fluency/94/iphone.png',
-  '手机配件': 'https://img.icons8.com/3d-fluency/94/usb-cable.png',
-  '摄影摄像': 'https://img.icons8.com/3d-fluency/94/camera.png',
-  '智能设备': 'https://img.icons8.com/3d-fluency/94/smartwatch.png',
-  '影音娱乐': 'https://img.icons8.com/3d-fluency/94/headphones.png',
-  '笔记本': 'https://img.icons8.com/3d-fluency/94/laptop.png',
-  '台式机': 'https://img.icons8.com/3d-fluency/94/workstation.png',
-  '显示器': 'https://img.icons8.com/3d-fluency/94/monitor.png',
-  '键鼠外设': 'https://img.icons8.com/3d-fluency/94/keyboard.png',
-  '办公文具': 'https://img.icons8.com/3d-fluency/94/pencil.png',
-  'T恤衬衫': 'https://img.icons8.com/3d-fluency/94/t-shirt.png',
-  '外套夹克': 'https://img.icons8.com/3d-fluency/94/coat.png',
-  '裤装': 'https://img.icons8.com/3d-fluency/94/trousers.png',
-  '内衣袜子': 'https://img.icons8.com/3d-fluency/94/socks.png',
-  '运动鞋': 'https://img.icons8.com/3d-fluency/94/sneakers.png',
-  '休闲鞋': 'https://img.icons8.com/3d-fluency/94/shoe-man.png',
-  '双肩包': 'https://img.icons8.com/3d-fluency/94/backpack.png',
-  '拉杆箱': 'https://img.icons8.com/3d-fluency/94/suitcase.png',
-  '面部护肤': 'https://img.icons8.com/3d-fluency/94/spa.png',
-  '彩妆': 'https://img.icons8.com/3d-fluency/94/lipstick.png',
-  '洗护用品': 'https://img.icons8.com/3d-fluency/94/soap.png',
-  '香水': 'https://img.icons8.com/3d-fluency/94/perfume-bottle.png',
-  '零食坚果': 'https://img.icons8.com/3d-fluency/94/peanuts.png',
-  '茶饮冲调': 'https://img.icons8.com/3d-fluency/94/tea.png',
-  '生鲜水果': 'https://img.icons8.com/3d-fluency/94/apple.png',
-  '粮油调味': 'https://img.icons8.com/3d-fluency/94/rice-bowl.png',
-  '空调': 'https://img.icons8.com/3d-fluency/94/air-conditioner.png',
-  '冰箱': 'https://img.icons8.com/3d-fluency/94/fridge.png',
-  '洗衣机': 'https://img.icons8.com/3d-fluency/94/washing-machine.png',
-  '厨房电器': 'https://img.icons8.com/3d-fluency/94/microwave.png',
-  '清洁电器': 'https://img.icons8.com/3d-fluency/94/vacuum-cleaner.png',
-  '运动服饰': 'https://img.icons8.com/3d-fluency/94/t-shirt.png',
-  '健身器材': 'https://img.icons8.com/3d-fluency/94/dumbbell.png',
-  '户外装备': 'https://img.icons8.com/3d-fluency/94/tent.png',
-  '骑行运动': 'https://img.icons8.com/3d-fluency/94/cycling.png',
-}
+const S3_ICON = 'https://blog-zwalker-bucket.s3.ap-southeast-1.amazonaws.com/joyshop/cat-icons'
 
 function getSubIcon(sub: Category): string {
-  return SUB_ICON_MAP[sub.name] || 'https://img.icons8.com/3d-fluency/94/tag.png'
+  return `${S3_ICON}/cat-${encodeURIComponent(sub.name)}.png`
 }
 
 // Parent categories (level 1)
