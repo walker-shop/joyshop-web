@@ -41,6 +41,8 @@
 <script setup lang="ts">
 import { showToast } from 'vant'
 
+definePageMeta({ layout: 'blank' })
+
 const route = useRoute()
 
 // Mock data — will be replaced with real API
