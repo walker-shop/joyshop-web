@@ -22,10 +22,13 @@
       <van-grid-item
         v-for="cat in topCategories"
         :key="cat.id"
-        :icon="cat.icon"
         :text="cat.name"
         @click="navigateTo(`/category?id=${cat.id}`)"
-      />
+      >
+        <template #icon>
+          <img class="cat-icon" :src="cat.icon" :alt="cat.name" />
+        </template>
+      </van-grid-item>
     </van-grid>
 
     <div class="section-header">
@@ -93,16 +96,16 @@ interface Category {
 }
 
 const ICON_MAP: Record<string, string> = {
-  '手机通讯': 'phone-o',
-  '电脑办公': 'tv-o',
-  '服饰鞋包': 'bag-o',
-  '家用电器': 'desktop-o',
-  '美妆护肤': 'smile-o',
-  '食品饮料': 'coupon-o',
-  '运动户外': 'fire-o',
-  '数码配件': 'audio-o',
-  '家居家装': 'home-o',
-  '母婴玩具': 'gift-o',
+  '手机通讯': 'https://img.icons8.com/3d-fluency/94/iphone.png',
+  '电脑办公': 'https://img.icons8.com/3d-fluency/94/laptop.png',
+  '服饰鞋包': 'https://img.icons8.com/3d-fluency/94/t-shirt.png',
+  '家用电器': 'https://img.icons8.com/3d-fluency/94/washing-machine.png',
+  '美妆护肤': 'https://img.icons8.com/3d-fluency/94/lipstick.png',
+  '食品饮料': 'https://img.icons8.com/3d-fluency/94/restaurant.png',
+  '运动户外': 'https://img.icons8.com/3d-fluency/94/basketball.png',
+  '数码配件': 'https://img.icons8.com/3d-fluency/94/headphones.png',
+  '家居家装': 'https://img.icons8.com/3d-fluency/94/sofa.png',
+  '母婴玩具': 'https://img.icons8.com/3d-fluency/94/teddy-bear.png',
 }
 
 const allCategories = ref<Category[]>([])
@@ -184,6 +187,12 @@ async function onRefresh() {
   margin: 8px 0;
   background-color: var(--color-bg-card);
   transition: var(--theme-transition);
+}
+
+.cat-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .section-header {
