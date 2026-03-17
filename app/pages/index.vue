@@ -20,11 +20,11 @@
 
     <van-grid :column-num="4" :border="false" class="category-grid">
       <van-grid-item
-        v-for="cat in categories"
-        :key="cat.name"
+        v-for="cat in topCategories"
+        :key="cat.id"
         :icon="cat.icon"
         :text="cat.name"
-        @click="navigateTo('/category')"
+        @click="navigateTo(`/category?id=${cat.id}`)"
       />
     </van-grid>
 
@@ -34,7 +34,7 @@
 
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <van-empty
-        v-if="products.length === 0"
+        v-if="!loading && products.length === 0"
         description="暂无商品"
         image="search"
       />
@@ -42,12 +42,13 @@
         <van-card
           v-for="item in products"
           :key="item.id"
-          :price="item.price"
+          :price="item.shopPrice?.toFixed(2)"
           :title="item.name"
-          :thumb="item.image"
+          :thumb="item.goodsFrontImage"
           @click="navigateTo(`/goods/${item.id}`)"
         />
       </div>
+      <van-loading v-if="loading" class="loading-more">加载中...</van-loading>
     </van-pull-refresh>
   </div>
 </template>
@@ -57,14 +58,15 @@ const config = useRuntimeConfig()
 const { tenantId } = useTenant()
 const searchValue = ref('')
 const refreshing = ref(false)
+const loading = ref(false)
 
+// === Banners ===
 interface Banner {
   id: number
   image: string
   url: string
   index: number
 }
-
 const banners = ref<Banner[]>([])
 
 async function fetchBanners() {
@@ -81,23 +83,80 @@ async function fetchBanners() {
   }
 }
 
-await fetchBanners()
+// === Categories ===
+interface Category {
+  id: number
+  name: string
+  parentId: number
+  level: number
+  icon?: string
+}
 
-const categories = ref([
-  { name: '手机', icon: 'phone-o' },
-  { name: '电脑', icon: 'tv-o' },
-  { name: '服饰', icon: 'bag-o' },
-  { name: '鞋包', icon: 'gift-o' },
-  { name: '美妆', icon: 'smile-o' },
-  { name: '食品', icon: 'coupon-o' },
-  { name: '家电', icon: 'desktop-o' },
-  { name: '更多', icon: 'more-o' },
-])
+const ICON_MAP: Record<string, string> = {
+  '手机通讯': 'phone-o',
+  '电脑办公': 'tv-o',
+  '服饰鞋包': 'bag-o',
+  '家用电器': 'desktop-o',
+  '美妆护肤': 'smile-o',
+  '食品饮料': 'coupon-o',
+  '运动户外': 'fire-o',
+  '数码配件': 'audio-o',
+  '家居家装': 'home-o',
+  '母婴玩具': 'gift-o',
+}
 
+const allCategories = ref<Category[]>([])
+const topCategories = computed(() => {
+  const tops = allCategories.value
+    .filter(c => !c.parentId || c.parentId === 0)
+    .slice(0, 8)
+  return tops.map(c => ({
+    ...c,
+    icon: ICON_MAP[c.name] || 'apps-o',
+  }))
+})
+
+async function fetchCategories() {
+  try {
+    const res = await $fetch<{ code: number; data: { data: Category[] } }>(
+      `${config.public.apiBase}/v1/categories`,
+    )
+    if (res.code === 200) {
+      const payload = res.data
+      allCategories.value = Array.isArray(payload) ? payload : (payload?.data || [])
+    }
+  } catch (e) {
+    console.warn('Failed to fetch categories:', e)
+  }
+}
+
+// === Products ===
 const products = ref<any[]>([])
 
+async function fetchProducts() {
+  loading.value = true
+  try {
+    const res = await $fetch<{ code: number; data: { data: any[]; total: number } }>(
+      `${config.public.apiBase}/v1/goods`,
+      { params: { page: 1, pageSize: 20, isHot: true, tenant_id: tenantId } },
+    )
+    if (res.code === 200 && res.data?.data) {
+      products.value = res.data.data
+    }
+  } catch (e) {
+    console.warn('Failed to fetch products:', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+// === Init ===
+await fetchBanners()
+await fetchCategories()
+await fetchProducts()
+
 async function onRefresh() {
-  await fetchBanners()
+  await Promise.all([fetchBanners(), fetchProducts()])
   refreshing.value = false
 }
 </script>
@@ -139,5 +198,10 @@ async function onRefresh() {
 
 .product-list {
   padding: 0 12px;
+}
+
+.loading-more {
+  text-align: center;
+  padding: 16px;
 }
 </style>

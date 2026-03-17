@@ -2,100 +2,139 @@
   <div class="category-page">
     <van-nav-bar title="分类" />
     <div class="category-body">
-      <van-sidebar v-model="activeIndex" class="category-sidebar">
+      <van-sidebar v-model="activeIndex" class="category-sidebar" @change="onSidebarChange">
         <van-sidebar-item
-          v-for="cat in sidebarList"
+          v-for="cat in parentCategories"
           :key="cat.id"
           :title="cat.name"
         />
       </van-sidebar>
       <div class="category-content">
-        <van-grid :column-num="3" :border="false">
+        <!-- Sub categories -->
+        <van-grid v-if="currentSubCategories.length" :column-num="3" :border="false">
           <van-grid-item
             v-for="sub in currentSubCategories"
             :key="sub.id"
             :text="sub.name"
             icon="photo-o"
+            @click="onSubClick(sub)"
           />
         </van-grid>
+
+        <!-- Products in this category -->
+        <div v-if="categoryProducts.length" class="category-products">
+          <van-card
+            v-for="item in categoryProducts"
+            :key="item.id"
+            :price="item.shopPrice?.toFixed(2)"
+            :title="item.name"
+            :thumb="item.goodsFrontImage"
+            @click="navigateTo(`/goods/${item.id}`)"
+          />
+        </div>
+        <van-loading v-if="loadingProducts" class="loading">加载中...</van-loading>
+        <van-empty v-if="!loadingProducts && categoryProducts.length === 0 && currentSubCategories.length === 0" description="暂无数据" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+const config = useRuntimeConfig()
+const { tenantId } = useTenant()
+const route = useRoute()
+
+interface Category {
+  id: number
+  name: string
+  parentId: number
+  level: number
+}
+
 const activeIndex = ref(0)
+const allCategories = ref<Category[]>([])
+const categoryProducts = ref<any[]>([])
+const loadingProducts = ref(false)
+const selectedSubId = ref<number | null>(null)
 
-const sidebarList = ref([
-  {
-    id: 1,
-    name: '手机数码',
-    children: [
-      { id: 101, name: '手机' },
-      { id: 102, name: '耳机' },
-      { id: 103, name: '充电器' },
-      { id: 104, name: '手机壳' },
-      { id: 105, name: '数据线' },
-      { id: 106, name: '移动电源' },
-    ],
-  },
-  {
-    id: 2,
-    name: '电脑办公',
-    children: [
-      { id: 201, name: '笔记本' },
-      { id: 202, name: '台式机' },
-      { id: 203, name: '显示器' },
-      { id: 204, name: '键盘' },
-      { id: 205, name: '鼠标' },
-    ],
-  },
-  {
-    id: 3,
-    name: '服饰鞋包',
-    children: [
-      { id: 301, name: 'T恤' },
-      { id: 302, name: '外套' },
-      { id: 303, name: '裤子' },
-      { id: 304, name: '运动鞋' },
-      { id: 305, name: '单肩包' },
-    ],
-  },
-  {
-    id: 4,
-    name: '美妆护肤',
-    children: [
-      { id: 401, name: '面膜' },
-      { id: 402, name: '防晒' },
-      { id: 403, name: '口红' },
-      { id: 404, name: '洗面奶' },
-    ],
-  },
-  {
-    id: 5,
-    name: '食品生鲜',
-    children: [
-      { id: 501, name: '零食' },
-      { id: 502, name: '水果' },
-      { id: 503, name: '饮料' },
-      { id: 504, name: '牛奶' },
-    ],
-  },
-  {
-    id: 6,
-    name: '家用电器',
-    children: [
-      { id: 601, name: '空调' },
-      { id: 602, name: '冰箱' },
-      { id: 603, name: '洗衣机' },
-      { id: 604, name: '电饭煲' },
-    ],
-  },
-])
+// Parent categories (level 1)
+const parentCategories = computed(() =>
+  allCategories.value.filter(c => !c.parentId || c.parentId === 0)
+)
 
+// Sub categories of active parent
 const currentSubCategories = computed(() => {
-  return sidebarList.value[activeIndex.value]?.children ?? []
+  const parent = parentCategories.value[activeIndex.value]
+  if (!parent) return []
+  return allCategories.value.filter(c => c.parentId === parent.id)
 })
+
+async function fetchCategories() {
+  try {
+    const res = await $fetch<{ code: number; data: any }>(
+      `${config.public.apiBase}/v1/categories`,
+    )
+    if (res.code === 200) {
+      const payload = res.data
+      allCategories.value = Array.isArray(payload) ? payload : (payload?.data || [])
+    }
+  } catch (e) {
+    console.warn('Failed to fetch categories:', e)
+  }
+}
+
+async function fetchProducts(categoryId: number) {
+  loadingProducts.value = true
+  categoryProducts.value = []
+  try {
+    const res = await $fetch<{ code: number; data: { data: any[]; total: number } }>(
+      `${config.public.apiBase}/v1/goods`,
+      { params: { page: 1, pageSize: 20, categoryId, tenant_id: tenantId } },
+    )
+    if (res.code === 200 && res.data?.data) {
+      categoryProducts.value = res.data.data
+    }
+  } catch (e) {
+    console.warn('Failed to fetch products:', e)
+  } finally {
+    loadingProducts.value = false
+  }
+}
+
+function onSidebarChange(index: number) {
+  selectedSubId.value = null
+  categoryProducts.value = []
+  // Auto-load products for the parent category
+  const parent = parentCategories.value[index]
+  if (parent) {
+    fetchProducts(parent.id)
+  }
+}
+
+function onSubClick(sub: Category) {
+  selectedSubId.value = sub.id
+  fetchProducts(sub.id)
+}
+
+// Init
+await fetchCategories()
+
+// Handle query param ?id=xxx (from homepage category click)
+const queryId = Number(route.query.id)
+if (queryId && parentCategories.value.length) {
+  const idx = parentCategories.value.findIndex(c => c.id === queryId)
+  if (idx >= 0) {
+    activeIndex.value = idx
+  }
+}
+
+// Load products for initial category
+if (parentCategories.value.length) {
+  const parent = parentCategories.value[activeIndex.value]
+  if (parent) {
+    await fetchProducts(parent.id)
+  }
+}
 </script>
 
 <style scoped>
@@ -122,5 +161,14 @@ const currentSubCategories = computed(() => {
   padding: 8px;
   background-color: var(--color-bg-page);
   transition: var(--theme-transition);
+}
+
+.category-products {
+  padding-top: 8px;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
 }
 </style>
