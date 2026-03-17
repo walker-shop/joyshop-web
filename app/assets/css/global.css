@@ -87,8 +87,11 @@ html, body {
   transition: var(--theme-transition);
 }
 
-/* 固定定位元素（tabbar等）限制在手机宽度内 */
-.van-tabbar {
+/* 固定定位元素限制在手机宽度内 */
+.van-tabbar,
+.van-action-bar,
+.van-nav-bar--fixed {
+  width: 100% !important;
   max-width: 480px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
