@@ -177,7 +177,7 @@ function onBuyNow() {
   max-width: 480px;
   display: flex;
   align-items: center;
-  padding: 8px 12px;
+  padding: 8px 0 8px 12px;
   background-color: var(--color-bg-card);
   border-top: 1px solid var(--color-border);
   box-sizing: border-box;
@@ -219,13 +219,13 @@ function onBuyNow() {
 .btn-cart {
   background-color: #111;
   color: #fff;
-  border-radius: 4px 0 0 4px;
+  border-radius: 0;
 }
 
 .btn-buy {
   background-color: var(--color-price);
   color: #fff;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0;
 }
 
 .btn-cart:active {
