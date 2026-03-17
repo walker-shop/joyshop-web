@@ -177,7 +177,7 @@ function onBuyNow() {
   max-width: 480px;
   display: flex;
   align-items: center;
-  padding: 0 0 0 12px;
+  padding: 0 0 0 16px;
   background-color: var(--color-bg-card);
   border-top: 1px solid var(--color-border);
   box-sizing: border-box;
