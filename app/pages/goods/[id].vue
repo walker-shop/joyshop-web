@@ -177,7 +177,7 @@ function onBuyNow() {
   max-width: 480px;
   display: flex;
   align-items: center;
-  padding: 8px 0 8px 12px;
+  padding: 0 0 0 12px;
   background-color: var(--color-bg-card);
   border-top: 1px solid var(--color-border);
   box-sizing: border-box;
@@ -186,6 +186,8 @@ function onBuyNow() {
 
 .action-icons {
   display: flex;
+  align-items: center;
+  align-self: stretch;
   gap: 16px;
   margin-right: 12px;
 }
@@ -208,7 +210,7 @@ function onBuyNow() {
 
 .action-buttons button {
   flex: 1;
-  height: 40px;
+  height: 50px;
   border: none;
   font-size: 14px;
   font-weight: 600;
