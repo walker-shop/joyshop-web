@@ -10,10 +10,8 @@
 
     <van-swipe v-if="banners.length" :autoplay="3000" lazy-render class="home-swiper">
       <van-swipe-item v-for="item in banners" :key="item.id">
-        <van-image
-          width="100%"
-          height="200"
-          fit="cover"
+        <img
+          class="banner-img"
           :src="item.image"
           @click="item.url && navigateTo(item.url)"
         />
@@ -114,6 +112,12 @@ async function onRefresh() {
   margin: 8px 12px;
   border-radius: 8px;
   overflow: hidden;
+}
+
+.banner-img {
+  width: 100%;
+  display: block;
+  object-fit: contain;
 }
 
 .category-grid {
