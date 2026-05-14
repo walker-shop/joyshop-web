@@ -46,7 +46,7 @@ export default defineNuxtConfig({
     server: {
       proxy: {
         '/api': {
-          target: 'https://adminshop.walker-learn.xyz',
+          target: 'https://zshop-admin.zwlab.app',
           changeOrigin: true,
         },
       },
