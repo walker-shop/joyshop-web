@@ -14,11 +14,24 @@
       </div>
     </div>
 
+    <!-- 订单状态快捷行 -->
+    <div class="order-card">
+      <div class="order-hd">
+        <span class="oh-title">我的订单</span>
+        <span class="oh-all" @click="goOrders()">全部订单 ›</span>
+      </div>
+      <div class="order-row">
+        <div v-for="o in orderTabs" :key="o.status" class="order-item" @click="goOrders(o.status)">
+          <van-icon :name="o.icon" size="26" />
+          <span>{{ o.label }}</span>
+        </div>
+      </div>
+    </div>
+
     <van-cell-group inset class="user-menu">
-      <van-cell title="我的订单" icon="orders-o" is-link />
-      <van-cell title="收货地址" icon="location-o" is-link />
-      <van-cell title="我的收藏" icon="like-o" is-link />
-      <van-cell title="联系客服" icon="service-o" is-link />
+      <van-cell title="收货地址" icon="location-o" is-link @click="requireLogin()" />
+      <van-cell title="我的收藏" icon="like-o" is-link @click="requireLogin()" />
+      <van-cell title="联系客服" icon="service-o" is-link @click="onToast('客服功能开发中')" />
     </van-cell-group>
 
     <van-cell-group inset class="user-menu">
@@ -42,6 +55,8 @@
 </template>
 
 <script setup lang="ts">
+import { showToast } from 'vant'
+
 const { themeMode, setTheme } = useTheme()
 
 const themeOptions = [
@@ -50,8 +65,26 @@ const themeOptions = [
   { label: '深色', value: 'dark' as const },
 ]
 
-function handleLogin() {
-  // TODO: navigate to login page
+const orderTabs = [
+  { status: 'unpaid', label: '待付款', icon: 'gold-coin-o' },
+  { status: 'unshipped', label: '待发货', icon: 'send-gift-o' },
+  { status: 'shipped', label: '待收货', icon: 'logistics' },
+  { status: 'unrated', label: '待评价', icon: 'comment-o' },
+  { status: 'aftersale', label: '退款/售后', icon: 'after-sale' },
+]
+
+function onToast(msg: string) { showToast(msg) }
+
+// 未接登录流程：一律诚实提示登录，不伪造已登录状态
+function requireLogin(): boolean {
+  const token = import.meta.client ? localStorage.getItem('token') : null
+  if (!token) { showToast('请先登录'); return false }
+  return true
+}
+function handleLogin() { showToast('登录功能开发中') }
+function goOrders(_status?: string) {
+  if (!requireLogin()) return
+  showToast('订单功能开发中')
 }
 </script>
 
@@ -91,6 +124,32 @@ function handleLogin() {
   margin-top: 4px;
   opacity: 0.8;
 }
+
+/* 订单快捷行 */
+.order-card {
+  margin: 12px;
+  background: var(--color-bg-card);
+  border-radius: 12px;
+  padding: 14px 8px 16px;
+  transition: var(--theme-transition);
+}
+.order-hd {
+  display: flex;
+  align-items: center;
+  padding: 0 8px 12px;
+}
+.oh-title { font-size: 15px; font-weight: 700; color: var(--color-text-primary); }
+.oh-all { margin-left: auto; font-size: 12px; color: var(--color-text-tertiary); }
+.order-row { display: grid; grid-template-columns: repeat(5, 1fr); }
+.order-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+.order-item :deep(.van-icon) { color: var(--color-primary); }
 
 .user-menu {
   margin-top: 12px;

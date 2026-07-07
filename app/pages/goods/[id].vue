@@ -1,55 +1,96 @@
 <template>
-  <div class="goods-detail">
-    <van-nav-bar
-      title="商品详情"
-      left-arrow
-      @click-left="$router.back()"
-      fixed
-      placeholder
-    />
-
-    <van-swipe :autoplay="3000" lazy-render class="goods-swiper">
-      <van-swipe-item v-for="(img, idx) in goods.images" :key="idx">
-        <van-image
-          width="100%"
-          height="375"
-          fit="cover"
-          :src="img"
-        />
-      </van-swipe-item>
-    </van-swipe>
-
-    <!-- Price card -->
-    <div class="price-card">
-      <div class="price-row">
-        <span class="price-symbol">¥</span>
-        <span class="price-value">{{ goods.price }}</span>
-        <span v-if="goods.originalPrice" class="price-original">¥{{ goods.originalPrice }}</span>
+  <div class="pdp">
+    <!-- 顶栏 -->
+    <div class="pdp-nav">
+      <div class="nav-btn" @click="$router.back()">
+        <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg>
+      </div>
+      <div class="nav-title">商品详情</div>
+      <div class="nav-btn" @click="showToast('功能开发中')">
+        <svg viewBox="0 0 24 24"><path d="M6 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
       </div>
     </div>
 
-    <!-- Info card -->
-    <div class="info-card">
-      <div class="goods-name">{{ goods.name }}</div>
-      <div class="goods-desc">{{ goods.description }}</div>
+    <!-- Hero 图 -->
+    <div class="pdp-hero">
+      <van-swipe :autoplay="4000" lazy-render @change="onSwipe">
+        <van-swipe-item v-for="(img, idx) in heroImages" :key="idx">
+          <van-image class="hero-img" :src="img" fit="cover">
+            <template #loading><van-loading type="spinner" /></template>
+            <template #error><div class="hero-ph">暂无图片</div></template>
+          </van-image>
+        </van-swipe-item>
+        <template #indicator><span /></template>
+      </van-swipe>
+      <div v-if="heroImages.length" class="hero-pager">{{ heroIdx + 1 }}/{{ heroImages.length }}</div>
     </div>
 
-    <!-- Action bar -->
-    <div class="action-bar">
-      <div class="action-icons">
-        <div class="action-icon-item" @click="showToast('客服功能开发中')">
-          <van-icon name="chat-o" size="22" />
-          <span>客服</span>
-        </div>
-        <div class="action-icon-item" @click="navigateTo('/cart')">
-          <van-icon name="cart-o" size="22" />
-          <span>购物车</span>
+    <!-- 价格条 -->
+    <div class="pdp-pricebar">
+      <div class="pb-price">
+        <span class="pb-cur">¥</span><b>{{ priceParts(goods.shopPrice).int }}</b><span class="pb-dec">.{{ priceParts(goods.shopPrice).dec }}</span>
+        <span v-if="goods.marketPrice > goods.shopPrice" class="pb-old">¥{{ goods.marketPrice }}</span>
+      </div>
+      <div class="pb-row">
+        <span v-if="goods.shipFree" class="pb-chip">包邮</span>
+        <span v-if="goods.isHot" class="pb-chip">热销</span>
+        <span v-if="goods.isNew" class="pb-chip">新品</span>
+      </div>
+    </div>
+
+    <!-- 标题 + 信任徽章 -->
+    <div class="pdp-blk">
+      <div class="pdp-title">{{ goods.name || '加载中…' }}</div>
+      <div class="pdp-trust">
+        <span>✓ 正品保障</span><span>✓ 7天无理由</span><span>✓ 极速退款</span>
+      </div>
+    </div>
+
+    <!-- 规格行 -->
+    <div class="pdp-blk">
+      <div class="cell" @click="showToast('规格选择开发中')">
+        <span class="k">选择</span><span class="v">规格 / 数量</span><span class="arr">›</span>
+      </div>
+      <div class="cell">
+        <span class="k">配送</span><span class="v">{{ goods.shipFree ? '包邮' : '快递' }} · 付款后48小时内发货</span>
+      </div>
+      <div class="cell">
+        <span class="k">服务</span><span class="v">正品保障 · 极速退款 · 运费险</span>
+      </div>
+    </div>
+
+    <!-- 商品详情 -->
+    <div v-if="goods.goodsDesc || goods.goodsBrief" class="pdp-blk">
+      <div class="blk-title">商品详情</div>
+      <div class="pdp-desc">{{ goods.goodsDesc || goods.goodsBrief }}</div>
+    </div>
+
+    <!-- 猜你喜欢 -->
+    <div v-if="recos.length" class="pdp-reco">
+      <div class="reco-title">— 猜你喜欢 —</div>
+      <div class="reco-grid">
+        <div v-for="r in recos" :key="r.id" class="rcard" @click="goDetail(r.id)">
+          <van-image class="rcard-img" :src="r.goodsFrontImage" fit="cover" lazy-load>
+            <template #error><div class="hero-ph sm">暂无图片</div></template>
+          </van-image>
+          <div class="rcard-body">
+            <div class="rcard-title">{{ r.name }}</div>
+            <div class="rcard-price"><span class="pp-cur">¥</span><span class="pp-int">{{ priceParts(r.shopPrice).int }}</span></div>
+          </div>
         </div>
       </div>
-      <div class="action-buttons">
-        <button class="btn-cart" @click="onAddCart">加入购物车</button>
-        <button class="btn-buy" @click="onBuyNow">立即购买</button>
+    </div>
+
+    <!-- 底部双 CTA -->
+    <div class="pdp-bar">
+      <div class="bar-ic" @click="showToast('客服功能开发中')">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg><span>客服</span>
       </div>
+      <div class="bar-ic" @click="navigateTo('/cart')">
+        <svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7.2 14.6l.9-1.6h7.5c.7 0 1.4-.4 1.7-1L21 4H6.2L5.3 2H2v2h2z"/></svg><span>购物车</span>
+      </div>
+      <button class="btn-cart" @click="onAddCart">加入购物车</button>
+      <button class="btn-buy" @click="onBuyNow">立即购买</button>
     </div>
   </div>
 </template>
@@ -59,187 +100,153 @@ import { showToast } from 'vant'
 
 definePageMeta({ layout: 'blank' })
 
+const config = useRuntimeConfig()
+const { tenantId } = useTenant()
 const route = useRoute()
 
-// Mock data — will be replaced with real API
-const { data: goods } = await useAsyncData(`goods-${route.params.id}`, () => {
-  return Promise.resolve({
-    id: route.params.id,
-    name: '示例商品 — ' + route.params.id,
-    description: '这是一个示例商品描述，后续将从API获取真实数据。',
-    price: '99.00',
-    originalPrice: '199.00',
-    images: [
-      'https://fastly.jsdelivr.net/npm/@vant/assets/apple-1.jpeg',
-      'https://fastly.jsdelivr.net/npm/@vant/assets/apple-2.jpeg',
-    ],
-  })
-}, {
-  default: () => ({
-    id: '',
-    name: '',
-    description: '',
-    price: '0.00',
-    originalPrice: '',
-    images: [],
-  }),
-})
+const heroIdx = ref(0)
+function onSwipe(i: number) { heroIdx.value = i }
 
-useSeoMeta({
-  title: () => `${goods.value.name} - ZShop`,
-  description: () => goods.value.description,
-  ogTitle: () => goods.value.name,
-  ogDescription: () => goods.value.description,
-  ogImage: () => goods.value.images?.[0] ?? '',
-})
-
-function onAddCart() {
-  showToast('已加入购物车')
+function priceParts(n: number) {
+  const v = Number(n || 0).toFixed(2)
+  const [int = '0', dec = '00'] = v.split('.')
+  return { int, dec }
 }
 
+// 真实商品数据
+const { data: goods } = await useAsyncData(`goods-${route.params.id}`, async () => {
+  try {
+    const res = await $fetch<{ code: number; data: any }>(
+      `${config.public.apiBase}/v1/goods/${route.params.id}`,
+      { params: { tenant_id: tenantId } },
+    )
+    if (res.code === 200 && res.data) return res.data
+  } catch (e) { console.warn('goods detail:', e) }
+  return {}
+}, {
+  default: () => ({ name: '', shopPrice: 0, marketPrice: 0, images: [], goodsFrontImage: '' }),
+})
+
+const heroImages = computed(() => {
+  const imgs = (goods.value?.images || []).filter(Boolean)
+  if (imgs.length) return imgs
+  return goods.value?.goodsFrontImage ? [goods.value.goodsFrontImage] : []
+})
+
+// 猜你喜欢：真实热卖商品
+const recos = ref<any[]>([])
+async function fetchRecos() {
+  try {
+    const res = await $fetch<{ code: number; data: { data: any[] } }>(
+      `${config.public.apiBase}/v1/goods`,
+      { params: { page: 1, pageSize: 6, isHot: true, tenant_id: tenantId } },
+    )
+    if (res.code === 200 && res.data?.data) {
+      recos.value = res.data.data.filter((g: any) => String(g.id) !== String(route.params.id)).slice(0, 4)
+    }
+  } catch (e) { console.warn('recos:', e) }
+}
+await fetchRecos()
+
+function goDetail(id: number) { navigateTo(`/goods/${id}`) }
+
+useSeoMeta({
+  title: () => `${goods.value?.name || '商品'} - ZShop`,
+  ogImage: () => heroImages.value[0] ?? '',
+})
+
+// 加购/购买：无登录流程 → 诚实提示登录，不伪造成功
+function requireLogin(): boolean {
+  const token = import.meta.client ? localStorage.getItem('token') : null
+  if (!token) {
+    showToast('请先登录')
+    navigateTo('/user')
+    return false
+  }
+  return true
+}
+function onAddCart() {
+  if (!requireLogin()) return
+  // TODO: 接购物车 API（order-api /v1/cart），登录流程完成后启用
+  showToast('购物车功能开发中')
+}
 function onBuyNow() {
-  showToast('立即购买功能开发中')
+  if (!requireLogin()) return
+  showToast('下单功能开发中')
 }
 </script>
 
 <style scoped>
-.goods-detail {
+.pdp {
   background-color: var(--color-bg-page);
   min-height: 100vh;
-  padding-bottom: 64px;
+  padding-bottom: 66px;
   transition: var(--theme-transition);
 }
 
-.goods-swiper {
-  width: 100%;
-  background-color: var(--color-bg-card);
+/* 顶栏 */
+.pdp-nav {
+  position: sticky; top: 0; z-index: 20;
+  height: 48px; display: flex; align-items: center; padding: 0 12px; gap: 8px;
+  background: var(--color-bg-card); border-bottom: 1px solid var(--color-border);
 }
+.nav-btn { width: 34px; height: 34px; border-radius: 50%; background: var(--color-bg-page); display: flex; align-items: center; justify-content: center; }
+.nav-btn svg { width: 18px; height: 18px; fill: var(--color-text-primary); }
+.nav-title { flex: 1; text-align: center; font-weight: 700; font-size: 15px; color: var(--color-text-primary); }
 
-/* ── Price card ── */
-.price-card {
-  background-color: var(--color-bg-card);
-  padding: 16px;
-  margin-bottom: 8px;
-}
+/* Hero */
+.pdp-hero { position: relative; background: var(--color-bg-card); }
+.hero-img { width: 100%; height: 390px; display: block; }
+.hero-ph { width: 100%; height: 390px; display: flex; align-items: center; justify-content: center; color: var(--color-text-tertiary); background: var(--color-bg-page); }
+.hero-ph.sm { height: 100%; }
+.hero-pager { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,.45); color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 20px; }
 
-.price-row {
-  display: flex;
-  align-items: baseline;
-  color: var(--color-price);
-}
+/* 价格条 */
+.pdp-pricebar { background: linear-gradient(120deg, var(--color-primary), var(--color-primary-light)); color: #fff; padding: 14px 16px; }
+.pb-price { display: flex; align-items: baseline; }
+.pb-cur { font-size: 15px; font-weight: 700; }
+.pb-price b { font-size: 30px; font-weight: 800; }
+.pb-dec { font-size: 14px; font-weight: 700; }
+.pb-old { text-decoration: line-through; opacity: .85; font-size: 13px; margin-left: 8px; }
+.pb-row { display: flex; gap: 6px; margin-top: 8px; }
+.pb-chip { background: #fff; color: var(--color-primary); border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
 
-.price-symbol {
-  font-size: 16px;
-  font-weight: 600;
-}
+/* 区块 */
+.pdp-blk { background: var(--color-bg-card); margin-top: 8px; padding: 14px 16px; }
+.pdp-title { font-size: 16px; font-weight: 700; line-height: 1.5; color: var(--color-text-primary); }
+.pdp-trust { display: flex; gap: 8px; margin-top: 10px; }
+.pdp-trust span { font-size: 11px; color: var(--color-primary); background: var(--color-primary-soft); padding: 3px 8px; border-radius: 4px; }
+.blk-title { font-size: 15px; font-weight: 700; color: var(--color-text-primary); margin-bottom: 8px; }
+.pdp-desc { font-size: 14px; line-height: 1.7; color: var(--color-text-secondary); white-space: pre-wrap; word-break: break-word; }
 
-.price-value {
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
+.cell { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--color-border); font-size: 14px; }
+.cell:last-child { border-bottom: 0; }
+.cell .k { color: var(--color-text-tertiary); width: 56px; flex: 0 0 56px; }
+.cell .v { flex: 1; color: var(--color-text-primary); }
+.cell .arr { color: var(--color-text-tertiary); }
 
-.price-original {
-  margin-left: 8px;
-  font-size: 13px;
-  color: var(--color-text-tertiary);
-  text-decoration: line-through;
-}
+/* 猜你喜欢 */
+.pdp-reco { padding: 14px 12px; }
+.reco-title { text-align: center; font-size: 14px; font-weight: 700; color: var(--color-text-secondary); margin-bottom: 12px; }
+.reco-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.rcard { background: var(--color-bg-card); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+.rcard-img { width: 100%; aspect-ratio: 1/1; display: block; background: var(--color-bg-page); }
+.rcard-body { padding: 8px 10px 10px; }
+.rcard-title { font-size: 13px; line-height: 1.4; color: var(--color-text-primary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
+.rcard-price { color: var(--color-price); font-weight: 800; margin-top: 4px; }
+.pp-cur { font-size: 12px; } .pp-int { font-size: 18px; }
 
-/* ── Info card ── */
-.info-card {
-  background-color: var(--color-bg-card);
-  padding: 16px;
-  margin-bottom: 8px;
+/* 底部双 CTA */
+.pdp-bar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px; height: 58px;
+  display: flex; align-items: center; padding: 0 12px; gap: 10px;
+  background: var(--color-bg-card); border-top: 1px solid var(--color-border); z-index: 100;
 }
-
-.goods-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 8px;
-  line-height: 1.5;
-}
-
-.goods-desc {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  line-height: 1.6;
-}
-
-/* ── Custom action bar ── */
-.action-bar {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
-  display: flex;
-  align-items: center;
-  padding: 0 0 0 16px;
-  background-color: var(--color-bg-card);
-  border-top: 1px solid var(--color-border);
-  box-sizing: border-box;
-  z-index: 100;
-}
-
-.action-icons {
-  display: flex;
-  align-items: center;
-  align-self: stretch;
-  gap: 16px;
-  margin-right: 12px;
-}
-
-.action-icon-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 10px;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  gap: 2px;
-}
-
-.action-buttons {
-  flex: 1;
-  display: flex;
-  gap: 0;
-}
-
-.action-buttons button {
-  flex: 1;
-  height: 50px;
-  border: none;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-}
-
-.btn-cart {
-  background-color: #111;
-  color: #fff;
-  border-radius: 0;
-}
-
-.btn-buy {
-  background-color: var(--color-price);
-  color: #fff;
-  border-radius: 0;
-}
-
-.btn-cart:active {
-  opacity: 0.85;
-}
-
-.btn-buy:active {
-  opacity: 0.85;
-}
-
-/* ── Dark mode ── */
-html.dark .btn-cart {
-  background-color: #2a2a3e;
-}
+.bar-ic { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--color-text-secondary); width: 44px; }
+.bar-ic svg { width: 20px; height: 20px; fill: var(--color-text-secondary); }
+.btn-cart, .btn-buy { flex: 1; height: 42px; border: 0; color: #fff; font-weight: 700; font-size: 15px; }
+.btn-cart { border-radius: 21px 0 0 21px; background: linear-gradient(135deg, #ffb64d, #ff8a00); }
+.btn-buy { border-radius: 0 21px 21px 0; background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); }
+.btn-cart:active, .btn-buy:active { opacity: .9; }
 </style>

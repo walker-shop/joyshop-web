@@ -6,9 +6,21 @@
 
 /* ========== Theme Variables ========== */
 :root {
-  /* Primary */
-  --color-primary: #0ea5a0;
-  --color-primary-dark: #0d8f8b;
+  /* Primary — 暖橙促销主色 */
+  --color-primary: #ff5000;
+  --color-primary-dark: #d94400;
+  --color-primary-light: #ff8f4d;
+  --color-primary-soft: #fff1e8; /* 浅橙底：标签/选中背景 */
+
+  /* 把设计 token 灌进 Vant，统一所有组件主色（消除默认蓝/紫） */
+  --van-primary-color: var(--color-primary);
+  --van-button-primary-background: var(--color-primary);
+  --van-button-primary-border-color: var(--color-primary);
+  --van-tabbar-item-active-color: var(--color-primary);
+  --van-tabbar-item-active-background: transparent;
+  --van-sidebar-selected-color: var(--color-primary);
+  --van-tag-primary-color: var(--color-primary);
+  --van-price-color: var(--color-price);
 
   /* Background */
   --color-bg-page: #f7f8fa;
@@ -26,9 +38,10 @@
   --color-border: #ebedf0;
 
   /* Component specific */
-  --color-price: #ee0a24;
-  --color-header-gradient-start: #0ea5a0;
-  --color-header-gradient-end: #0d8f8b;
+  --color-price: #ff1a1a;
+  --color-coupon: #ff3b30;
+  --color-header-gradient-start: #ff7a18;
+  --color-header-gradient-end: #ff3d00;
   --color-navbar-bg: #ffffff;
   --color-tabbar-bg: #ffffff;
   --color-search-bg: #f7f8fa;
@@ -41,8 +54,15 @@
 }
 
 html.dark {
-  --color-primary: #2dd4bf;
-  --color-primary-dark: #14b8a6;
+  --color-primary: #ff7a3c;
+  --color-primary-dark: #ff5a1a;
+  --color-primary-light: #ff9d6b;
+  --color-primary-soft: #3a2317;
+  --van-primary-color: var(--color-primary);
+  --van-button-primary-background: var(--color-primary);
+  --van-button-primary-border-color: var(--color-primary);
+  --van-tabbar-item-active-color: var(--color-primary);
+  --van-sidebar-selected-color: var(--color-primary);
 
   --color-bg-page: #0a0a1a;
   --color-bg-card: #1a1a2e;
@@ -57,13 +77,35 @@ html.dark {
   --color-border: #2a2a3e;
 
   --color-price: #ff6b6b;
-  --color-header-gradient-start: #1a3a4a;
-  --color-header-gradient-end: #0f2a35;
+  --color-header-gradient-start: #b23600;
+  --color-header-gradient-end: #7a2400;
   --color-navbar-bg: #16162a;
   --color-tabbar-bg: #16162a;
   --color-search-bg: #1a1a2e;
 
   --shadow-app: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+/* 兜底：确保 Vant 主色组件用暖橙（不同版本变量名不一，强制覆盖） */
+.van-button--primary {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+.van-tag--primary {
+  background: var(--color-primary) !important;
+}
+.van-tabbar-item--active {
+  color: var(--color-primary) !important;
+}
+.van-swipe__indicator--active {
+  background-color: var(--color-primary) !important;
+}
+.van-sidebar-item--select,
+.van-sidebar-item--select:active {
+  color: var(--color-primary) !important;
+}
+.van-sidebar-item--select::before {
+  background-color: var(--color-primary) !important;
 }
 
 html, body {
