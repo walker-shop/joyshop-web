@@ -1,17 +1,51 @@
 <template>
-  <div class="addr-edit">
-    <van-nav-bar :title="isEdit ? '编辑地址' : '新增地址'" left-arrow @click-left="back" />
-    <van-cell-group inset>
-      <van-field v-model="form.signerName" label="收货人" placeholder="姓名" />
-      <van-field v-model="form.signerMobile" label="手机号" placeholder="11 位手机号" />
-      <van-field v-model="form.province" label="省" placeholder="省" />
-      <van-field v-model="form.city" label="市" placeholder="市" />
-      <van-field v-model="form.district" label="区" placeholder="区/县" />
-      <van-field v-model="form.address" label="详细地址" placeholder="街道门牌等" type="textarea" rows="2" />
-    </van-cell-group>
-    <div class="addr-actions">
-      <van-button type="primary" block round :loading="saving" @click="save">保存</van-button>
-      <van-button v-if="isEdit" block round class="del-btn" :loading="deleting" @click="remove">删除</van-button>
+  <div class="lux addr-edit">
+    <header class="lux-head">
+      <button class="lux-back" aria-label="返回" @click="back">
+        <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z" /></svg>
+      </button>
+      <span class="lux-head-title">{{ isEdit ? '编辑地址' : '新增地址' }}</span>
+    </header>
+
+    <div class="lux-scroll">
+      <section class="lux-card ae-card">
+        <label class="ae-field">
+          <span class="ae-label">收货人</span>
+          <input v-model="form.signerName" class="ae-input" placeholder="姓名">
+        </label>
+        <label class="ae-field">
+          <span class="ae-label">手机号</span>
+          <input v-model="form.signerMobile" class="ae-input" inputmode="numeric" placeholder="11 位手机号">
+        </label>
+        <label class="ae-field">
+          <span class="ae-label">省</span>
+          <input v-model="form.province" class="ae-input" placeholder="省">
+        </label>
+        <label class="ae-field">
+          <span class="ae-label">市</span>
+          <input v-model="form.city" class="ae-input" placeholder="市">
+        </label>
+        <label class="ae-field">
+          <span class="ae-label">区</span>
+          <input v-model="form.district" class="ae-input" placeholder="区/县">
+        </label>
+        <label class="ae-field ae-field--area">
+          <span class="ae-label">详细地址</span>
+          <textarea v-model="form.address" class="ae-input ae-textarea" rows="2" placeholder="街道门牌等" />
+        </label>
+        <span class="lux-edge" />
+      </section>
+
+      <div class="ae-actions">
+        <button class="lux-btn lux-btn--block" :disabled="saving" @click="save">
+          <span v-if="!saving">保存</span>
+          <span v-else class="lux-spin" />
+        </button>
+        <button v-if="isEdit" class="lux-btn-ghost ae-del" :disabled="deleting" @click="remove">
+          <span v-if="!deleting">删除地址</span>
+          <span v-else class="ae-del-spin" />
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -61,7 +95,41 @@ function back() { navigateTo(`/user/address${route.query.from ? '?from=' + route
 </script>
 
 <style scoped>
-.addr-edit { min-height:100vh; background:var(--color-bg-page); }
-.addr-actions { padding:16px 12px; display:flex; flex-direction:column; gap:10px; }
-.del-btn { color: var(--color-danger, #ee0a24); }
+/* ---- Form card ---- */
+.ae-card { position: relative; padding: 4px 16px; overflow: hidden; }
+.ae-field {
+  display: flex; align-items: center; gap: 14px;
+  padding: 15px 0; border-bottom: 1px solid var(--lux-hair-soft);
+}
+.ae-field:last-of-type { border-bottom: 0; }
+.ae-field--area { align-items: flex-start; }
+.ae-label {
+  flex: 0 0 68px; font-size: 14px; font-weight: 500; color: var(--lux-text);
+  letter-spacing: .5px;
+}
+.ae-field--area .ae-label { padding-top: 6px; }
+.ae-input {
+  flex: 1; min-width: 0; border: 0; background: transparent; outline: none;
+  font-size: 14px; color: var(--lux-text); font-family: inherit;
+  border-bottom: 1px solid transparent; transition: border-color .15s ease;
+  padding: 4px 0;
+}
+.ae-input::placeholder { color: var(--lux-text-3); }
+.ae-input:focus { border-bottom-color: var(--lux-gold); }
+.ae-textarea { resize: none; line-height: 1.5; }
+
+/* ---- Actions ---- */
+.ae-actions { margin-top: 8px; display: flex; flex-direction: column; gap: 12px; }
+.ae-del {
+  width: 100%; height: 48px; font-size: 15px; font-weight: 600; letter-spacing: 1px;
+  color: var(--lux-accent);
+}
+.ae-del:disabled { opacity: .6; }
+.ae-del-spin {
+  width: 18px; height: 18px; border: 2.5px solid rgba(224, 190, 120, .25);
+  border-top-color: var(--lux-accent); border-radius: 50%; animation: ae-rot .7s linear infinite;
+}
+@keyframes ae-rot { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) { .ae-input, .ae-del-spin { transition: none; animation: none; } }
 </style>

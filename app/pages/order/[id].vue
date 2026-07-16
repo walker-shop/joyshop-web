@@ -1,24 +1,73 @@
 <template>
-  <div class="od-page">
-    <van-nav-bar title="订单详情" left-arrow @click-left="navigateTo('/order')" />
+  <div class="lux">
+    <header class="lux-head">
+      <button class="lux-back" aria-label="返回" @click="navigateTo('/order')">
+        <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z" /></svg>
+      </button>
+      <span class="lux-head-title">订单详情</span>
+    </header>
+
     <template v-if="detail">
-      <div class="od-status">{{ statusLabel(detail.order_info.status) }}</div>
-      <div class="od-addr">
-        <div class="od-name">{{ detail.order_info.name }} {{ detail.order_info.mobile }}</div>
-        <div class="od-detail">{{ detail.order_info.address }}</div>
-      </div>
-      <div class="od-goods">
-        <div v-for="(g,i) in detail.goods" :key="i" class="od-item">
-          <van-image width="60" height="60" radius="6" :src="g.goods_image" />
-          <div class="od-item-main">
-            <div class="od-item-name">{{ g.goods_name }}</div>
-            <div class="od-item-row"><span class="od-price">¥{{ g.goods_price?.toFixed(2) }}</span><span>x{{ g.nums }}</span></div>
+      <div class="lux-scroll">
+        <!-- 状态 hero -->
+        <section
+          class="od-hero"
+          :class="{
+            'is-amber': statusLabel(detail.order_info.status) === '待付款',
+            'is-muted': statusLabel(detail.order_info.status) === '已支付' || statusLabel(detail.order_info.status) === '已完成',
+            'is-dim': statusLabel(detail.order_info.status) === '已关闭',
+          }"
+        >
+          <span class="od-hero-dot" />
+          <div class="od-hero-status">{{ statusLabel(detail.order_info.status) }}</div>
+          <div class="od-hero-sn">订单号 {{ detail.order_info.order_sn }}</div>
+        </section>
+
+        <!-- 收货信息 -->
+        <section class="lux-card od-addr">
+          <div class="od-addr-pin">
+            <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z" /></svg>
           </div>
-        </div>
+          <div class="od-addr-body">
+            <div class="od-name">{{ detail.order_info.name }}<span class="od-tel">{{ detail.order_info.mobile }}</span></div>
+            <div class="od-detail">{{ detail.order_info.address }}</div>
+          </div>
+          <span class="lux-edge" />
+        </section>
+
+        <!-- 商品 -->
+        <section class="lux-card od-goods">
+          <div v-for="(g, i) in detail.goods" :key="i" class="od-item">
+            <div class="od-thumb">
+              <img v-if="g.goods_image" :src="g.goods_image" :alt="g.goods_name">
+              <span v-else class="od-thumb-ph">无图</span>
+            </div>
+            <div class="od-item-main">
+              <div class="od-item-name">{{ g.goods_name }}</div>
+              <div class="od-item-row">
+                <span class="lux-price od-price"><i>¥</i>{{ g.goods_price?.toFixed(2) }}</span>
+                <span class="od-qty">×{{ g.nums }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="od-sum">
+            <span class="od-sum-label">实付款</span>
+            <span class="lux-price od-total"><i>¥</i>{{ detail.order_info.total?.toFixed(2) }}</span>
+          </div>
+        </section>
       </div>
-      <div class="od-sum">实付 <span class="od-total">¥{{ detail.order_info.total?.toFixed(2) }}</span></div>
-      <div v-if="isUnpaid" class="od-pay">
-        <van-button type="primary" block round :loading="paying" @click="doPay">立即支付</van-button>
+
+      <!-- 支付条 -->
+      <div v-if="isUnpaid" class="lux-bar">
+        <div class="od-bar-info">
+          <span class="od-bar-label">应付</span>
+          <span class="lux-price od-bar-price"><i>¥</i>{{ detail.order_info.total?.toFixed(2) }}</span>
+        </div>
+        <button class="lux-btn od-pay-btn" :disabled="paying" @click="doPay">
+          <span v-if="!paying">立即支付</span>
+          <span v-else class="lux-spin" />
+        </button>
       </div>
     </template>
   </div>
@@ -59,17 +108,75 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.od-page { min-height:100vh; background:var(--color-bg-page); padding-bottom:70px; }
-.od-status { padding:20px; font-size:18px; font-weight:bold; color:var(--color-primary); }
-.od-addr { background:var(--color-bg-card); margin:10px; padding:14px; border-radius:12px; }
-.od-name { font-weight:bold; color:var(--color-text-primary); }
-.od-detail { color:var(--color-text-secondary); font-size:13px; margin-top:4px; }
-.od-goods { background:var(--color-bg-card); margin:10px; padding:6px 12px; border-radius:12px; }
-.od-item { display:flex; gap:10px; padding:10px 0; }
-.od-item-main { flex:1; min-width:0; }
-.od-item-name { font-size:14px; color:var(--color-text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.od-item-row { display:flex; justify-content:space-between; margin-top:14px; }
-.od-price,.od-total { color:var(--color-primary); font-weight:bold; }
-.od-sum { text-align:right; padding:12px 20px; color:var(--color-text-primary); }
-.od-pay { position:fixed; left:0; right:0; bottom:0; padding:10px 12px; background:var(--color-bg-card); }
+/* ---- Status hero ---- */
+.od-hero {
+  position: relative; overflow: hidden;
+  padding: 30px 22px 28px; margin-bottom: 14px; border-radius: 20px;
+  background: linear-gradient(160deg, var(--lux-surface-2), var(--lux-surface));
+  border: 1px solid var(--lux-hair);
+}
+.od-hero-dot {
+  display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--lux-text-3); box-shadow: 0 0 0 4px rgba(255, 255, 255, .04);
+  margin-bottom: 14px;
+}
+.od-hero-status { font-size: 27px; font-weight: 700; letter-spacing: 3px; color: var(--lux-text); line-height: 1; }
+.od-hero-sn { margin-top: 12px; font-size: 12px; letter-spacing: .5px; color: var(--lux-text-3); font-variant-numeric: tabular-nums; }
+/* status colour treatments */
+.od-hero.is-amber {
+  border-color: rgba(227, 186, 125, .38);
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(224, 190, 120, .16), transparent 60%),
+    linear-gradient(160deg, var(--lux-surface-2), var(--lux-surface));
+}
+.od-hero.is-amber .od-hero-dot { background: var(--lux-gold); box-shadow: 0 0 12px rgba(227, 186, 125, .8), 0 0 0 4px rgba(227, 186, 125, .12); }
+.od-hero.is-amber .od-hero-status { color: var(--lux-gold); }
+.od-hero.is-muted .od-hero-dot { background: var(--lux-text-2); box-shadow: 0 0 0 4px rgba(255, 255, 255, .05); }
+.od-hero.is-muted .od-hero-status { color: var(--lux-text); }
+.od-hero.is-dim .od-hero-status { color: var(--lux-text-2); }
+
+/* ---- Address ---- */
+.od-addr { position: relative; display: flex; align-items: center; gap: 14px; padding: 18px 16px; overflow: hidden; }
+.od-addr-pin {
+  flex: 0 0 42px; width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center;
+  background: linear-gradient(140deg, var(--lux-accent-2), var(--lux-accent));
+  box-shadow: 0 6px 16px rgba(224, 190, 120, .45);
+}
+.od-addr-pin svg { width: 23px; height: 23px; fill: #fff; }
+.od-addr-body { flex: 1; min-width: 0; }
+.od-name { font-size: 16px; font-weight: 600; color: var(--lux-text); display: flex; align-items: baseline; gap: 10px; }
+.od-tel { font-size: 13px; font-weight: 400; color: var(--lux-text-2); letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+.od-detail { font-size: 13px; color: var(--lux-text-2); margin-top: 5px; line-height: 1.5; }
+
+/* ---- Goods ---- */
+.od-goods { padding: 4px 16px 16px; }
+.od-item { display: flex; gap: 13px; padding: 15px 0; border-bottom: 1px solid var(--lux-hair-soft); }
+.od-thumb {
+  flex: 0 0 66px; width: 66px; height: 66px; border-radius: 14px; overflow: hidden;
+  background: var(--lux-thumb-bg); border: 1px solid var(--lux-hair-soft); display: grid; place-items: center;
+}
+.od-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.od-thumb-ph { font-size: 11px; color: var(--lux-text-3); }
+.od-item-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.od-item-name {
+  font-size: 14px; font-weight: 500; color: var(--lux-text); line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.od-item-row { margin-top: auto; padding-top: 8px; display: flex; align-items: baseline; justify-content: space-between; }
+.od-price { font-size: 16px; }
+.od-qty {
+  font-size: 12px; color: var(--lux-text-2); font-variant-numeric: tabular-nums;
+  background: var(--lux-chip-bg); border: 1px solid var(--lux-hair-soft); padding: 3px 10px; border-radius: 999px;
+}
+
+/* ---- Sum ---- */
+.od-sum { display: flex; align-items: baseline; justify-content: flex-end; gap: 12px; padding: 16px 0 4px; }
+.od-sum-label { font-size: 14px; color: var(--lux-text); font-weight: 500; }
+.od-total { font-size: 22px; }
+
+/* ---- Pay bar ---- */
+.od-bar-info { flex: 1; display: flex; align-items: baseline; gap: 8px; }
+.od-bar-label { font-size: 13px; color: var(--lux-text-2); }
+.od-bar-price { font-size: 25px; line-height: 1; }
+.od-pay-btn { flex: 0 0 auto; min-width: 148px; height: 50px; font-size: 16px; }
 </style>
