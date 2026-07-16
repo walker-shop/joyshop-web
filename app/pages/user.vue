@@ -9,8 +9,14 @@
         class="user-avatar"
       />
       <div class="user-info">
-        <span class="login-text" @click="handleLogin">登录/注册</span>
-        <span class="login-tip">登录后享受更多权益</span>
+        <template v-if="isLoggedIn">
+          <span class="login-text">{{ user?.nickname || user?.username }}</span>
+          <span class="login-tip">欢迎回来</span>
+        </template>
+        <template v-else>
+          <span class="login-text" @click="handleLogin">登录/注册</span>
+          <span class="login-tip">登录后享受更多权益</span>
+        </template>
       </div>
     </div>
 
@@ -29,8 +35,8 @@
     </div>
 
     <van-cell-group inset class="user-menu">
-      <van-cell title="收货地址" icon="location-o" is-link @click="requireLogin()" />
-      <van-cell title="我的收藏" icon="like-o" is-link @click="requireLogin()" />
+      <van-cell title="收货地址" icon="location-o" is-link @click="goAddress" />
+      <van-cell title="我的收藏" icon="like-o" is-link @click="onToast('收藏功能开发中')" />
       <van-cell title="联系客服" icon="service-o" is-link @click="onToast('客服功能开发中')" />
     </van-cell-group>
 
@@ -51,6 +57,10 @@
         </template>
       </van-cell>
     </van-cell-group>
+
+    <van-cell-group v-if="isLoggedIn" inset class="user-menu">
+      <van-cell title="退出登录" icon="revoke" is-link @click="onLogout" />
+    </van-cell-group>
   </div>
 </template>
 
@@ -58,6 +68,7 @@
 import { showToast } from 'vant'
 
 const { themeMode, setTheme } = useTheme()
+const { isLoggedIn, user, logout } = useAuth()
 
 const themeOptions = [
   { label: '跟随系统', value: 'system' as const },
@@ -66,26 +77,24 @@ const themeOptions = [
 ]
 
 const orderTabs = [
-  { status: 'unpaid', label: '待付款', icon: 'gold-coin-o' },
-  { status: 'unshipped', label: '待发货', icon: 'send-gift-o' },
-  { status: 'shipped', label: '待收货', icon: 'logistics' },
-  { status: 'unrated', label: '待评价', icon: 'comment-o' },
-  { status: 'aftersale', label: '退款/售后', icon: 'after-sale' },
+  { status: 'PAYING', label: '待付款', icon: 'gold-coin-o' },
+  { status: 'TRADE_SUCCESS', label: '已支付', icon: 'send-gift-o' },
+  { status: 'TRADE_CLOSED', label: '已关闭', icon: 'close' },
+  { status: '', label: '全部', icon: 'orders-o' },
 ]
 
 function onToast(msg: string) { showToast(msg) }
-
-// 未接登录流程：一律诚实提示登录，不伪造已登录状态
-function requireLogin(): boolean {
-  const token = import.meta.client ? localStorage.getItem('token') : null
-  if (!token) { showToast('请先登录'); return false }
+function ensureLogin(): boolean {
+  if (!isLoggedIn.value) { navigateTo('/login?redirect=/user'); return false }
   return true
 }
-function handleLogin() { showToast('登录功能开发中') }
-function goOrders(_status?: string) {
-  if (!requireLogin()) return
-  showToast('订单功能开发中')
+function handleLogin() { if (!isLoggedIn.value) navigateTo('/login?redirect=/user') }
+function goOrders(status?: string) {
+  if (!ensureLogin()) return
+  navigateTo(status ? `/order?status=${status}` : '/order')
 }
+function goAddress() { if (ensureLogin()) navigateTo('/user/address') }
+function onLogout() { logout(); showToast('已退出登录') }
 </script>
 
 <style scoped>
