@@ -155,24 +155,39 @@ useSeoMeta({
   ogImage: () => heroImages.value[0] ?? '',
 })
 
-// 加购/购买：无登录流程 → 诚实提示登录，不伪造成功
+// 加购/购买：真实对接 order-web /v1/cart
+const { apiFetch } = useApi()
+const { isLoggedIn } = useAuth()
+const { refresh: refreshCart } = useCartCount()
+
 function requireLogin(): boolean {
-  const token = import.meta.client ? localStorage.getItem('token') : null
-  if (!token) {
+  if (!isLoggedIn.value) {
     showToast('请先登录')
-    navigateTo('/user')
+    navigateTo(`/login?redirect=/goods/${route.params.id}`)
     return false
   }
   return true
 }
-function onAddCart() {
-  if (!requireLogin()) return
-  // TODO: 接购物车 API（order-api /v1/cart），登录流程完成后启用
-  showToast('购物车功能开发中')
+async function addToCart(): Promise<boolean> {
+  try {
+    await apiFetch<{ id: number; msg: string }>('/v1/cart', {
+      method: 'POST',
+      body: { goodsId: Number(route.params.id), nums: 1, checked: true },
+    })
+    await refreshCart()
+    return true
+  } catch (e: any) {
+    showToast(e?.data?.msg || e?.message || '加入购物车失败')
+    return false
+  }
 }
-function onBuyNow() {
+async function onAddCart() {
   if (!requireLogin()) return
-  showToast('下单功能开发中')
+  if (await addToCart()) showToast('已加入购物车')
+}
+async function onBuyNow() {
+  if (!requireLogin()) return
+  if (await addToCart()) navigateTo('/cart')
 }
 </script>
 
