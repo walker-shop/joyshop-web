@@ -34,6 +34,7 @@ export default defineNuxtConfig({
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://zshop-admin.zwlab.app/api',
       tenantCode: process.env.NUXT_PUBLIC_TENANT_CODE || 'joyshop',
       tenantId: process.env.NUXT_PUBLIC_TENANT_ID || '3',
+      iamBase: process.env.NUXT_PUBLIC_IAM_BASE || 'https://iam-api.walker-learn.xyz',
     },
   },
 
@@ -48,6 +49,11 @@ export default defineNuxtConfig({
         '/api': {
           target: 'https://zshop-admin.zwlab.app',
           changeOrigin: true,
+        },
+        '/iam-api': {
+          target: process.env.NUXT_DEV_IAM_TARGET || 'https://iam-api.walker-learn.xyz',
+          changeOrigin: true,
+          rewrite: (p: string) => p.replace(/^\/iam-api/, ''),
         },
       },
     },
