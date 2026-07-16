@@ -6,11 +6,11 @@
 
 /* ========== Theme Variables ========== */
 :root {
-  /* Primary — 暖橙促销主色 */
-  --color-primary: #ff5000;
-  --color-primary-dark: #d94400;
-  --color-primary-light: #ff8f4d;
-  --color-primary-soft: #fff1e8; /* 浅橙底：标签/选中背景 */
+  /* Primary — Lux 香槟金主色（与交易/登录页统一） */
+  --color-primary: #a9822f;
+  --color-primary-dark: #8a6412;
+  --color-primary-light: #c9a24c;
+  --color-primary-soft: #f3ecdd; /* 浅金底：标签/选中背景 */
 
   /* 把设计 token 灌进 Vant，统一所有组件主色（消除默认蓝/紫） */
   --van-primary-color: var(--color-primary);
@@ -22,29 +22,29 @@
   --van-tag-primary-color: var(--color-primary);
   --van-price-color: var(--color-price);
 
-  /* Background */
-  --color-bg-page: #f7f8fa;
-  --color-bg-card: #ffffff;
-  --color-bg-sidebar: #f7f8fa;
-  --color-bg-viewport: #e8e8ed;
+  /* Background — 暖砂燕麦（Lux 浅色） */
+  --color-bg-page: #e9e0d3;
+  --color-bg-card: #f6f1e8;
+  --color-bg-sidebar: #e9e0d3;
+  --color-bg-viewport: #ded3c2;
 
-  /* Text */
-  --color-text-primary: #333333;
-  --color-text-secondary: #666666;
-  --color-text-tertiary: #999999;
+  /* Text — Lux 深咖阶梯 */
+  --color-text-primary: #241f18;
+  --color-text-secondary: #6a6157;
+  --color-text-tertiary: #a09788;
   --color-text-inverse: #ffffff;
 
   /* Border & Divider */
-  --color-border: #ebedf0;
+  --color-border: rgba(38, 28, 16, 0.12);
 
-  /* Component specific */
-  --color-price: #ff1a1a;
-  --color-coupon: #ff3b30;
-  --color-header-gradient-start: #ff7a18;
-  --color-header-gradient-end: #ff3d00;
-  --color-navbar-bg: #ffffff;
-  --color-tabbar-bg: #ffffff;
-  --color-search-bg: #f7f8fa;
+  /* Component specific — 金价 + 香槟渐变 */
+  --color-price: #8a6412;
+  --color-coupon: #a9822f;
+  --color-header-gradient-start: #c9a24c;
+  --color-header-gradient-end: #a9822f;
+  --color-navbar-bg: #f6f1e8;
+  --color-tabbar-bg: #f6f1e8;
+  --color-search-bg: #ede6da;
 
   /* Shadow */
   --shadow-app: 0 0 40px rgba(0, 0, 0, 0.15);
@@ -54,34 +54,34 @@
 }
 
 html.dark {
-  --color-primary: #ff7a3c;
-  --color-primary-dark: #ff5a1a;
-  --color-primary-light: #ff9d6b;
-  --color-primary-soft: #3a2317;
+  --color-primary: #e3ba7d;
+  --color-primary-dark: #c39f52;
+  --color-primary-light: #ecd39a;
+  --color-primary-soft: #2a2015;
   --van-primary-color: var(--color-primary);
   --van-button-primary-background: var(--color-primary);
   --van-button-primary-border-color: var(--color-primary);
   --van-tabbar-item-active-color: var(--color-primary);
   --van-sidebar-selected-color: var(--color-primary);
 
-  --color-bg-page: #0a0a1a;
-  --color-bg-card: #1a1a2e;
-  --color-bg-sidebar: #12121f;
+  --color-bg-page: #0b0b0d;
+  --color-bg-card: #161619;
+  --color-bg-sidebar: #101013;
   --color-bg-viewport: #000000;
 
-  --color-text-primary: #e5e5e5;
-  --color-text-secondary: #a3a3a3;
-  --color-text-tertiary: #737373;
+  --color-text-primary: #f4f4f6;
+  --color-text-secondary: #9b9ba6;
+  --color-text-tertiary: #63636e;
   --color-text-inverse: #ffffff;
 
-  --color-border: #2a2a3e;
+  --color-border: rgba(255, 255, 255, 0.09);
 
-  --color-price: #ff6b6b;
-  --color-header-gradient-start: #b23600;
-  --color-header-gradient-end: #7a2400;
-  --color-navbar-bg: #16162a;
-  --color-tabbar-bg: #16162a;
-  --color-search-bg: #1a1a2e;
+  --color-price: #e8cf9a;
+  --color-header-gradient-start: #dcbd76;
+  --color-header-gradient-end: #b8963f;
+  --color-navbar-bg: #161619;
+  --color-tabbar-bg: #161619;
+  --color-search-bg: #1d1d22;
 
   --shadow-app: 0 0 40px rgba(0, 0, 0, 0.5);
 }
@@ -106,6 +106,15 @@ html.dark {
 }
 .van-sidebar-item--select::before {
   background-color: var(--color-primary) !important;
+}
+
+/* 快速加购：购物车 tab 弹跳 */
+.van-tabbar-item.cart-bumped .van-tabbar-item__icon {
+  animation: tabCartBump 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes tabCartBump {
+  0%, 100% { transform: scale(1); }
+  35% { transform: scale(1.45) translateY(-3px); }
 }
 
 html, body {

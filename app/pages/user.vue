@@ -4,16 +4,24 @@
     <header class="uz-hero">
       <div class="uz-hero-glow" />
       <div class="uz-id" :class="{ 'is-guest': !isLoggedIn }" @click="!isLoggedIn && handleLogin()">
-        <div class="uz-avatar">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
+        <div class="uz-avatar" :class="{ tappable: isLoggedIn }" @click.stop="isLoggedIn && pickAvatar()">
+          <img v-if="avatarUrl" class="uz-avatar-img" :src="avatarUrl" alt="头像">
+          <svg v-else viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z" />
           </svg>
           <span class="uz-avatar-ring" />
+          <span v-if="isLoggedIn" class="uz-avatar-cam" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM9 2 7.2 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.2L15 2H9z" /></svg>
+          </span>
+          <input ref="fileInput" type="file" accept="image/*" hidden @change="onAvatarPicked">
         </div>
         <div class="uz-id-body">
           <template v-if="isLoggedIn">
             <span class="uz-name">{{ user?.nickname || user?.username }}</span>
-            <span class="uz-sub">欢迎回来 · 尊享会员</span>
+            <div class="uz-tags">
+              <span class="uz-level">{{ memberLevel }}</span>
+              <span class="uz-badge">✦ 尊享会员</span>
+            </div>
           </template>
           <template v-else>
             <span class="uz-name">登录 / 注册</span>
@@ -21,6 +29,24 @@
           </template>
         </div>
         <svg v-if="!isLoggedIn" class="uz-id-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
+      </div>
+
+      <!-- 会员数据 -->
+      <div v-if="isLoggedIn" class="uz-stats">
+        <button class="uz-stat" @click="onToast('积分商城开发中')">
+          <span class="uz-stat-num">{{ stats.points }}</span>
+          <span class="uz-stat-label">积分</span>
+        </button>
+        <span class="uz-stat-div" />
+        <button class="uz-stat" @click="onToast('优惠券开发中')">
+          <span class="uz-stat-num">{{ stats.coupons }}</span>
+          <span class="uz-stat-label">优惠券</span>
+        </button>
+        <span class="uz-stat-div" />
+        <button class="uz-stat" @click="onToast('收藏功能开发中')">
+          <span class="uz-stat-num">{{ stats.favorites }}</span>
+          <span class="uz-stat-label">收藏</span>
+        </button>
       </div>
     </header>
 
@@ -101,6 +127,36 @@ const themeOptions = [
   { label: '深色', value: 'dark' as const },
 ]
 
+// 会员数据（积分/优惠券暂无后端，占位 0，UI 已就绪待接；收藏可后续接真实数）
+const stats = reactive({ points: 0, coupons: 0, favorites: 0 })
+// 会员等级：按积分档换算（1000/级），暂无后端积分故为 V1
+const memberLevel = computed(() => `V${Math.floor(stats.points / 1000) + 1}`)
+
+// 头像：oss-web 直传 S3 + walker-iam 统一落档；失败回退本地预览
+const { upload: uploadAvatar } = useAvatarUpload()
+const avatarUrl = ref('')
+const fileInput = ref<HTMLInputElement | null>(null)
+const avatarUploading = ref(false)
+watchEffect(() => { if (user.value?.avatar) avatarUrl.value = user.value.avatar })
+function pickAvatar() { if (!avatarUploading.value) fileInput.value?.click() }
+async function onAvatarPicked(e: Event) {
+  const input = e.target as HTMLInputElement
+  const f = input.files?.[0]
+  if (!f) return
+  avatarUrl.value = URL.createObjectURL(f) // 即时本地预览
+  avatarUploading.value = true
+  try {
+    const url = await uploadAvatar(f)
+    avatarUrl.value = url
+    showToast('头像已更新')
+  } catch (err) {
+    showToast('已本地预览（上传服务未就绪）')
+  } finally {
+    avatarUploading.value = false
+    input.value = ''
+  }
+}
+
 const orderTabs = [
   { status: 'PAYING', label: '待付款', icon: 'gold-coin-o' },
   { status: 'TRADE_SUCCESS', label: '已支付', icon: 'send-gift-o' },
@@ -129,14 +185,21 @@ function onLogout() { logout(); showToast('已退出登录') }
 /* ---- Hero ---- */
 .uz-hero {
   position: relative;
-  padding: 40px 18px 26px;
+  margin: 14px 14px 8px;
+  padding: 26px 22px;
+  border-radius: 22px;
   overflow: hidden;
+  background:
+    linear-gradient(120deg, rgba(16, 11, 3, .30), rgba(16, 11, 3, .62)),
+    var(--lux-auth-bg) center / cover no-repeat;
+  border: 1px solid color-mix(in srgb, var(--lux-gold) 34%, transparent);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 246, 223, .12);
 }
 .uz-hero-glow {
-  position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
-  width: 320px; height: 220px; pointer-events: none;
-  background: radial-gradient(60% 60% at 50% 40%, rgba(224, 190, 120, .28), transparent 70%);
-  filter: blur(6px);
+  position: absolute; top: -70px; right: -30px; pointer-events: none;
+  width: 240px; height: 200px;
+  background: radial-gradient(60% 60% at 60% 40%, rgba(230, 205, 143, .38), transparent 70%);
+  filter: blur(4px);
 }
 .uz-id {
   position: relative;
@@ -147,9 +210,10 @@ function onLogout() { logout(); showToast('已退出登录') }
 .uz-avatar {
   position: relative; flex: 0 0 62px; width: 62px; height: 62px; border-radius: 50%;
   display: grid; place-items: center;
-  background: linear-gradient(140deg, var(--lux-surface-2), var(--lux-surface));
-  border: 1px solid var(--lux-hair);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+  background: linear-gradient(140deg, rgba(30, 22, 10, .72), rgba(16, 11, 4, .82));
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 246, 223, .18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
 }
 .uz-avatar svg { width: 34px; height: 34px; fill: var(--lux-gold); }
 .uz-avatar-ring {
@@ -159,10 +223,52 @@ function onLogout() { logout(); showToast('已退出登录') }
   mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
   opacity: .85;
 }
-.uz-id-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
-.uz-name { font-size: 20px; font-weight: 700; color: var(--lux-text); letter-spacing: .5px; }
-.uz-sub { font-size: 12.5px; color: var(--lux-text-2); letter-spacing: .3px; }
+.uz-avatar.tappable { cursor: pointer; }
+.uz-avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.uz-avatar-cam {
+  position: absolute; right: -2px; bottom: -2px; z-index: 2;
+  width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+  background: linear-gradient(135deg, #e6cd8f, #a9822f); border: 2px solid rgba(16, 11, 4, .9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .5);
+}
+.uz-avatar-cam svg { width: 12px; height: 12px; fill: #2a1f0a; }
+
+.uz-id-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.uz-tags { display: flex; align-items: center; gap: 7px; }
+.uz-level {
+  display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 7px;
+  font-size: 12px; font-weight: 900; font-style: italic; letter-spacing: .5px;
+  color: #2a1f0a; background: linear-gradient(135deg, #fbe9bd, #d9b876 55%, #b8963f);
+  box-shadow: 0 2px 8px rgba(184, 150, 63, .5);
+}
+.uz-name { font-size: 21px; font-weight: 800; color: #fdf6e6; letter-spacing: .5px; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+.uz-sub { font-size: 12.5px; color: rgba(253, 246, 230, .78); letter-spacing: .3px; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+.uz-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 11px; border-radius: 999px; font-size: 11.5px; font-weight: 800; letter-spacing: .5px;
+  color: #2a1f0a; background: linear-gradient(135deg, #f0dca6, #d9b876 52%, #c39f52);
+  box-shadow: 0 3px 10px rgba(195, 159, 82, .5);
+}
 .uz-id-arr { width: 20px; height: 20px; fill: none; stroke: var(--lux-text-3); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---- 会员数据 ---- */
+.uz-stats {
+  position: relative;
+  display: flex; align-items: center; justify-content: space-around;
+  margin-top: 20px; padding: 12px 8px 4px;
+  border-top: 1px solid rgba(255, 246, 223, .16);
+}
+.uz-stat {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  border: 0; background: transparent; cursor: pointer;
+}
+.uz-stat-num {
+  font-size: 19px; font-weight: 800; color: #fdf6e6;
+  font-variant-numeric: tabular-nums; text-shadow: 0 1px 6px rgba(0,0,0,.5);
+}
+.uz-stat-label { font-size: 11.5px; color: rgba(253, 246, 230, .72); letter-spacing: .5px; }
+.uz-stat-div { width: 1px; height: 24px; background: rgba(255, 246, 223, .18); }
+.uz-stat:active .uz-stat-num { color: var(--lux-accent-2); }
 
 /* ---- Scroll body ---- */
 .uz-scroll { flex: 1; padding: 4px 14px calc(66px + env(safe-area-inset-bottom)); }

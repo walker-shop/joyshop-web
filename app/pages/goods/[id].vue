@@ -70,7 +70,7 @@
       <div class="reco-title">— 猜你喜欢 —</div>
       <div class="reco-grid">
         <div v-for="r in recos" :key="r.id" class="rcard" @click="goDetail(r.id)">
-          <van-image class="rcard-img" :src="r.goodsFrontImage" fit="cover" lazy-load>
+          <van-image class="rcard-img" :src="r.goodsFrontImage" fit="cover">
             <template #error><div class="hero-ph sm">暂无图片</div></template>
           </van-image>
           <div class="rcard-body">
@@ -86,10 +86,10 @@
       <div class="bar-ic" @click="showToast('客服功能开发中')">
         <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg><span>客服</span>
       </div>
-      <div class="bar-ic" @click="navigateTo('/cart')">
+      <div ref="cartIconRef" class="bar-ic" :class="{ bump: cartBump }" @click="navigateTo('/cart')">
         <svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7.2 14.6l.9-1.6h7.5c.7 0 1.4-.4 1.7-1L21 4H6.2L5.3 2H2v2h2z"/></svg><span>购物车</span>
       </div>
-      <button class="btn-cart" @click="onAddCart">加入购物车</button>
+      <button ref="addBtnRef" class="btn-cart" @click="onAddCart">加入购物车</button>
       <button class="btn-buy" @click="onBuyNow">立即购买</button>
     </div>
   </div>
@@ -124,6 +124,7 @@ const { data: goods } = await useAsyncData(`goods-${route.params.id}`, async () 
   } catch (e) { console.warn('goods detail:', e) }
   return {}
 }, {
+  server: false, // 客户端拉取（走 Vite dev 代理到本地网关；SSR 相对路径拿不到）
   default: () => ({ name: '', shopPrice: 0, marketPrice: 0, images: [], goodsFrontImage: '' }),
 })
 
@@ -146,7 +147,7 @@ async function fetchRecos() {
     }
   } catch (e) { console.warn('recos:', e) }
 }
-await fetchRecos()
+onMounted(fetchRecos)
 
 function goDetail(id: number) { navigateTo(`/goods/${id}`) }
 
@@ -181,9 +182,36 @@ async function addToCart(): Promise<boolean> {
     return false
   }
 }
+// 飞入购物车动画
+const cartIconRef = ref<HTMLElement | null>(null)
+const addBtnRef = ref<HTMLElement | null>(null)
+const cartBump = ref(false)
+function flyToCart() {
+  if (!import.meta.client) return
+  const cart = cartIconRef.value?.getBoundingClientRect()
+  const btn = addBtnRef.value?.getBoundingClientRect()
+  if (!cart || !btn) return
+  const sx = btn.left + btn.width / 2
+  const sy = btn.top + btn.height / 2
+  const dx = (cart.left + cart.width / 2) - sx
+  const dy = (cart.top + cart.height / 2) - sy
+  const ball = document.createElement('div')
+  ball.style.cssText = `position:fixed;left:${sx}px;top:${sy}px;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:linear-gradient(135deg,#e6cd8f,#a9822f);box-shadow:0 5px 14px rgba(169,130,47,.6);z-index:9999;pointer-events:none;`
+  document.body.appendChild(ball)
+  const anim = ball.animate([
+    { transform: 'translate(0,0) scale(1)', opacity: 1, offset: 0 },
+    { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 90}px) scale(.95)`, opacity: 1, offset: 0.5 },
+    { transform: `translate(${dx}px,${dy}px) scale(.25)`, opacity: .35, offset: 1 },
+  ], { duration: 680, easing: 'cubic-bezier(.45,-0.25,.7,1)' })
+  anim.onfinish = () => {
+    ball.remove()
+    cartBump.value = true
+    setTimeout(() => { cartBump.value = false }, 420)
+  }
+}
 async function onAddCart() {
   if (!requireLogin()) return
-  if (await addToCart()) showToast('已加入购物车')
+  if (await addToCart()) { flyToCart(); showToast('已加入购物车') }
 }
 async function onBuyNow() {
   if (!requireLogin()) return
@@ -260,8 +288,20 @@ async function onBuyNow() {
 }
 .bar-ic { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--color-text-secondary); width: 44px; }
 .bar-ic svg { width: 20px; height: 20px; fill: var(--color-text-secondary); }
-.btn-cart, .btn-buy { flex: 1; height: 42px; border: 0; color: #fff; font-weight: 700; font-size: 15px; }
-.btn-cart { border-radius: 21px 0 0 21px; background: linear-gradient(135deg, #ffb64d, #ff8a00); }
-.btn-buy { border-radius: 0 21px 21px 0; background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); }
-.btn-cart:active, .btn-buy:active { opacity: .9; }
+.btn-cart, .btn-buy { flex: 1; height: 42px; border: 0; font-weight: 800; font-size: 15px; }
+.btn-cart { border-radius: 21px 0 0 21px; color: var(--color-primary-dark);
+  background: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-page));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 40%, transparent); }
+.btn-buy { border-radius: 0 21px 21px 0; color: #2a1f0a;
+  background: linear-gradient(135deg, #e6cd8f, #c9a24c 52%, #a9822f);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 40%, transparent); }
+.btn-cart:active, .btn-buy:active { transform: scale(.98); opacity: .92; }
+
+/* 购物车图标弹跳 */
+.bar-ic.bump { animation: cartBump .42s cubic-bezier(.34,1.56,.64,1); }
+.bar-ic.bump svg { fill: var(--color-primary); }
+@keyframes cartBump {
+  0%, 100% { transform: scale(1); }
+  35% { transform: scale(1.38) translateY(-2px); }
+}
 </style>

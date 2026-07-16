@@ -1,102 +1,145 @@
 <template>
-  <div class="home-page">
-    <!-- 搜索栏：主色渐变底 -->
-    <div class="search-wrap">
-      <div class="search-box" @click="navigateTo('/search')">
-        <svg viewBox="0 0 24 24" class="s-ic"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
-        <span>搜索商品</span>
+  <div class="home">
+    <!-- 氛围光晕背景 -->
+    <div class="ambient" aria-hidden="true" />
+
+    <!-- 顶部玻璃头 -->
+    <header class="topbar">
+      <div class="brand">
+        <img class="brand-mark" src="/logo.png" alt="ZShop" width="30" height="30">
+        <span class="brand-name">ZShop</span>
       </div>
-    </div>
+      <div class="search" @click="navigateTo('/search')">
+        <svg viewBox="0 0 24 24" class="s-ic"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        <span>搜索心仪好物</span>
+      </div>
+    </header>
 
-    <!-- Banner -->
-    <van-swipe v-if="banners.length" :autoplay="3000" lazy-render class="home-swiper" indicator-color="#ffffff">
-      <van-swipe-item v-for="item in banners" :key="item.id">
-        <van-image class="banner-img" :src="item.image" fit="cover" @click="item.url && navigateTo(item.url)" />
-      </van-swipe-item>
-    </van-swipe>
+    <!-- Hero：有 banner 用轮播，否则用品牌渐变位 -->
+    <section class="hero">
+      <van-swipe v-if="banners.length" :autoplay="3500" lazy-render class="hero-swipe" indicator-color="#fff6df">
+        <van-swipe-item v-for="item in banners" :key="item.id">
+          <van-image class="hero-img" :src="item.image" fit="cover" @click="item.url && navigateTo(item.url)" />
+        </van-swipe-item>
+      </van-swipe>
+      <div v-else class="hero-blank">
+        <div class="hero-eyebrow">臻选臻品 · 尊享品质</div>
+        <div class="hero-title">发现你的<em>心动清单</em></div>
+        <div class="hero-sub">精选好物，一站直达</div>
+      </div>
+    </section>
 
-    <!-- 分类快捷入口 5 列 -->
-    <div class="quicknav">
-      <div
+    <!-- 类目金格 -->
+    <nav v-if="topCategories.length" class="cats">
+      <button
         v-for="cat in topCategories"
         :key="cat.id"
-        class="qn"
+        class="cat"
         @click="navigateTo(`/category?id=${cat.id}`)"
       >
-        <img class="qn-ic" :src="cat.icon" :alt="cat.name" />
+        <img class="cat-ic" :src="cat.icon" :alt="cat.name" />
         <span>{{ cat.name }}</span>
-      </div>
-    </div>
+      </button>
+    </nav>
 
-    <!-- 限时秒杀（横滑热卖） -->
-    <div v-if="flashItems.length" class="flash">
+    <!-- 限时秒杀 -->
+    <section v-if="flashItems.length" class="flash">
       <div class="flash-hd">
-        <b>限时秒杀</b>
-        <span class="timer">距结束 <i>{{ countdown.h }}</i>:<i>{{ countdown.m }}</i>:<i>{{ countdown.s }}</i></span>
-        <span class="more" @click="navigateTo('/category')">更多 ›</span>
+        <div class="flash-tt"><span class="spark">✦</span> 限时秒杀</div>
+        <div class="flash-timer">
+          <span class="lbl">距结束</span>
+          <i>{{ countdown.h }}</i><b>:</b><i>{{ countdown.m }}</i><b>:</b><i>{{ countdown.s }}</i>
+        </div>
+        <span class="flash-more" @click="navigateTo('/category')">全部 ›</span>
       </div>
       <div class="flash-row">
-        <div
+        <button
           v-for="item in flashItems"
           :key="item.id"
           class="flash-item"
           @click="navigateTo(`/goods/${item.id}`)"
         >
-          <van-image class="flash-img" :src="item.goodsFrontImage" fit="cover">
-            <template #error><div class="img-ph sm">图</div></template>
-          </van-image>
-          <div class="fp">¥{{ priceParts(item.shopPrice).int }}</div>
-          <div v-if="item.marketPrice > item.shopPrice" class="fo">¥{{ item.marketPrice }}</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="sec"><b>为你推荐</b><span class="tip">猜你喜欢</span></div>
-
-    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-      <van-empty v-if="!loading && products.length === 0" description="暂无商品">
-        <template #image><div class="empty-ill">🛒</div></template>
-      </van-empty>
-      <div v-else class="product-grid">
-        <div
-          v-for="item in products"
-          :key="item.id"
-          class="pcard"
-          @click="navigateTo(`/goods/${item.id}`)"
-        >
-          <van-image class="pcard-img" :src="item.goodsFrontImage" fit="cover" lazy-load>
-            <template #loading><van-loading type="spinner" size="20" /></template>
-            <template #error><div class="img-ph">暂无图片</div></template>
-          </van-image>
-          <div class="pcard-body">
-            <div class="pcard-title">{{ item.name }}</div>
-            <div v-if="item.isHot || item.isNew || item.shipFree" class="pcard-tags">
-              <span v-if="item.isHot" class="ptag ptag-hot">热销</span>
-              <span v-if="item.isNew" class="ptag ptag-new">新品</span>
-              <span v-if="item.shipFree" class="ptag ptag-ship">包邮</span>
-            </div>
-            <div class="pcard-foot">
-              <div class="pcard-price">
-                <span class="pp-cur">¥</span><span class="pp-int">{{ priceParts(item.shopPrice).int }}</span><span class="pp-dec">.{{ priceParts(item.shopPrice).dec }}</span>
-              </div>
-              <span v-if="item.marketPrice > item.shopPrice" class="pcard-market">¥{{ item.marketPrice }}</span>
-              <div class="pcard-add" @click.stop="navigateTo(`/goods/${item.id}`)">
-                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
-              </div>
-            </div>
+          <div class="flash-thumb">
+            <van-image class="fill" :src="item.goodsFrontImage" fit="cover">
+              <template #error><div class="mono">{{ monogram(item.name) }}</div></template>
+              <template #loading><div class="mono dim">{{ monogram(item.name) }}</div></template>
+            </van-image>
           </div>
-        </div>
+          <div class="flash-price">¥{{ priceParts(item.shopPrice).int }}</div>
+          <div v-if="item.marketPrice > item.shopPrice" class="flash-old">¥{{ item.marketPrice }}</div>
+        </button>
       </div>
-      <van-loading v-if="loading" class="loading-more">加载中...</van-loading>
-    </van-pull-refresh>
+    </section>
+
+    <!-- 为你推荐 -->
+    <section class="feed">
+      <div class="feed-hd">
+        <h2>为你推荐</h2>
+        <span>猜你喜欢</span>
+      </div>
+
+      <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+        <div v-if="loading && !products.length" class="grid">
+          <div v-for="n in 4" :key="n" class="skel" />
+        </div>
+        <van-empty v-else-if="!products.length" description="好物马上上架">
+          <template #image><div class="empty-mark">Z</div></template>
+        </van-empty>
+        <div v-else class="grid">
+          <button
+            v-for="(item, i) in products"
+            :key="item.id"
+            class="card"
+            :style="{ animationDelay: `${Math.min(i, 8) * 45}ms` }"
+            @click="navigateTo(`/goods/${item.id}`)"
+          >
+            <div class="card-thumb">
+              <van-image class="fill" :src="item.goodsFrontImage" fit="cover">
+                <template #loading><div class="mono dim">{{ monogram(item.name) }}</div></template>
+                <template #error><div class="mono">{{ monogram(item.name) }}</div></template>
+              </van-image>
+              <div v-if="item.marketPrice > item.shopPrice" class="card-off">
+                {{ Math.round((1 - item.shopPrice / item.marketPrice) * 100) }}% off
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="card-title">{{ item.name }}</div>
+              <div v-if="item.isHot || item.isNew || item.shipFree" class="card-tags">
+                <span v-if="item.isHot" class="tag hot">热销</span>
+                <span v-if="item.isNew" class="tag">新品</span>
+                <span v-if="item.shipFree" class="tag">包邮</span>
+              </div>
+              <div class="card-foot">
+                <div class="price">
+                  <span class="cur">¥</span><span class="int">{{ priceParts(item.shopPrice).int }}</span><span class="dec">.{{ priceParts(item.shopPrice).dec }}</span>
+                </div>
+                <span v-if="item.marketPrice > item.shopPrice" class="market">¥{{ item.marketPrice }}</span>
+                <span class="add" @click.stop="quickAdd($event, item)">
+                  <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
+                </span>
+              </div>
+            </div>
+          </button>
+        </div>
+        <div v-if="loading && products.length" class="loading-more">加载中…</div>
+      </van-pull-refresh>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
+import { showToast } from 'vant'
+
 const config = useRuntimeConfig()
 const { tenantId } = useTenant()
 const refreshing = ref(false)
-const loading = ref(false)
+const loading = ref(true)
+
+// 图片兜底：取商品名首个有效字符作金字底纹
+function monogram(name: string) {
+  const s = (name || '').trim()
+  return s ? s[0] : 'Z'
+}
 
 // === 倒计时到当天 24:00 ===
 const countdown = ref({ h: '00', m: '00', s: '00' })
@@ -110,7 +153,11 @@ function tick() {
   const p = (n: number) => String(n).padStart(2, '0')
   countdown.value = { h: p(h), m: p(m), s: p(s) }
 }
-onMounted(() => { tick(); timer = setInterval(tick, 1000) })
+onMounted(() => {
+  tick(); timer = setInterval(tick, 1000)
+  // 客户端拉数据（走 Vite dev 代理到本地网关；避免 SSR 相对路径拿不到）
+  fetchBanners(); fetchCategories(); fetchProducts()
+})
 onUnmounted(() => { if (timer) clearInterval(timer) })
 
 // === Banners ===
@@ -149,7 +196,6 @@ async function fetchCategories() {
 
 // === Products ===
 const products = ref<any[]>([])
-// 限时秒杀：取前 6 个热卖商品（真实数据；未来接专门的秒杀活动 API）
 const flashItems = computed(() => products.value.slice(0, 6))
 
 function priceParts(n: number) {
@@ -169,130 +215,261 @@ async function fetchProducts() {
   } catch (e) { console.warn('products:', e) } finally { loading.value = false }
 }
 
-await fetchBanners()
-await fetchCategories()
-await fetchProducts()
-
 async function onRefresh() {
-  await Promise.all([fetchBanners(), fetchProducts()])
+  await Promise.all([fetchBanners(), fetchCategories(), fetchProducts()])
   refreshing.value = false
+}
+
+// 快速加购 + 飞入 tabbar 购物车
+const { apiFetch } = useApi()
+const { isLoggedIn } = useAuth()
+const { refresh: refreshCart } = useCartCount()
+async function quickAdd(e: MouseEvent, item: any) {
+  if (!isLoggedIn.value) {
+    showToast('请先登录')
+    navigateTo(`/login?redirect=/`)
+    return
+  }
+  const btn = (e.currentTarget as HTMLElement)?.getBoundingClientRect()
+  try {
+    await apiFetch('/v1/cart', { method: 'POST', body: { goodsId: Number(item.id), nums: 1, checked: true } })
+    await refreshCart()
+    if (btn) flyToCart(btn.left + btn.width / 2, btn.top + btn.height / 2, item.goodsFrontImage)
+    showToast('已加入购物车')
+  } catch (err: any) {
+    showToast(err?.data?.msg || err?.message || '加入购物车失败')
+  }
+}
+function flyToCart(sx: number, sy: number, img?: string) {
+  if (!import.meta.client) return
+  const cartTab = document.querySelectorAll('.van-tabbar .van-tabbar-item')[2] as HTMLElement
+  const cart = cartTab?.getBoundingClientRect()
+  if (!cart) return
+  const dx = (cart.left + cart.width / 2) - sx
+  const dy = (cart.top + cart.height / 2 - 8) - sy
+  const ball = document.createElement('div')
+  ball.style.cssText = `position:fixed;left:${sx}px;top:${sy}px;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;z-index:9999;pointer-events:none;overflow:hidden;box-shadow:0 5px 16px rgba(169,130,47,.6);${img ? `background:#000 center/cover url('${img}')` : 'background:linear-gradient(135deg,#e6cd8f,#a9822f)'};border:2px solid #f0dca6;`
+  document.body.appendChild(ball)
+  const anim = ball.animate([
+    { transform: 'translate(0,0) scale(1)', opacity: 1, offset: 0 },
+    { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 100}px) scale(.9)`, opacity: 1, offset: 0.55 },
+    { transform: `translate(${dx}px,${dy}px) scale(.2)`, opacity: .3, offset: 1 },
+  ], { duration: 720, easing: 'cubic-bezier(.45,-0.2,.7,1)' })
+  anim.onfinish = () => {
+    ball.remove()
+    cartTab?.classList.add('cart-bumped')
+    setTimeout(() => cartTab?.classList.remove('cart-bumped'), 450)
+  }
 }
 </script>
 
 <style scoped>
-.home-page {
-  background-color: var(--color-bg-page);
-  transition: var(--theme-transition);
-  padding-bottom: 8px;
+.home {
+  position: relative;
+  min-height: 100vh;
+  padding-bottom: 12px;
+  background: var(--color-bg-page);
 }
 
-/* 搜索栏 */
-.search-wrap {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: linear-gradient(180deg, var(--color-primary), var(--color-primary-light));
-  padding: 10px 14px;
+/* 氛围金色光晕 */
+.ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(80% 32% at 50% -4%, color-mix(in srgb, var(--color-primary) 24%, transparent), transparent 60%),
+    radial-gradient(60% 26% at 100% 8%, color-mix(in srgb, var(--color-primary-light) 18%, transparent), transparent 66%);
 }
-.search-box {
-  height: 36px;
-  background: #fff;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 14px;
-  color: var(--color-text-tertiary);
-  font-size: 13px;
+.home > :not(.ambient) { position: relative; z-index: 1; }
+
+/* ---------- 顶部玻璃头 ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px 12px;
+  background: color-mix(in srgb, var(--color-bg-page) 72%, transparent);
+  backdrop-filter: saturate(150%) blur(16px);
+  -webkit-backdrop-filter: saturate(150%) blur(16px);
 }
-.s-ic { width: 16px; height: 16px; fill: var(--color-text-tertiary); }
-
-.home-swiper { margin: 12px; border-radius: 16px; overflow: hidden; }
-.banner-img { width: 100%; aspect-ratio: 2.6 / 1; display: block; }
-
-/* 分类快捷 5 列 */
-.quicknav {
+.brand { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.brand-mark {
+  width: 30px; height: 30px; border-radius: 9px; display: block;
+  object-fit: cover;
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+.brand-name {
+  font-weight: 800; font-size: 17px; letter-spacing: .3px;
+  background: linear-gradient(120deg, var(--color-primary-light), var(--color-primary));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.search {
+  flex: 1; height: 38px; display: flex; align-items: center; gap: 8px;
+  padding: 0 14px; border-radius: 20px;
+  color: var(--color-text-tertiary); font-size: 13px;
   background: var(--color-bg-card);
-  margin: 0 12px;
-  border-radius: 16px;
-  padding: 14px 4px;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 14px 0;
-  transition: var(--theme-transition);
+  border: 1px solid var(--color-border);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 40%, transparent);
 }
-.qn { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.qn-ic {
-  width: 44px; height: 44px; border-radius: 14px;
-  object-fit: contain; display: block;
-}
-.qn span { font-size: 11px; color: var(--color-text-secondary); }
+.s-ic { width: 16px; height: 16px; fill: var(--color-primary); flex-shrink: 0; }
 
-/* 限时秒杀 */
+/* ---------- Hero ---------- */
+.hero { margin: 4px 14px 0; }
+.hero-swipe { border-radius: 18px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.14); }
+.hero-img { width: 100%; aspect-ratio: 2.4 / 1; display: block; }
+.hero-blank {
+  border-radius: 18px; padding: 22px 20px 24px;
+  color: #2a1f0a;
+  background:
+    radial-gradient(120% 120% at 0% 0%, #f0dca6, transparent 60%),
+    linear-gradient(135deg, #e6cd8f, #c9a24c 55%, #a9822f);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--color-primary) 34%, transparent);
+}
+.hero-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; opacity: .7; }
+.hero-title { font-size: 25px; font-weight: 900; line-height: 1.2; margin-top: 6px; }
+.hero-title em { font-style: normal; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 4px; }
+.hero-sub { font-size: 12.5px; margin-top: 8px; opacity: .8; }
+
+/* ---------- 类目金格 ---------- */
+.cats {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 19%;
+  gap: 4px 0; overflow-x: auto; scroll-snap-type: x proximity;
+  padding: 16px 10px 4px;
+}
+.cats::-webkit-scrollbar { display: none; }
+.cat {
+  scroll-snap-align: start;
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  background: none; border: 0; padding: 4px 0; cursor: pointer;
+}
+.cat-ic {
+  width: 46px; height: 46px; display: block;
+  filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--color-primary) 30%, transparent));
+  transition: transform .18s ease;
+}
+.cat:active .cat-ic { transform: scale(.9); }
+.cat span {
+  font-size: 11.5px; color: var(--color-text-secondary); max-width: 62px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ---------- 限时秒杀 ---------- */
 .flash {
-  margin: 12px;
-  background: linear-gradient(120deg, #fff5f0, #ffe8dd);
-  border-radius: 16px;
-  padding: 12px;
+  margin: 14px; padding: 14px 12px 12px; border-radius: 18px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-card)), var(--color-bg-card));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 26%, transparent);
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
 }
-html.dark .flash { background: linear-gradient(120deg, #2a1a10, #3a2317); }
-.flash-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-.flash-hd b { color: var(--color-primary); font-size: 16px; font-weight: 900; }
-.flash-hd .timer { display: flex; gap: 2px; align-items: center; font-size: 11px; color: var(--color-text-secondary); }
-.flash-hd .timer i { background: #1a1a1a; color: #fff; border-radius: 4px; padding: 2px 4px; font-style: normal; font-weight: 700; }
-.flash-hd .more { margin-left: auto; font-size: 11px; color: var(--color-text-tertiary); }
-.flash-row { display: flex; gap: 10px; overflow-x: auto; }
+.flash-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.flash-tt { font-size: 16px; font-weight: 900; color: var(--color-text-primary); display: flex; align-items: center; gap: 5px; }
+.flash-tt .spark { color: var(--color-primary); }
+.flash-timer { display: flex; align-items: center; gap: 3px; }
+.flash-timer .lbl { font-size: 11px; color: var(--color-text-tertiary); margin-right: 3px; }
+.flash-timer i {
+  font-style: normal; font-weight: 800; font-size: 12px; font-variant-numeric: tabular-nums;
+  color: #fffaf0; background: linear-gradient(135deg, #c9a24c, #a9822f);
+  border-radius: 5px; padding: 2px 5px; min-width: 20px; text-align: center;
+}
+.flash-timer b { color: var(--color-primary); font-weight: 800; }
+.flash-more { margin-left: auto; font-size: 12px; color: var(--color-primary); font-weight: 600; }
+.flash-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 2px; }
 .flash-row::-webkit-scrollbar { display: none; }
-.flash-item { flex: 0 0 76px; }
-.flash-img { width: 76px; height: 76px; border-radius: 10px; overflow: hidden; display: block; }
-.fp { color: var(--color-price); font-weight: 800; font-size: 13px; margin-top: 4px; }
-.fo { color: var(--color-text-tertiary); font-size: 10px; text-decoration: line-through; }
+.flash-item { flex: 0 0 82px; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.flash-thumb { width: 82px; height: 82px; border-radius: 12px; overflow: hidden; }
+.flash-price { color: var(--color-price); font-weight: 900; font-size: 14px; margin-top: 6px; }
+.flash-old { color: var(--color-text-tertiary); font-size: 10px; text-decoration: line-through; }
 
-/* 区块标题 */
-.sec { padding: 8px 14px; display: flex; align-items: baseline; }
-.sec b { font-size: 17px; font-weight: 800; color: var(--color-text-primary); }
-.sec .tip { font-size: 11px; color: var(--color-text-tertiary); margin-left: 8px; }
+/* ---------- 为你推荐 ---------- */
+.feed { padding: 6px 0 0; }
+.feed-hd { display: flex; align-items: baseline; gap: 9px; padding: 8px 16px 12px; }
+.feed-hd h2 { font-size: 19px; font-weight: 900; color: var(--color-text-primary); margin: 0;
+  position: relative; padding-left: 12px; }
+.feed-hd h2::before {
+  content: ''; position: absolute; left: 0; top: 3px; bottom: 3px; width: 4px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary));
+}
+.feed-hd span { font-size: 12px; color: var(--color-text-tertiary); }
 
-/* 双列瀑布流 */
-.product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 12px 12px; }
-.pcard {
-  background: var(--color-bg-card);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
-  transition: transform 0.15s ease;
-}
-.pcard:active { transform: scale(0.98); }
-.pcard-img { width: 100%; aspect-ratio: 1 / 1; display: block; background: var(--color-bg-page); }
-.img-ph {
-  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
-  font-size: 12px; color: var(--color-text-tertiary); background: var(--color-bg-page);
-}
-.img-ph.sm { font-size: 11px; }
-.pcard-body { padding: 8px 10px 10px; }
-.pcard-title {
-  font-size: 13px; line-height: 1.4; color: var(--color-text-primary);
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden; min-height: 36px;
-}
-.pcard-tags { display: flex; gap: 4px; margin: 6px 0 4px; }
-.ptag { font-size: 10px; line-height: 1; padding: 3px 5px; border-radius: 4px; font-weight: 600; }
-.ptag-hot { color: #fff; background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); }
-.ptag-new { color: var(--color-primary); background: var(--color-primary-soft); }
-.ptag-ship { color: var(--color-primary); background: var(--color-primary-soft); }
-.pcard-foot { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }
-.pcard-price { color: var(--color-price); font-weight: 800; }
-.pp-cur { font-size: 12px; }
-.pp-int { font-size: 20px; }
-.pp-dec { font-size: 12px; }
-.pcard-market { font-size: 11px; color: var(--color-text-tertiary); text-decoration: line-through; }
-.pcard-add {
-  margin-left: auto; width: 26px; height: 26px; border-radius: 50%;
-  background: var(--color-primary); display: flex; align-items: center; justify-content: center;
-  align-self: flex-end;
-}
-.pcard-add svg { width: 15px; height: 15px; fill: #fff; }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 12px 12px; }
 
-.empty-ill { font-size: 56px; }
-.loading-more { text-align: center; padding: 16px; }
+/* 卡片 */
+.card {
+  background: var(--color-bg-card); border: 1px solid var(--color-border);
+  border-radius: 16px; overflow: hidden; padding: 0; cursor: pointer; text-align: left;
+  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+  animation: rise .42s cubic-bezier(.22,.61,.36,1) both;
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+.card:active { transform: translateY(1px) scale(.985); box-shadow: 0 1px 6px rgba(0,0,0,.05); }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.card-thumb { position: relative; width: 100%; aspect-ratio: 1 / 1; background: var(--color-search-bg); }
+.card-off {
+  position: absolute; top: 8px; left: 8px; z-index: 2;
+  font-size: 10px; font-weight: 800; color: #2a1f0a;
+  background: linear-gradient(135deg, #e6cd8f, #c9a24c); border-radius: 7px; padding: 3px 6px;
+}
+.fill { width: 100%; height: 100%; display: block; }
+.mono {
+  width: 100%; height: 100%; display: grid; place-items: center;
+  font-size: 40px; font-weight: 900; font-style: italic;
+  color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  background:
+    radial-gradient(120% 120% at 30% 20%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 60%),
+    var(--color-search-bg);
+}
+.mono.dim { opacity: .5; }
+
+.card-body { padding: 9px 11px 11px; }
+.card-title {
+  font-size: 13px; line-height: 1.42; color: var(--color-text-primary);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 37px;
+}
+.card-tags { display: flex; gap: 5px; margin: 7px 0 5px; }
+.tag {
+  font-size: 10px; line-height: 1; padding: 3px 6px; border-radius: 5px; font-weight: 700;
+  color: var(--color-primary-dark); background: var(--color-primary-soft);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+.tag.hot {
+  color: #2a1f0a; border: 0;
+  background: linear-gradient(135deg, #e6cd8f, #c9a24c);
+}
+.card-foot { display: flex; align-items: baseline; gap: 6px; margin-top: 5px; }
+.price { color: var(--color-price); font-weight: 900; font-variant-numeric: tabular-nums; }
+.cur { font-size: 12px; }
+.int { font-size: 21px; }
+.dec { font-size: 12px; }
+.market { font-size: 11px; color: var(--color-text-tertiary); text-decoration: line-through; }
+.add {
+  margin-left: auto; align-self: flex-end;
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  background: linear-gradient(135deg, #e6cd8f, #c9a24c 52%, #a9822f);
+  box-shadow: 0 3px 9px color-mix(in srgb, var(--color-primary) 42%, transparent);
+  transition: transform .14s ease;
+}
+.add:active { transform: scale(.86); }
+.add svg { width: 15px; height: 15px; fill: #2a1f0a; }
+
+/* 骨架屏 */
+.skel {
+  height: 232px; border-radius: 16px;
+  background: linear-gradient(100deg, var(--color-bg-card) 30%, var(--color-search-bg) 50%, var(--color-bg-card) 70%);
+  background-size: 200% 100%; animation: shine 1.3s ease-in-out infinite;
+}
+@keyframes shine { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+.empty-mark {
+  width: 76px; height: 76px; margin: 0 auto; border-radius: 22px; display: grid; place-items: center;
+  font-size: 40px; font-weight: 900; font-style: italic; color: #2a1f0a;
+  background: linear-gradient(135deg, #e6cd8f, #c9a24c 52%, #a9822f);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--color-primary) 34%, transparent);
+}
+.loading-more { text-align: center; padding: 16px; color: var(--color-text-tertiary); font-size: 13px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card { animation: none; }
+  .skel { animation: none; }
+}
 </style>

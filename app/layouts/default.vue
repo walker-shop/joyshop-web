@@ -54,11 +54,41 @@ onMounted(refreshCart)
   padding-bottom: 50px;
 }
 
-/* PC 端限制 tabbar 宽度居中 */
+/* 玻璃质感 tabbar + 金色顶边 */
 .app-tabbar :deep(.van-tabbar) {
   max-width: 480px;
   left: 50% !important;
   transform: translateX(-50%);
   right: auto !important;
+  height: 58px;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: color-mix(in srgb, var(--color-tabbar-bg) 80%, transparent);
+  backdrop-filter: saturate(160%) blur(18px);
+  -webkit-backdrop-filter: saturate(160%) blur(18px);
+  border-top: 1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+  box-shadow: 0 -6px 22px rgba(0, 0, 0, 0.16);
+}
+.app-tabbar :deep(.van-tabbar-item) {
+  color: var(--color-text-tertiary);
+  background: transparent;
+  transition: color .18s ease, transform .18s ease;
+}
+.app-tabbar :deep(.van-tabbar-item__text) { font-size: 11px; font-weight: 600; margin-top: 3px; letter-spacing: .5px; }
+.app-tabbar :deep(.van-tabbar-item--active) { color: var(--color-primary); background: transparent; }
+/* 选中项：图标上浮 + 金色发光 + 顶部金条 */
+.app-tabbar :deep(.van-tabbar-item--active .van-tabbar-item__icon) {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--color-primary) 60%, transparent));
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1);
+}
+.app-tabbar :deep(.van-tabbar-item--active)::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 26px; height: 3px; border-radius: 0 0 3px 3px;
+  background: linear-gradient(90deg, var(--color-primary-light), var(--color-primary));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-primary) 70%, transparent);
+}
+.app-tabbar :deep(.van-badge) {
+  background: linear-gradient(135deg, #e6cd8f, #a9822f) !important;
+  border: none !important; color: #2a1f0a !important; font-weight: 800;
 }
 </style>

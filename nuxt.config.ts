@@ -57,6 +57,8 @@ export default defineNuxtConfig({
       proxy: {
         // 本地全栈 e2e 分流（dev-only，临时）；stripOrigin 去掉浏览器 Origin 头避免后端 CORS 403
         '/v1/goods': { target: 'http://127.0.0.1:8022', changeOrigin: true, configure: stripOrigin },
+        '/v1/banners': { target: 'http://127.0.0.1:8022', changeOrigin: true, configure: stripOrigin },
+        '/v1/categories': { target: 'http://127.0.0.1:8022', changeOrigin: true, configure: stripOrigin },
         '/v1/cart': { target: 'http://127.0.0.1:8024', changeOrigin: true, configure: stripOrigin },
         '/v1/orders': { target: 'http://127.0.0.1:8024', changeOrigin: true, configure: stripOrigin },
         '/v1/payment': { target: 'http://127.0.0.1:8024', changeOrigin: true, configure: stripOrigin },

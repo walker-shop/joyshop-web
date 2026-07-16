@@ -30,6 +30,18 @@ export function useAuth() {
   const user = useState<AuthUser | null>('auth-user', () => null)
   const isLoggedIn = computed(() => !!token.value)
 
+  // 从 JWT 恢复 user（刷新后 useState 重置但 cookie 仍在 → 用户名不丢）
+  function userFromToken(tok: string): AuthUser | null {
+    try {
+      const seg = tok.split('.')[1]
+      if (!seg) return null
+      const json = atob(seg.replace(/-/g, '+').replace(/_/g, '/'))
+      const p = JSON.parse(decodeURIComponent(escape(json)))
+      return { id: p.user_id, username: p.username, nickname: p.nickname || p.username, avatar: p.avatar || '', role: p.role }
+    } catch { return null }
+  }
+  if (token.value && !user.value) user.value = userFromToken(token.value)
+
   function persist(data: IamLoginData) {
     token.value = data.access_token
     user.value = data.user

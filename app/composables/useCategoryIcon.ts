@@ -213,11 +213,23 @@ const ICONS: Record<string, CatIconDef> = {
     colors: PALETTES.sports,
     path: 'M5.5 17a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zm13 0a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zM5.5 12.5l5.5-5 2 3 5.5-5',
   },
+
+  // === 实际库内一级类目（与 DB category 表对齐）===
+  '电子数码': { colors: PALETTES.digital, path: 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm4 18h.01' },
+  '服装鞋包': { colors: PALETTES.clothing, path: 'M6.5 2 2 7l3.5 1L7 22h10l1.5-14 3.5-1L17.5 2C17.5 2 15 5 12 5S6.5 2 6.5 2z' },
+  '家居生活': { colors: PALETTES.appliance, path: 'M3 10.5 12 3l9 7.5M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5M9.5 21v-6h5v6' },
+  '图书文教': { colors: PALETTES.computer, path: 'M4 4a2 2 0 0 1 2-2h13v18H6a2 2 0 0 0-2 2V4zm2 14h13M8 6h8M8 9h6' },
+  '运动户外': { colors: PALETTES.sports, path: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 0v4m-4 4 4-4 4 4M6 4l-2 4m14-4 2 4' },
+  '美妆个护': { colors: PALETTES.beauty, path: 'M9 2h6l1 7H8L9 2zm-1 7h8v2a6 6 0 0 1-4 5.66V20h4v2H7v-2h4v-3.34A6 6 0 0 1 7 11V9h1z' },
+  '食品饮料': { colors: PALETTES.food, path: 'M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zm4-6 1 3m4-3v3m4-3-1 3' },
+  '母婴玩具': { colors: PALETTES.beauty, path: 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-7 10a7 7 0 0 1 14 0M9 6h.01M15 6h.01M10.5 8a2 2 0 0 0 3 0' },
+  '手机通讯': { colors: PALETTES.digital, path: 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm4 18h.01' },
+  '摄影摄像': { colors: PALETTES.digital, path: 'M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' },
 }
 
 // ── Fallback icon (shopping bag) ──
 const FALLBACK: CatIconDef = {
-  colors: ['#6b7280', '#9ca3af'],
+  colors: ['#c9a24c', '#a9822f'],
   path: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0',
 }
 
@@ -237,17 +249,21 @@ export function useCategoryIcon() {
   /**
    * Generates an inline SVG data URI for use in <img> src or as background.
    */
+  // 统一香槟金玻璃质感：所有类目共用同一套金色渐变 + 象牙白描边（弃彩虹，贴合 Lux）
   function getIconSvg(categoryName: string, parentName?: string): string {
     const def = getIconDef(categoryName, parentName)
-    const [c1, c2] = def.colors
-    const id = categoryName.replace(/[^a-zA-Z0-9]/g, '')
+    const id = categoryName.replace(/[^a-zA-Z0-9]/g, '') || 'x'
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-      <defs><linearGradient id="g${id}" x1="0" y1="0" x2="48" y2="48">
-        <stop offset="0%" stop-color="${c1}"/>
-        <stop offset="100%" stop-color="${c2}"/>
-      </linearGradient></defs>
-      <rect width="48" height="48" rx="14" fill="url(#g${id})"/>
-      <g transform="translate(12,12)" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <defs>
+        <linearGradient id="g${id}" x1="6" y1="4" x2="42" y2="46">
+          <stop offset="0%" stop-color="#e6cd8f"/>
+          <stop offset="52%" stop-color="#c9a24c"/>
+          <stop offset="100%" stop-color="#a9822f"/>
+        </linearGradient>
+      </defs>
+      <rect x="1" y="1" width="46" height="46" rx="15" fill="url(#g${id})"/>
+      <rect x="1.5" y="1.5" width="45" height="45" rx="14.5" fill="none" stroke="#fff6df" stroke-opacity="0.35"/>
+      <g transform="translate(12,12)" stroke="#fffaf0" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none">
         <path d="${def.path}"/>
       </g>
     </svg>`
