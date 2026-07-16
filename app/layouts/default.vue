@@ -16,7 +16,7 @@
         </template>
         分类
       </van-tabbar-item>
-      <van-tabbar-item to="/cart">
+      <van-tabbar-item to="/cart" :badge="cartCount > 0 ? cartCount : ''">
         <template #icon="{ active }">
           <PhShoppingBag :weight="active ? 'fill' : 'regular'" :size="22" />
         </template>
@@ -36,6 +36,8 @@
 import { PhStorefront, PhSquaresFour, PhShoppingBag, PhUserCircle } from '@phosphor-icons/vue'
 
 const activeTab = ref(0)
+const { count: cartCount, refresh: refreshCart } = useCartCount()
+onMounted(refreshCart)
 </script>
 
 <style scoped>
