@@ -1,0 +1,153 @@
+/* ============================================================
+   Lux — 高级设计系统（storefront 交易域共享）· 深/浅双主题
+   页面 markup 只用 .lux-* 类 + --lux-* token；
+   浅色为默认，html.dark .lux 覆盖为暗黑奢华。
+   ============================================================ */
+
+/* ---------- 浅色（默认）：暖砂燕麦 · 柔光不刺眼 ---------- */
+.lux {
+  --lux-bg: #e7ded1;
+  --lux-surface: #f4efe6;
+  --lux-surface-2: #ede6da;
+  --lux-hair: rgba(38, 28, 16, .12);
+  --lux-hair-soft: rgba(38, 28, 16, .07);
+  --lux-text: #241f18;
+  --lux-text-2: #6a6157;
+  --lux-text-3: #a09788;
+  --lux-accent: #9c7420;
+  --lux-accent-2: #c19a44;
+  --lux-gold: #9c7420;
+  --lux-price: #8a6412;
+
+  /* CTA：香槟金渐变 + 深咖字（金牌质感） */
+  --lux-btn-grad: linear-gradient(135deg, #e0c274, #c9a24c 52%, #ab8330);
+  --lux-btn-text: #2a1f0a;
+  --lux-btn-glow: rgba(169, 130, 47, .26);
+
+  /* 缩略图底 / 胶囊标签底（跟随主题） */
+  --lux-thumb-bg: #e4dccf;
+  --lux-chip-bg: rgba(38, 28, 16, .06);
+
+  /* auth 页品牌背景图（跟随主题） */
+  --lux-auth-bg: url('/auth-bg-light.jpg');
+
+  --lux-glow-top: rgba(200, 160, 80, .09);
+  --lux-glow-corner: rgba(169, 121, 47, .07);
+
+  min-height: 100vh;
+  color: var(--lux-text);
+  background:
+    radial-gradient(90% 40% at 50% -5%, var(--lux-glow-top), transparent 62%),
+    radial-gradient(70% 30% at 100% 100%, var(--lux-glow-corner), transparent 70%),
+    var(--lux-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- 深色：暗黑奢华 ---------- */
+html.dark .lux {
+  --lux-bg: #0b0b0d;
+  --lux-surface: #161619;
+  --lux-surface-2: #1d1d22;
+  --lux-hair: rgba(255, 255, 255, .08);
+  --lux-hair-soft: rgba(255, 255, 255, .05);
+  --lux-text: #f4f4f6;
+  --lux-text-2: #9b9ba6;
+  --lux-text-3: #63636e;
+  --lux-accent: #d9b876;
+  --lux-accent-2: #ecd39a;
+  --lux-gold: #e3ba7d;
+  --lux-price: #e8cf9a;
+
+  --lux-btn-grad: linear-gradient(135deg, #f0dca6, #dcbd76 50%, #c39f52);
+  --lux-btn-text: #2a1f0a;
+  --lux-btn-glow: rgba(224, 190, 120, .42);
+
+  --lux-thumb-bg: #101013;
+  --lux-chip-bg: rgba(255, 255, 255, .05);
+
+  --lux-auth-bg: url('/auth-bg-dark.jpg');
+
+  --lux-glow-top: rgba(227, 186, 125, .16);
+  --lux-glow-corner: rgba(227, 186, 125, .07);
+}
+
+/* ---- Header ---- */
+.lux-head {
+  position: sticky; top: 0; z-index: 20;
+  height: 54px; display: flex; align-items: center; justify-content: center; padding: 0 12px;
+  background: color-mix(in srgb, var(--lux-bg) 82%, transparent);
+  backdrop-filter: saturate(150%) blur(14px);
+  border-bottom: 1px solid var(--lux-hair-soft);
+}
+.lux-head-title { font-size: 17px; font-weight: 600; letter-spacing: 2px; color: var(--lux-text); }
+.lux-back {
+  position: absolute; left: 12px; width: 36px; height: 36px; border: 1px solid var(--lux-hair); padding: 0;
+  display: grid; place-items: center; border-radius: 50%; background: var(--lux-surface); cursor: pointer;
+}
+.lux-back svg { width: 20px; height: 20px; fill: var(--lux-text); }
+
+/* ---- Scroll region ---- */
+.lux-scroll { flex: 1; padding: 16px 14px 100px; overflow-y: auto; }
+
+/* ---- Card ---- */
+.lux-card {
+  position: relative;
+  background: var(--lux-surface); border: 1px solid var(--lux-hair-soft); border-radius: 18px;
+  margin-bottom: 14px;
+}
+.lux-card--raised { background: linear-gradient(160deg, var(--lux-surface-2), var(--lux-surface)); border-color: var(--lux-hair); }
+
+/* thin gold→orange signature hairline */
+.lux-edge {
+  position: absolute; left: 16px; right: 16px; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--lux-gold) 30%, var(--lux-accent) 70%, transparent);
+  opacity: .8;
+}
+
+/* ---- Price ---- */
+.lux-price { color: var(--lux-price); font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .3px; }
+.lux-price i { font-size: .72em; font-weight: 600; font-style: normal; margin-right: 1px; opacity: .85; }
+
+/* ---- Primary CTA ---- */
+.lux-btn {
+  border: 0; border-radius: 999px; color: var(--lux-btn-text); font-weight: 700; letter-spacing: 1px;
+  background: var(--lux-btn-grad);
+  box-shadow: 0 8px 24px var(--lux-btn-glow), inset 0 1px 0 rgba(255, 255, 255, .3);
+  display: grid; place-items: center; cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.lux-btn:active { transform: translateY(1px) scale(.99); filter: brightness(1.03); box-shadow: 0 4px 14px var(--lux-btn-glow); }
+.lux-btn:disabled { opacity: .7; cursor: default; }
+.lux-btn--block { width: 100%; height: 50px; font-size: 16px; }
+
+/* ---- Ghost / secondary ---- */
+.lux-btn-ghost {
+  border: 1px solid var(--lux-hair); background: var(--lux-surface); color: var(--lux-text);
+  border-radius: 999px; cursor: pointer; transition: border-color .12s ease, background .12s ease;
+}
+.lux-btn-ghost:active { background: var(--lux-surface-2); }
+
+/* ---- Sticky bottom bar ---- */
+.lux-bar {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: 0;
+  width: 100%; max-width: 480px; z-index: 30;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--lux-bg) 90%, transparent);
+  backdrop-filter: saturate(160%) blur(16px);
+  border-top: 1px solid var(--lux-hair);
+}
+
+/* ---- Spinner ---- */
+.lux-spin { width: 20px; height: 20px; border: 2.5px solid rgba(255, 255, 255, .4); border-top-color: #fff; border-radius: 50%; animation: lux-rot .7s linear infinite; }
+@keyframes lux-rot { to { transform: rotate(360deg); } }
+
+/* ---- Empty state ---- */
+.lux-empty { padding: 80px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+.lux-empty-ico { width: 76px; height: 76px; border-radius: 24px; display: grid; place-items: center; background: var(--lux-surface); border: 1px solid var(--lux-hair); font-size: 34px; }
+.lux-empty-txt { color: var(--lux-text-2); font-size: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lux-btn, .lux-spin { transition: none; animation: none; }
+}
