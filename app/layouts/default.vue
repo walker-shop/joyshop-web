@@ -78,15 +78,16 @@ onMounted(refreshCart)
 .app-tabbar :deep(.van-tabbar-item__text) { font-size: 11px; font-weight: 600; margin-top: 2px; letter-spacing: .5px; }
 .app-tabbar :deep(.van-tabbar-item--active) { color: var(--color-primary); background: transparent; }
 .app-tabbar :deep(.van-tabbar-item--active .van-tabbar-item__text) { font-weight: 800; }
-/* 选中项：图标嵌入香槟金胶囊 + 上浮发光（金色药丸，去掉旧顶条） */
+/* 选中项：图标嵌入香槟金渐变圆角块 + 深咖图标 + 上浮发光（对齐全站金按钮语言） */
 .app-tabbar :deep(.van-tabbar-item__icon) {
-  padding: 5px 16px; border-radius: 999px; margin-bottom: 2px;
-  transition: background .2s ease, transform .22s cubic-bezier(.34, 1.56, .64, 1), box-shadow .2s ease;
+  padding: 6px 9px; border-radius: 13px; margin-bottom: 3px;
+  transition: background .2s ease, transform .22s cubic-bezier(.34, 1.56, .64, 1), box-shadow .2s ease, color .2s ease;
 }
 .app-tabbar :deep(.van-tabbar-item--active .van-tabbar-item__icon) {
-  background: var(--color-primary-soft);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 14px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  background: linear-gradient(135deg, #e6cd8f, #c9a24c 52%, #a9822f);
+  color: #2a1f0a !important; /* 盖过 global.css 里 html.dark .van-tabbar-item__icon{color:inherit!important} */
+  transform: translateY(-3px);
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--color-primary) 55%, transparent), inset 0 1px 0 rgba(255, 255, 255, .4);
 }
 .app-tabbar :deep(.van-badge) {
   background: linear-gradient(135deg, #e6cd8f, #a9822f) !important;
