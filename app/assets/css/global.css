@@ -46,6 +46,10 @@
   --color-tabbar-bg: #f6f1e8;
   --color-search-bg: #ede6da;
 
+  /* PC 端手机框外的大背景（浅色：香槟丝绸）+ 柔化蒙版 */
+  --bg-desktop: url('/auth-bg-light.jpg');
+  --bg-scrim: radial-gradient(80% 90% at 50% 42%, rgba(233, 224, 211, 0.28), rgba(214, 201, 182, 0.62));
+
   /* Shadow */
   --shadow-app: 0 0 40px rgba(0, 0, 0, 0.15);
 
@@ -82,6 +86,10 @@ html.dark {
   --color-navbar-bg: #161619;
   --color-tabbar-bg: #161619;
   --color-search-bg: #1d1d22;
+
+  /* PC 端大背景（深色：液态金 on 墨黑）+ 加深蒙版 */
+  --bg-desktop: url('/auth-bg-dark.jpg');
+  --bg-scrim: radial-gradient(80% 90% at 50% 42%, rgba(10, 10, 13, 0.42), rgba(4, 4, 6, 0.7));
 
   --shadow-app: 0 0 40px rgba(0, 0, 0, 0.5);
 }
@@ -136,6 +144,32 @@ html, body {
   position: relative;
   box-shadow: var(--shadow-app);
   transition: var(--theme-transition);
+}
+
+/* ===== PC 端（宽于手机列）：手机框浮在品牌大背景上 ===== */
+@media (min-width: 600px) {
+  /* 品牌大图（随主题切换）+ 轻模糊，固定铺满视口，置于最底层 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -16px;
+    z-index: 0;
+    background: var(--bg-desktop) center / cover no-repeat;
+    filter: blur(2px) saturate(1.04);
+  }
+  /* 柔化蒙版：压住大图、把视觉焦点收回中间的 App */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: var(--bg-scrim);
+  }
+  /* App 列浮在大背景之上，强化投影 + 一条描边勾出手机边界 */
+  #__nuxt {
+    z-index: 1;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--color-border);
+  }
 }
 
 /* 固定定位元素限制在手机宽度内 */
