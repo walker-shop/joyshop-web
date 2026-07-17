@@ -54,13 +54,14 @@ onMounted(refreshCart)
   padding-bottom: 50px;
 }
 
-/* 玻璃质感 tabbar + 金色顶边 */
-.app-tabbar :deep(.van-tabbar) {
+/* 玻璃质感 tabbar + 金色顶边（.app-tabbar 直接就是 .van-tabbar 根元素，不能用 :deep 后代选择） */
+.app-tabbar {
   max-width: 480px;
   left: 50% !important;
   transform: translateX(-50%);
   right: auto !important;
-  height: 58px;
+  --van-tabbar-height: 62px;
+  height: 62px;
   padding-bottom: env(safe-area-inset-bottom);
   background: color-mix(in srgb, var(--color-tabbar-bg) 80%, transparent);
   backdrop-filter: saturate(160%) blur(18px);
@@ -71,21 +72,21 @@ onMounted(refreshCart)
 .app-tabbar :deep(.van-tabbar-item) {
   color: var(--color-text-tertiary);
   background: transparent;
-  transition: color .18s ease, transform .18s ease;
+  padding-top: 3px;
+  transition: color .18s ease;
 }
-.app-tabbar :deep(.van-tabbar-item__text) { font-size: 11px; font-weight: 600; margin-top: 3px; letter-spacing: .5px; }
+.app-tabbar :deep(.van-tabbar-item__text) { font-size: 11px; font-weight: 600; margin-top: 2px; letter-spacing: .5px; }
 .app-tabbar :deep(.van-tabbar-item--active) { color: var(--color-primary); background: transparent; }
-/* 选中项：图标上浮 + 金色发光 + 顶部金条 */
-.app-tabbar :deep(.van-tabbar-item--active .van-tabbar-item__icon) {
-  transform: translateY(-2px);
-  filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--color-primary) 60%, transparent));
-  transition: transform .18s cubic-bezier(.34,1.56,.64,1);
+.app-tabbar :deep(.van-tabbar-item--active .van-tabbar-item__text) { font-weight: 800; }
+/* 选中项：图标嵌入香槟金胶囊 + 上浮发光（金色药丸，去掉旧顶条） */
+.app-tabbar :deep(.van-tabbar-item__icon) {
+  padding: 5px 16px; border-radius: 999px; margin-bottom: 2px;
+  transition: background .2s ease, transform .22s cubic-bezier(.34, 1.56, .64, 1), box-shadow .2s ease;
 }
-.app-tabbar :deep(.van-tabbar-item--active)::before {
-  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  width: 26px; height: 3px; border-radius: 0 0 3px 3px;
-  background: linear-gradient(90deg, var(--color-primary-light), var(--color-primary));
-  box-shadow: 0 0 10px color-mix(in srgb, var(--color-primary) 70%, transparent);
+.app-tabbar :deep(.van-tabbar-item--active .van-tabbar-item__icon) {
+  background: var(--color-primary-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
 .app-tabbar :deep(.van-badge) {
   background: linear-gradient(135deg, #e6cd8f, #a9822f) !important;
