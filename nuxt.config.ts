@@ -35,7 +35,14 @@ export default defineNuxtConfig({
   ],
 
   build: {
-    transpile: ['vant'],
+    transpile: ['vant', 'vue-i18n'],
+  },
+
+  // 纯 vue-i18n（非 @nuxtjs/i18n）：自动导入 useI18n，各页 script 直接用
+  imports: {
+    presets: [
+      { from: 'vue-i18n', imports: ['useI18n'] },
+    ],
   },
 
   runtimeConfig: {
