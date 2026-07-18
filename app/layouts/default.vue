@@ -8,25 +8,25 @@
         <template #icon="{ active }">
           <PhStorefront :weight="active ? 'fill' : 'regular'" :size="22" />
         </template>
-        首页
+        {{ $t('nav.home') }}
       </van-tabbar-item>
       <van-tabbar-item to="/category">
         <template #icon="{ active }">
           <PhSquaresFour :weight="active ? 'fill' : 'regular'" :size="22" />
         </template>
-        分类
+        {{ $t('nav.category') }}
       </van-tabbar-item>
       <van-tabbar-item to="/cart" :badge="cartCount > 0 ? cartCount : ''">
         <template #icon="{ active }">
           <PhShoppingBag :weight="active ? 'fill' : 'regular'" :size="22" />
         </template>
-        购物车
+        {{ $t('nav.cart') }}
       </van-tabbar-item>
       <van-tabbar-item to="/user">
         <template #icon="{ active }">
           <PhUserCircle :weight="active ? 'fill' : 'regular'" :size="22" />
         </template>
-        我的
+        {{ $t('nav.mine') }}
       </van-tabbar-item>
     </van-tabbar>
   </div>

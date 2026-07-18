@@ -7,7 +7,7 @@
     </div>
 
     <header class="auth-head">
-      <button class="lux-back" aria-label="返回" @click="navigateTo('/user')">
+      <button class="lux-back" :aria-label="$t('common.back')" @click="navigateTo('/user')">
         <svg viewBox="0 0 24 24"><path d="M15.5 4.5 8 12l7.5 7.5-1.4 1.4L5.2 12l8.9-8.9z" /></svg>
       </button>
     </header>
@@ -19,38 +19,38 @@
       </div>
       <div class="auth-brand">ZShop</div>
       <div class="auth-rule"><span class="auth-rule-dot" /></div>
-      <h1 class="auth-title">欢迎回来</h1>
-      <p class="auth-sub">登录以继续您的臻选之旅</p>
+      <h1 class="auth-title">{{ $t('login.title') }}</h1>
+      <p class="auth-sub">{{ $t('login.subtitle') }}</p>
     </section>
 
     <section class="auth-card">
       <label class="auth-field">
-        <span class="auth-label">账号</span>
+        <span class="auth-label">{{ $t('login.account') }}</span>
         <div class="auth-inwrap">
           <svg class="auth-ico" viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5 0-9 2.5-9 5.5V22h18v-2.5C21 16.5 17 14 12 14z" /></svg>
-          <input v-model="account" class="auth-input" type="text" autocomplete="username" placeholder="用户名或邮箱" >
+          <input v-model="account" class="auth-input" type="text" autocomplete="username" :placeholder="$t('login.accountPlaceholder')" >
         </div>
       </label>
       <label class="auth-field">
-        <span class="auth-label">密码</span>
+        <span class="auth-label">{{ $t('login.password') }}</span>
         <div class="auth-inwrap">
           <svg class="auth-ico" viewBox="0 0 24 24"><path d="M17 9V7a5 5 0 0 0-10 0v2H5v13h14V9h-2zm-8 0V7a3 3 0 0 1 6 0v2H9z" /></svg>
-          <input v-model="password" class="auth-input" type="password" autocomplete="current-password" placeholder="请输入密码" >
+          <input v-model="password" class="auth-input" type="password" autocomplete="current-password" :placeholder="$t('login.passwordPlaceholder')" >
         </div>
       </label>
 
       <button class="lux-btn lux-btn--block auth-submit" :disabled="loading" @click="onSubmit">
         <span v-if="loading" class="lux-spin" />
-        <span v-else>登 录</span>
+        <span v-else>{{ $t('login.submit') }}</span>
       </button>
 
-      <div class="auth-alt">还没有账号？<span @click="toRegister">立即注册</span></div>
+      <div class="auth-alt">{{ $t('login.noAccount') }}<span @click="toRegister">{{ $t('login.register') }}</span></div>
     </section>
 
     <ul class="auth-perks">
-      <li><i>✓</i>正品保障</li>
-      <li><i>✓</i>极速退款</li>
-      <li><i>✓</i>尊享会员</li>
+      <li><i>✓</i>{{ $t('login.perkGenuine') }}</li>
+      <li><i>✓</i>{{ $t('login.perkRefund') }}</li>
+      <li><i>✓</i>{{ $t('login.perkMember') }}</li>
     </ul>
   </div>
 </template>
@@ -58,6 +58,7 @@
 <script setup lang="ts">
 import { showToast } from 'vant'
 definePageMeta({ layout: 'blank' })
+const { t } = useI18n()
 const route = useRoute()
 const { login } = useAuth()
 const account = ref('')
@@ -69,14 +70,14 @@ function redirectTarget() {
   return typeof r === 'string' && r ? r : '/user'
 }
 async function onSubmit() {
-  if (!account.value || !password.value) { showToast('请输入账号和密码'); return }
+  if (!account.value || !password.value) { showToast(t('login.needBoth')); return }
   loading.value = true
   try {
     await login(account.value, password.value)
-    showToast('登录成功')
+    showToast(t('login.loginSuccess'))
     navigateTo(redirectTarget())
   } catch (e: any) {
-    showToast(e?.message || '登录失败')
+    showToast(e?.message || t('login.loginFailed'))
   } finally {
     loading.value = false
   }

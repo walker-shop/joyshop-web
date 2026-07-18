@@ -20,12 +20,12 @@
             <span class="uz-name">{{ user?.nickname || user?.username }}</span>
             <div class="uz-tags">
               <span class="uz-level">{{ memberLevel }}</span>
-              <span class="uz-badge">✦ 尊享会员</span>
+              <span class="uz-badge">✦ {{ $t('user.memberBadge') }}</span>
             </div>
           </template>
           <template v-else>
-            <span class="uz-name">登录 / 注册</span>
-            <span class="uz-sub">登录后享受更多专属权益</span>
+            <span class="uz-name">{{ $t('user.guestTitle') }}</span>
+            <span class="uz-sub">{{ $t('user.guestSubtitle') }}</span>
           </template>
         </div>
         <svg v-if="!isLoggedIn" class="uz-id-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
@@ -33,19 +33,19 @@
 
       <!-- 会员数据 -->
       <div v-if="isLoggedIn" class="uz-stats">
-        <button class="uz-stat" @click="onToast('积分商城开发中')">
+        <button class="uz-stat" @click="onToast($t('user.pointsWip'))">
           <span class="uz-stat-num">{{ stats.points }}</span>
-          <span class="uz-stat-label">积分</span>
+          <span class="uz-stat-label">{{ $t('user.points') }}</span>
         </button>
         <span class="uz-stat-div" />
-        <button class="uz-stat" @click="onToast('优惠券开发中')">
+        <button class="uz-stat" @click="onToast($t('user.couponsWip'))">
           <span class="uz-stat-num">{{ stats.coupons }}</span>
-          <span class="uz-stat-label">优惠券</span>
+          <span class="uz-stat-label">{{ $t('user.coupons') }}</span>
         </button>
         <span class="uz-stat-div" />
-        <button class="uz-stat" @click="onToast('收藏功能开发中')">
+        <button class="uz-stat" @click="onToast($t('user.favoritesWip'))">
           <span class="uz-stat-num">{{ stats.favorites }}</span>
-          <span class="uz-stat-label">收藏</span>
+          <span class="uz-stat-label">{{ $t('user.favorites') }}</span>
         </button>
       </div>
     </header>
@@ -54,9 +54,9 @@
       <!-- 订单状态快捷行 -->
       <section class="lux-card lux-card--raised uz-orders">
         <div class="uz-orders-hd">
-          <span class="uz-orders-title">我的订单</span>
+          <span class="uz-orders-title">{{ $t('user.myOrders') }}</span>
           <button class="uz-orders-all" @click="goOrders()">
-            全部订单
+            {{ $t('user.allOrders') }}
             <svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
           </button>
         </div>
@@ -75,17 +75,17 @@
       <section class="lux-card uz-menu">
         <button class="uz-row" @click="goAddress">
           <span class="uz-row-ico"><van-icon name="location-o" size="20" /></span>
-          <span class="uz-row-label">收货地址</span>
+          <span class="uz-row-label">{{ $t('user.address') }}</span>
           <svg class="uz-row-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
         </button>
-        <button class="uz-row" @click="onToast('收藏功能开发中')">
+        <button class="uz-row" @click="onToast($t('user.favoritesWip'))">
           <span class="uz-row-ico"><van-icon name="like-o" size="20" /></span>
-          <span class="uz-row-label">我的收藏</span>
+          <span class="uz-row-label">{{ $t('user.myFavorites') }}</span>
           <svg class="uz-row-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
         </button>
-        <button class="uz-row" @click="onToast('客服功能开发中')">
+        <button class="uz-row" @click="onToast($t('user.supportWip'))">
           <span class="uz-row-ico"><van-icon name="service-o" size="20" /></span>
-          <span class="uz-row-label">联系客服</span>
+          <span class="uz-row-label">{{ $t('user.support') }}</span>
           <svg class="uz-row-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
         </button>
       </section>
@@ -94,7 +94,7 @@
       <section class="lux-card uz-theme">
         <div class="uz-theme-hd">
           <span class="uz-row-ico"><van-icon name="brush-o" size="20" /></span>
-          <span class="uz-row-label">深色模式</span>
+          <span class="uz-row-label">{{ $t('user.darkMode') }}</span>
         </div>
         <div class="uz-switch">
           <button
@@ -109,23 +109,45 @@
         </div>
       </section>
 
+      <!-- 语言切换 -->
+      <section class="lux-card uz-theme">
+        <div class="uz-theme-hd">
+          <span class="uz-row-ico"><van-icon name="globe-o" size="20" /></span>
+          <span class="uz-row-label">{{ $t('user.language') }}</span>
+        </div>
+        <div class="uz-switch">
+          <button
+            v-for="l in SUPPORTED_LOCALES"
+            :key="l.code"
+            class="uz-switch-opt"
+            :class="{ active: locale === l.code }"
+            @click="$setAppLocale(l.code)"
+          >
+            {{ l.label }}
+          </button>
+        </div>
+      </section>
+
       <!-- 退出登录 -->
-      <button v-if="isLoggedIn" class="lux-btn-ghost uz-logout" @click="onLogout">退出登录</button>
+      <button v-if="isLoggedIn" class="lux-btn-ghost uz-logout" @click="onLogout">{{ $t('user.logout') }}</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { showToast } from 'vant'
+import { SUPPORTED_LOCALES } from '~/i18n/constants'
 
+const { t, locale } = useI18n()
+const { $setAppLocale } = useNuxtApp()
 const { themeMode, setTheme } = useTheme()
 const { isLoggedIn, user, logout } = useAuth()
 
-const themeOptions = [
-  { label: '跟随系统', value: 'system' as const },
-  { label: '浅色', value: 'light' as const },
-  { label: '深色', value: 'dark' as const },
-]
+const themeOptions = computed(() => [
+  { label: t('user.themeSystem'), value: 'system' as const },
+  { label: t('user.themeLight'), value: 'light' as const },
+  { label: t('user.themeDark'), value: 'dark' as const },
+])
 
 // 会员数据（积分/优惠券暂无后端，占位 0，UI 已就绪待接；收藏可后续接真实数）
 const stats = reactive({ points: 0, coupons: 0, favorites: 0 })
@@ -148,21 +170,21 @@ async function onAvatarPicked(e: Event) {
   try {
     const url = await uploadAvatar(f)
     avatarUrl.value = url
-    showToast('头像已更新')
+    showToast(t('user.avatarUpdated'))
   } catch (err) {
-    showToast('已本地预览（上传服务未就绪）')
+    showToast(t('user.avatarLocalPreview'))
   } finally {
     avatarUploading.value = false
     input.value = ''
   }
 }
 
-const orderTabs = [
-  { status: 'PAYING', label: '待付款', icon: 'gold-coin-o' },
-  { status: 'TRADE_SUCCESS', label: '已支付', icon: 'send-gift-o' },
-  { status: 'TRADE_CLOSED', label: '已关闭', icon: 'close' },
-  { status: '', label: '全部', icon: 'orders-o' },
-]
+const orderTabs = computed(() => [
+  { status: 'PAYING', label: t('user.orderUnpaid'), icon: 'gold-coin-o' },
+  { status: 'TRADE_SUCCESS', label: t('user.orderPaid'), icon: 'send-gift-o' },
+  { status: 'TRADE_CLOSED', label: t('user.orderClosed'), icon: 'close' },
+  { status: '', label: t('user.orderAll'), icon: 'orders-o' },
+])
 
 function onToast(msg: string) { showToast(msg) }
 function ensureLogin(): boolean {
@@ -175,7 +197,7 @@ function goOrders(status?: string) {
   navigateTo(status ? `/order?status=${status}` : '/order')
 }
 function goAddress() { if (ensureLogin()) navigateTo('/user/address') }
-function onLogout() { logout(); showToast('已退出登录') }
+function onLogout() { logout(); showToast(t('user.loggedOut')) }
 </script>
 
 <style scoped>

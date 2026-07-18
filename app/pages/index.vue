@@ -11,7 +11,7 @@
       </div>
       <div class="search" @click="navigateTo('/search')">
         <svg viewBox="0 0 24 24" class="s-ic"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
-        <span>搜索心仪好物</span>
+        <span>{{ $t('home.searchPlaceholder') }}</span>
       </div>
     </header>
 
@@ -23,9 +23,9 @@
         </van-swipe-item>
       </van-swipe>
       <div v-else class="hero-blank">
-        <div class="hero-eyebrow">臻选臻品 · 尊享品质</div>
-        <div class="hero-title">发现你的<em>心动清单</em></div>
-        <div class="hero-sub">精选好物，一站直达</div>
+        <div class="hero-eyebrow">{{ $t('home.heroTag') }}</div>
+        <div class="hero-title">{{ $t('home.heroTitle1') }}<em>{{ $t('home.heroTitle2') }}</em></div>
+        <div class="hero-sub">{{ $t('home.heroSubtitle') }}</div>
       </div>
     </section>
 
@@ -45,12 +45,12 @@
     <!-- 限时秒杀 -->
     <section v-if="flashItems.length" class="flash">
       <div class="flash-hd">
-        <div class="flash-tt"><span class="spark">✦</span> 限时秒杀</div>
+        <div class="flash-tt"><span class="spark">✦</span> {{ $t('home.flashSale') }}</div>
         <div class="flash-timer">
-          <span class="lbl">距结束</span>
+          <span class="lbl">{{ $t('home.flashEndIn') }}</span>
           <i>{{ countdown.h }}</i><b>:</b><i>{{ countdown.m }}</i><b>:</b><i>{{ countdown.s }}</i>
         </div>
-        <span class="flash-more" @click="navigateTo('/category')">全部 ›</span>
+        <span class="flash-more" @click="navigateTo('/category')">{{ $t('home.viewAll') }}</span>
       </div>
       <div class="flash-row">
         <button
@@ -74,15 +74,15 @@
     <!-- 为你推荐 -->
     <section class="feed">
       <div class="feed-hd">
-        <h2>为你推荐</h2>
-        <span>猜你喜欢</span>
+        <h2>{{ $t('home.recommend') }}</h2>
+        <span>{{ $t('home.recommendSub') }}</span>
       </div>
 
       <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
         <div v-if="loading && !products.length" class="grid">
           <div v-for="n in 4" :key="n" class="skel" />
         </div>
-        <van-empty v-else-if="!products.length" description="好物马上上架">
+        <van-empty v-else-if="!products.length" :description="$t('home.emptyGoods')">
           <template #image><div class="empty-mark">Z</div></template>
         </van-empty>
         <div v-else class="grid">
@@ -105,9 +105,9 @@
             <div class="card-body">
               <div class="card-title">{{ item.name }}</div>
               <div v-if="item.isHot || item.isNew || item.shipFree" class="card-tags">
-                <span v-if="item.isHot" class="tag hot">热销</span>
-                <span v-if="item.isNew" class="tag">新品</span>
-                <span v-if="item.shipFree" class="tag">包邮</span>
+                <span v-if="item.isHot" class="tag hot">{{ $t('home.tagHot') }}</span>
+                <span v-if="item.isNew" class="tag">{{ $t('home.tagNew') }}</span>
+                <span v-if="item.shipFree" class="tag">{{ $t('home.tagFreeShip') }}</span>
               </div>
               <div class="card-foot">
                 <div class="price">
@@ -121,7 +121,7 @@
             </div>
           </button>
         </div>
-        <div v-if="loading && products.length" class="loading-more">加载中…</div>
+        <div v-if="loading && products.length" class="loading-more">{{ $t('common.loading') }}</div>
       </van-pull-refresh>
     </section>
   </div>
@@ -130,6 +130,7 @@
 <script setup lang="ts">
 import { showToast } from 'vant'
 
+const { t } = useI18n()
 const config = useRuntimeConfig()
 const { tenantId } = useTenant()
 const refreshing = ref(false)
@@ -226,7 +227,7 @@ const { isLoggedIn } = useAuth()
 const { refresh: refreshCart } = useCartCount()
 async function quickAdd(e: MouseEvent, item: any) {
   if (!isLoggedIn.value) {
-    showToast('请先登录')
+    showToast(t('common.loginRequired'))
     navigateTo(`/login?redirect=/`)
     return
   }
@@ -235,9 +236,9 @@ async function quickAdd(e: MouseEvent, item: any) {
     await apiFetch('/v1/cart', { method: 'POST', body: { goodsId: Number(item.id), nums: 1, checked: true } })
     await refreshCart()
     if (btn) flyToCart(btn.left + btn.width / 2, btn.top + btn.height / 2, item.goodsFrontImage)
-    showToast('已加入购物车')
+    showToast(t('common.addedToCart'))
   } catch (err: any) {
-    showToast(err?.data?.msg || err?.message || '加入购物车失败')
+    showToast(err?.data?.msg || err?.message || t('common.addToCartFailed'))
   }
 }
 function flyToCart(sx: number, sy: number, img?: string) {
