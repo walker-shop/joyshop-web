@@ -111,15 +111,27 @@ async function doPay() {
   if (!detail.value) return
   paying.value = true
   try {
-    const oi = detail.value.order_info
-    const r = await pay({ orderId: oi.id, orderSn: oi.order_sn, amount: oi.total })
-    if (r === 'paid') { showToast(t('order.paySuccess')); await load() }
-    else showToast(t('order.payIncomplete'))
-  } catch (e:any) { showToast(e?.message || t('order.payFailed')) }
-  finally { paying.value = false }
+    const r = await pay({ orderId: detail.value.order_info.id })
+    // 'redirecting' 时页面即将跳转 Stripe 收银台；失败才提示
+    if (r !== 'redirecting') { showToast(t('order.payFailed')); paying.value = false }
+  } catch (e:any) { showToast(e?.message || t('order.payFailed')); paying.value = false }
+}
+// Stripe 回跳后轮询 webhook 入账结果（异步，稍等几秒）
+async function pollPaid() {
+  paying.value = true
+  for (let i = 0; i < 10; i++) {
+    await load()
+    if (detail.value?.order_info.status === 'TRADE_SUCCESS') {
+      showToast(t('order.paySuccess')); paying.value = false; return
+    }
+    await new Promise(r => setTimeout(r, 1500))
+  }
+  paying.value = false
+  showToast(t('order.payIncomplete'))
 }
 onMounted(async () => {
   await load()
+  if (route.query.paid === '1') { pollPaid(); return }
   if (route.query.pay === '1' && isUnpaid.value) doPay()
 })
 </script>
