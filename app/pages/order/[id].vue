@@ -58,16 +58,21 @@
         </section>
       </div>
 
-      <!-- 支付条 -->
-      <div v-if="isUnpaid" class="lux-bar">
-        <div class="od-bar-info">
+      <!-- 动作条 -->
+      <div v-if="barActions.length" class="lux-bar od-bar">
+        <div v-if="isUnpaid" class="od-bar-info">
           <span class="od-bar-label">{{ $t('order.due') }}</span>
           <span class="lux-price od-bar-price"><i>¥</i>{{ detail.order_info.total?.toFixed(2) }}</span>
         </div>
-        <button class="lux-btn od-pay-btn" :disabled="paying" @click="doPay">
-          <span v-if="!paying">{{ $t('order.payNow') }}</span>
-          <span v-else class="lux-spin" />
-        </button>
+        <div class="od-bar-btns">
+          <button v-if="barActions.includes('cancel')" class="lux-btn-ghost od-act-btn" :disabled="acting" @click="onCancel">{{ $t('order.cancelOrder') }}</button>
+          <button v-if="barActions.includes('delete')" class="lux-btn-ghost od-act-btn" :disabled="acting" @click="onDelete">{{ $t('order.deleteOrder') }}</button>
+          <button v-if="barActions.includes('confirmReceipt')" class="lux-btn od-act-btn" :disabled="acting" @click="onConfirm">{{ $t('order.confirmReceipt') }}</button>
+          <button v-if="barActions.includes('pay')" class="lux-btn od-pay-btn" :disabled="paying" @click="doPay">
+            <span v-if="!paying">{{ $t('order.payNow') }}</span>
+            <span v-else class="lux-spin" />
+          </button>
+        </div>
       </div>
     </template>
   </div>
@@ -77,10 +82,22 @@
 definePageMeta({ middleware: 'auth' })
 import { showToast } from 'vant'
 import { orderStatusKey, orderStatusTone } from '~/utils/orderStatus'
+import { availableActions } from '~/utils/orderActions'
 const { t } = useI18n()
 interface Detail { order_info:{ id:number; order_sn:string; status:string; total:number; name:string; mobile:string; address:string }; goods:{ goods_name:string; goods_image:string; goods_price:number; nums:number }[] }
 const { apiFetch } = useApi()
 const { pay } = usePayment()
+const { busy: acting, cancel, confirmReceipt, remove } = useOrderActions()
+const barActions = computed(() => detail.value ? availableActions(detail.value.order_info.status) : [])
+async function onCancel() {
+  if (detail.value && await cancel(detail.value.order_info.id)) await load()
+}
+async function onConfirm() {
+  if (detail.value && await confirmReceipt(detail.value.order_info.id)) await load()
+}
+async function onDelete() {
+  if (detail.value && await remove(detail.value.order_info.id)) navigateTo('/order')
+}
 const route = useRoute()
 const detail = ref<Detail | null>(null)
 const paying = ref(false)
@@ -179,4 +196,6 @@ onMounted(async () => {
 .od-bar-label { font-size: 13px; color: var(--lux-text-2); }
 .od-bar-price { font-size: 25px; line-height: 1; }
 .od-pay-btn { flex: 0 0 auto; min-width: 148px; height: 50px; font-size: 16px; }
+.od-bar-btns { flex: 1; display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
+.od-act-btn { flex: 0 0 auto; min-width: 116px; height: 50px; font-size: 15px; }
 </style>
