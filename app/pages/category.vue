@@ -5,10 +5,10 @@
 
     <!-- 顶部玻璃头 -->
     <header class="topbar">
-      <span class="tt">全部分类</span>
+      <span class="tt">{{ $t('category.title') }}</span>
       <div class="search" @click="navigateTo('/search')">
         <svg viewBox="0 0 24 24" class="s-ic"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
-        <span>搜索心仪好物</span>
+        <span>{{ $t('home.searchPlaceholder') }}</span>
       </div>
     </header>
 
@@ -36,7 +36,7 @@
         <section v-if="currentSubCategories.length" class="subs">
           <div class="sec-hd">
             <h3>{{ activeParentName }}</h3>
-            <span class="count">{{ currentSubCategories.length }} 个子类</span>
+            <span class="count">{{ $t('category.subCount', { n: currentSubCategories.length }) }}</span>
           </div>
           <div class="sub-grid">
             <button
@@ -55,8 +55,8 @@
         <!-- 商品列表 -->
         <section class="feed">
           <div class="sec-hd">
-            <h3>{{ selectedSubName || activeParentName || '商品' }}</h3>
-            <span v-if="!loadingProducts && categoryProducts.length" class="count">{{ categoryProducts.length }} 件</span>
+            <h3>{{ selectedSubName || activeParentName || $t('category.goods') }}</h3>
+            <span v-if="!loadingProducts && categoryProducts.length" class="count">{{ $t('search.count', { n: categoryProducts.length }) }}</span>
           </div>
 
           <!-- 骨架 -->
@@ -67,7 +67,7 @@
           <!-- 空态 -->
           <div v-else-if="!categoryProducts.length" class="empty">
             <div class="empty-mark">Z</div>
-            <p>该分类暂无好物</p>
+            <p>{{ $t('category.empty') }}</p>
           </div>
 
           <!-- 商品卡 -->
@@ -91,9 +91,9 @@
               <div class="p-body">
                 <div class="p-title">{{ item.name }}</div>
                 <div v-if="item.isHot || item.isNew || item.shipFree" class="p-tags">
-                  <span v-if="item.isHot" class="tag hot">热销</span>
-                  <span v-if="item.isNew" class="tag">新品</span>
-                  <span v-if="item.shipFree" class="tag">包邮</span>
+                  <span v-if="item.isHot" class="tag hot">{{ $t('home.tagHot') }}</span>
+                  <span v-if="item.isNew" class="tag">{{ $t('home.tagNew') }}</span>
+                  <span v-if="item.shipFree" class="tag">{{ $t('home.tagFreeShip') }}</span>
                 </div>
                 <div class="p-foot">
                   <div class="price">
@@ -116,6 +116,7 @@
 <script setup lang="ts">
 import { showToast } from 'vant'
 
+const { t } = useI18n()
 const config = useRuntimeConfig()
 const { tenantId } = useTenant()
 const route = useRoute()
@@ -206,7 +207,7 @@ const { isLoggedIn } = useAuth()
 const { refresh: refreshCart } = useCartCount()
 async function quickAdd(e: MouseEvent, item: any) {
   if (!isLoggedIn.value) {
-    showToast('请先登录')
+    showToast(t('common.loginRequired'))
     navigateTo('/login?redirect=/category')
     return
   }
@@ -215,9 +216,9 @@ async function quickAdd(e: MouseEvent, item: any) {
     await apiFetch('/v1/cart', { method: 'POST', body: { goodsId: Number(item.id), nums: 1, checked: true } })
     await refreshCart()
     if (btn) flyToCart(btn.left + btn.width / 2, btn.top + btn.height / 2, item.goodsFrontImage)
-    showToast('已加入购物车')
+    showToast(t('common.addedToCart'))
   } catch (err: any) {
-    showToast(err?.data?.msg || err?.message || '加入购物车失败')
+    showToast(err?.data?.msg || err?.message || t('common.addToCartFailed'))
   }
 }
 function flyToCart(sx: number, sy: number, img?: string) {

@@ -93,6 +93,39 @@ export interface MessageSchema {
     deleted: string
     deleteFailed: string
   }
+  category: {
+    title: string
+    subCount: string
+    goods: string
+    empty: string
+  }
+  pdp: {
+    navTitle: string
+    wip: string
+    noImage: string
+    noReason7: string
+    delivery: string
+    express: string
+    shipTip: string
+    service: string
+    serviceDesc: string
+    buyNow: string
+    supportShort: string
+    specSelect: string
+    specValue: string
+    specWip: string
+  }
+  search: {
+    clear: string
+    search: string
+    history: string
+    clearHistory: string
+    hot: string
+    count: string
+    notFound: string
+    notFoundTip: string
+    needKeyword: string
+  }
   cart: {
     title: string
     guestEmpty: string

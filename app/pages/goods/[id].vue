@@ -5,8 +5,8 @@
       <div class="nav-btn" @click="$router.back()">
         <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg>
       </div>
-      <div class="nav-title">商品详情</div>
-      <div class="nav-btn" @click="showToast('功能开发中')">
+      <div class="nav-title">{{ $t('pdp.navTitle') }}</div>
+      <div class="nav-btn" @click="showToast($t('pdp.wip'))">
         <svg viewBox="0 0 24 24"><path d="M6 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
       </div>
     </div>
@@ -17,7 +17,7 @@
         <van-swipe-item v-for="(img, idx) in heroImages" :key="idx">
           <van-image class="hero-img" :src="img" fit="cover">
             <template #loading><van-loading type="spinner" /></template>
-            <template #error><div class="hero-ph">暂无图片</div></template>
+            <template #error><div class="hero-ph">{{ $t('pdp.noImage') }}</div></template>
           </van-image>
         </van-swipe-item>
         <template #indicator><span /></template>
@@ -32,46 +32,46 @@
         <span v-if="goods.marketPrice > goods.shopPrice" class="pb-old">¥{{ goods.marketPrice }}</span>
       </div>
       <div class="pb-row">
-        <span v-if="goods.shipFree" class="pb-chip">包邮</span>
-        <span v-if="goods.isHot" class="pb-chip">热销</span>
-        <span v-if="goods.isNew" class="pb-chip">新品</span>
+        <span v-if="goods.shipFree" class="pb-chip">{{ $t('home.tagFreeShip') }}</span>
+        <span v-if="goods.isHot" class="pb-chip">{{ $t('home.tagHot') }}</span>
+        <span v-if="goods.isNew" class="pb-chip">{{ $t('home.tagNew') }}</span>
       </div>
     </div>
 
     <!-- 标题 + 信任徽章 -->
     <div class="pdp-blk">
-      <div class="pdp-title">{{ goods.name || '加载中…' }}</div>
+      <div class="pdp-title">{{ goods.name || $t('common.loading') }}</div>
       <div class="pdp-trust">
-        <span>✓ 正品保障</span><span>✓ 7天无理由</span><span>✓ 极速退款</span>
+        <span>✓ {{ $t('login.perkGenuine') }}</span><span>✓ {{ $t('pdp.noReason7') }}</span><span>✓ {{ $t('login.perkRefund') }}</span>
       </div>
     </div>
 
     <!-- 规格行 -->
     <div class="pdp-blk">
-      <div class="cell" @click="showToast('规格选择开发中')">
-        <span class="k">选择</span><span class="v">规格 / 数量</span><span class="arr">›</span>
+      <div class="cell" @click="showToast($t('pdp.specWip'))">
+        <span class="k">{{ $t('pdp.specSelect') }}</span><span class="v">{{ $t('pdp.specValue') }}</span><span class="arr">›</span>
       </div>
       <div class="cell">
-        <span class="k">配送</span><span class="v">{{ goods.shipFree ? '包邮' : '快递' }} · 付款后48小时内发货</span>
+        <span class="k">{{ $t('pdp.delivery') }}</span><span class="v">{{ goods.shipFree ? $t('home.tagFreeShip') : $t('pdp.express') }} · {{ $t('pdp.shipTip') }}</span>
       </div>
       <div class="cell">
-        <span class="k">服务</span><span class="v">正品保障 · 极速退款 · 运费险</span>
+        <span class="k">{{ $t('pdp.service') }}</span><span class="v">{{ $t('pdp.serviceDesc') }}</span>
       </div>
     </div>
 
     <!-- 商品详情 -->
     <div v-if="goods.goodsDesc || goods.goodsBrief" class="pdp-blk">
-      <div class="blk-title">商品详情</div>
+      <div class="blk-title">{{ $t('pdp.navTitle') }}</div>
       <div class="pdp-desc">{{ goods.goodsDesc || goods.goodsBrief }}</div>
     </div>
 
     <!-- 猜你喜欢 -->
     <div v-if="recos.length" class="pdp-reco">
-      <div class="reco-title">— 猜你喜欢 —</div>
+      <div class="reco-title">— {{ $t('home.recommendSub') }} —</div>
       <div class="reco-grid">
         <div v-for="r in recos" :key="r.id" class="rcard" @click="goDetail(r.id)">
           <van-image class="rcard-img" :src="r.goodsFrontImage" fit="cover">
-            <template #error><div class="hero-ph sm">暂无图片</div></template>
+            <template #error><div class="hero-ph sm">{{ $t('pdp.noImage') }}</div></template>
           </van-image>
           <div class="rcard-body">
             <div class="rcard-title">{{ r.name }}</div>
@@ -83,14 +83,14 @@
 
     <!-- 底部双 CTA -->
     <div class="pdp-bar">
-      <div class="bar-ic" @click="showToast('客服功能开发中')">
-        <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg><span>客服</span>
+      <div class="bar-ic" @click="showToast($t('user.supportWip'))">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg><span>{{ $t('pdp.supportShort') }}</span>
       </div>
       <div ref="cartIconRef" class="bar-ic" :class="{ bump: cartBump }" @click="navigateTo('/cart')">
-        <svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7.2 14.6l.9-1.6h7.5c.7 0 1.4-.4 1.7-1L21 4H6.2L5.3 2H2v2h2z"/></svg><span>购物车</span>
+        <svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7.2 14.6l.9-1.6h7.5c.7 0 1.4-.4 1.7-1L21 4H6.2L5.3 2H2v2h2z"/></svg><span>{{ $t('nav.cart') }}</span>
       </div>
-      <button ref="addBtnRef" class="btn-cart" @click="onAddCart">加入购物车</button>
-      <button class="btn-buy" @click="onBuyNow">立即购买</button>
+      <button ref="addBtnRef" class="btn-cart" @click="onAddCart">{{ $t('common.addToCart') }}</button>
+      <button class="btn-buy" @click="onBuyNow">{{ $t('pdp.buyNow') }}</button>
     </div>
   </div>
 </template>
@@ -100,6 +100,7 @@ import { showToast } from 'vant'
 
 definePageMeta({ layout: 'blank' })
 
+const { t } = useI18n()
 const config = useRuntimeConfig()
 const { tenantId } = useTenant()
 const route = useRoute()
@@ -163,7 +164,7 @@ const { refresh: refreshCart } = useCartCount()
 
 function requireLogin(): boolean {
   if (!isLoggedIn.value) {
-    showToast('请先登录')
+    showToast(t('common.loginRequired'))
     navigateTo(`/login?redirect=/goods/${route.params.id}`)
     return false
   }
@@ -178,7 +179,7 @@ async function addToCart(): Promise<boolean> {
     await refreshCart()
     return true
   } catch (e: any) {
-    showToast(e?.data?.msg || e?.message || '加入购物车失败')
+    showToast(e?.data?.msg || e?.message || t('common.addToCartFailed'))
     return false
   }
 }
@@ -211,7 +212,7 @@ function flyToCart() {
 }
 async function onAddCart() {
   if (!requireLogin()) return
-  if (await addToCart()) { flyToCart(); showToast('已加入购物车') }
+  if (await addToCart()) { flyToCart(); showToast(t('common.addedToCart')) }
 }
 async function onBuyNow() {
   if (!requireLogin()) return

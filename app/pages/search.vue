@@ -4,7 +4,7 @@
 
     <!-- 搜索头 -->
     <header class="topbar">
-      <button class="back" aria-label="返回" @click="goBack">
+      <button class="back" :aria-label="$t('common.back')" @click="goBack">
         <svg viewBox="0 0 24 24"><path d="M15.5 19 8.5 12l7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="box">
@@ -15,14 +15,14 @@
           class="input"
           type="search"
           enterkeyhint="search"
-          placeholder="搜索心仪好物"
+          :placeholder="$t('home.searchPlaceholder')"
           @keyup.enter="submit(kw)"
         >
-        <button v-if="kw" class="clear" aria-label="清空" @click="clearInput">
+        <button v-if="kw" class="clear" :aria-label="$t('search.clear')" @click="clearInput">
           <svg viewBox="0 0 24 24"><path d="M12 10.6 7.4 6 6 7.4l4.6 4.6L6 16.6 7.4 18l4.6-4.6 4.6 4.6 1.4-1.4-4.6-4.6L18 7.4 16.6 6z"/></svg>
         </button>
       </div>
-      <button class="go" @click="submit(kw)">搜索</button>
+      <button class="go" @click="submit(kw)">{{ $t('search.search') }}</button>
     </header>
 
     <div class="scroll">
@@ -30,8 +30,8 @@
       <template v-if="!submitted">
         <section v-if="history.length" class="block">
           <div class="blk-hd">
-            <h3>搜索历史</h3>
-            <button class="del" aria-label="清除历史" @click="clearHistory">
+            <h3>{{ $t('search.history') }}</h3>
+            <button class="del" :aria-label="$t('search.clearHistory')" @click="clearHistory">
               <svg viewBox="0 0 24 24"><path d="M6 7h12M9 7V5h6v2m-7 0 1 12h6l1-12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
           </div>
@@ -41,7 +41,7 @@
         </section>
 
         <section class="block">
-          <div class="blk-hd"><h3><span class="spark">✦</span> 热门搜索</h3></div>
+          <div class="blk-hd"><h3><span class="spark">✦</span> {{ $t('search.hot') }}</h3></div>
           <div class="chips">
             <button v-for="(h, i) in hotTerms" :key="h" class="chip hot" :class="{ top: i < 3 }" @click="submit(h)">{{ h }}</button>
           </div>
@@ -52,7 +52,7 @@
       <template v-else>
         <div class="res-hd">
           <span>“<em>{{ activeKw }}</em>”</span>
-          <span v-if="!loading" class="cnt">{{ total }} 件</span>
+          <span v-if="!loading" class="cnt">{{ $t('search.count', { n: total }) }}</span>
         </div>
 
         <div v-if="loading" class="grid">
@@ -61,8 +61,8 @@
 
         <div v-else-if="!results.length" class="empty">
           <div class="empty-mark">Z</div>
-          <p>没找到「{{ activeKw }}」相关好物</p>
-          <span class="tip">换个关键词试试</span>
+          <p>{{ $t('search.notFound', { kw: activeKw }) }}</p>
+          <span class="tip">{{ $t('search.notFoundTip') }}</span>
         </div>
 
         <div v-else class="grid">
@@ -104,6 +104,7 @@
 <script setup lang="ts">
 import { showToast } from 'vant'
 
+const { t } = useI18n()
 const config = useRuntimeConfig()
 const { tenantId } = useTenant()
 const route = useRoute()
@@ -164,19 +165,19 @@ function goBack() {
 }
 
 async function submit(term: string) {
-  const t = (term || '').trim()
-  if (!t) { showToast('请输入关键词'); return }
-  kw.value = t
-  activeKw.value = t
+  const q = (term || '').trim()
+  if (!q) { showToast(t('search.needKeyword')); return }
+  kw.value = q
+  activeKw.value = q
   submitted.value = true
   loading.value = true
   results.value = []
-  pushHistory(t)
+  pushHistory(q)
   inputEl.value?.blur()
   try {
     const res = await $fetch<{ code: number; data: { data: any[]; total: number } }>(
       `${config.public.apiBase}/v1/goods`,
-      { params: { page: 1, pageSize: 20, keywords: t, tenant_id: tenantId } },
+      { params: { page: 1, pageSize: 20, keywords: q, tenant_id: tenantId } },
     )
     if (res.code === 200 && res.data) {
       results.value = res.data.data || []
@@ -190,14 +191,14 @@ const { apiFetch } = useApi()
 const { isLoggedIn } = useAuth()
 const { refresh: refreshCart } = useCartCount()
 async function quickAdd(e: MouseEvent, item: any) {
-  if (!isLoggedIn.value) { showToast('请先登录'); navigateTo('/login?redirect=/search'); return }
+  if (!isLoggedIn.value) { showToast(t('common.loginRequired')); navigateTo('/login?redirect=/search'); return }
   const btn = (e.currentTarget as HTMLElement)?.getBoundingClientRect()
   try {
     await apiFetch('/v1/cart', { method: 'POST', body: { goodsId: Number(item.id), nums: 1, checked: true } })
     await refreshCart()
     if (btn) flyToCart(btn.left + btn.width / 2, btn.top + btn.height / 2, item.goodsFrontImage)
-    showToast('已加入购物车')
-  } catch (err: any) { showToast(err?.data?.msg || err?.message || '加入购物车失败') }
+    showToast(t('common.addedToCart'))
+  } catch (err: any) { showToast(err?.data?.msg || err?.message || t('common.addToCartFailed')) }
 }
 function flyToCart(sx: number, sy: number, img?: string) {
   if (!import.meta.client) return
