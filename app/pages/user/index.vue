@@ -112,7 +112,13 @@
       <!-- 语言切换 -->
       <section class="lux-card uz-theme">
         <div class="uz-theme-hd">
-          <span class="uz-row-ico"><van-icon name="globe-o" size="20" /></span>
+          <span class="uz-row-ico">
+            <svg class="uz-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M3 12h18" />
+              <path d="M12 3c2.6 2.7 3.9 5.8 3.9 9s-1.3 6.3-3.9 9c-2.6-2.7-3.9-5.8-3.9-9S9.4 5.7 12 3z" />
+            </svg>
+          </span>
           <span class="uz-row-label">{{ $t('user.language') }}</span>
         </div>
         <div class="uz-switch">
@@ -334,6 +340,7 @@ function onLogout() { logout(); showToast(t('user.loggedOut')) }
   background: var(--lux-surface-2); border: 1px solid var(--lux-hair-soft);
 }
 .uz-row-ico :deep(.van-icon) { color: var(--lux-price); }
+.uz-row-ico .uz-globe { width: 20px; height: 20px; color: var(--lux-price); }
 .uz-row-label { flex: 1; font-size: 15px; color: var(--lux-text); font-weight: 500; }
 .uz-row-arr { width: 18px; height: 18px; fill: none; stroke: var(--lux-text-3); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
