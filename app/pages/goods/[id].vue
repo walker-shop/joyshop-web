@@ -6,8 +6,9 @@
         <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg>
       </div>
       <div class="nav-title">{{ $t('pdp.navTitle') }}</div>
-      <div class="nav-btn" @click="showToast($t('pdp.wip'))">
-        <svg viewBox="0 0 24 24"><path d="M6 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+      <div class="nav-btn" :class="{ 'is-faved': faved }" :aria-label="$t('user.favorites')" @click="onToggleFav">
+        <svg v-if="faved" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.8-10-9.3C.6 8.9 2 5.5 5.2 5.5c1.8 0 3.1 1 3.8 2.1.7-1.1 2-2.1 3.8-2.1 3.2 0 4.6 3.4 3.2 6.2C19.5 16.2 12 21 12 21z"/></svg>
+        <svg v-else viewBox="0 0 24 24"><path d="M12 20.3l-.1.1-.11-.1C7.14 15.99 4 13.14 4 10.25 4 8.25 5.5 6.75 7.5 6.75c1.54 0 3.04.99 3.57 2.36h1.87C13.46 7.74 14.96 6.75 16.5 6.75c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>
       </div>
     </div>
 
@@ -162,6 +163,19 @@ const { apiFetch } = useApi()
 const { isLoggedIn } = useAuth()
 const { refresh: refreshCart } = useCartCount()
 
+// 收藏
+const { check: checkFav, add: addFav, remove: removeFav } = useFav()
+const faved = ref(false)
+onMounted(async () => { faved.value = await checkFav(Number(route.params.id)) })
+async function onToggleFav() {
+  if (!requireLogin()) return
+  const id = Number(route.params.id)
+  try {
+    if (faved.value) { await removeFav(id); faved.value = false; showToast(t('user.favRemoved')) }
+    else { await addFav(id); faved.value = true; showToast(t('user.favAdded')) }
+  } catch (e: any) { showToast(e?.data?.msg || e?.message || t('user.favActionFailed')) }
+}
+
 function requireLogin(): boolean {
   if (!isLoggedIn.value) {
     showToast(t('common.loginRequired'))
@@ -236,6 +250,9 @@ async function onBuyNow() {
 }
 .nav-btn { width: 34px; height: 34px; border-radius: 50%; background: var(--color-bg-page); display: flex; align-items: center; justify-content: center; }
 .nav-btn svg { width: 18px; height: 18px; fill: var(--color-text-primary); }
+.nav-btn.is-faved { background: var(--color-primary-soft); }
+.nav-btn.is-faved svg { fill: var(--color-primary); }
+.nav-btn:active { transform: scale(.9); }
 .nav-title { flex: 1; text-align: center; font-weight: 700; font-size: 15px; color: var(--color-text-primary); }
 
 /* Hero */

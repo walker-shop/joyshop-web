@@ -43,8 +43,8 @@
           <span class="uz-stat-label">{{ $t('user.coupons') }}</span>
         </button>
         <span class="uz-stat-div" />
-        <button class="uz-stat" @click="onToast($t('user.favoritesWip'))">
-          <span class="uz-stat-num">{{ stats.favorites }}</span>
+        <button class="uz-stat" @click="goFavorites">
+          <span class="uz-stat-num">{{ favCount }}</span>
           <span class="uz-stat-label">{{ $t('user.favorites') }}</span>
         </button>
       </div>
@@ -78,7 +78,7 @@
           <span class="uz-row-label">{{ $t('user.address') }}</span>
           <svg class="uz-row-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
         </button>
-        <button class="uz-row" @click="onToast($t('user.favoritesWip'))">
+        <button class="uz-row" @click="goFavorites">
           <span class="uz-row-ico"><van-icon name="like-o" size="20" /></span>
           <span class="uz-row-label">{{ $t('user.myFavorites') }}</span>
           <svg class="uz-row-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
@@ -148,6 +148,9 @@ const { t, locale } = useI18n()
 const { $setAppLocale } = useNuxtApp()
 const { themeMode, setTheme } = useTheme()
 const { isLoggedIn, user, logout } = useAuth()
+const { count: favCount, refreshCount: refreshFav } = useFav()
+onMounted(refreshFav)
+function goFavorites() { if (ensureLogin()) navigateTo('/user/favorites') }
 
 const themeOptions = computed(() => [
   { label: t('user.themeSystem'), value: 'system' as const },

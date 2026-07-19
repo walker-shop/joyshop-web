@@ -206,6 +206,12 @@ export interface MessageSchema {
     pointsWip: string
     couponsWip: string
     favoritesWip: string
+    favEmpty: string
+    favGoShop: string
+    favAdded: string
+    favRemoved: string
+    favActionFailed: string
+    favRemove: string
     myOrders: string
     allOrders: string
     orderUnpaid: string
