@@ -19,7 +19,6 @@
           <template v-if="isLoggedIn">
             <span class="uz-name">{{ user?.nickname || user?.username }}</span>
             <div class="uz-tags">
-              <span class="uz-level">{{ memberLevel }}</span>
               <span class="uz-badge">✦ {{ $t('user.memberBadge') }}</span>
             </div>
           </template>
@@ -33,16 +32,6 @@
 
       <!-- 会员数据 -->
       <div v-if="isLoggedIn" class="uz-stats">
-        <button class="uz-stat" @click="onToast($t('user.pointsWip'))">
-          <span class="uz-stat-num">{{ stats.points }}</span>
-          <span class="uz-stat-label">{{ $t('user.points') }}</span>
-        </button>
-        <span class="uz-stat-div" />
-        <button class="uz-stat" @click="onToast($t('user.couponsWip'))">
-          <span class="uz-stat-num">{{ stats.coupons }}</span>
-          <span class="uz-stat-label">{{ $t('user.coupons') }}</span>
-        </button>
-        <span class="uz-stat-div" />
         <button class="uz-stat" @click="goFavorites">
           <span class="uz-stat-num">{{ favCount }}</span>
           <span class="uz-stat-label">{{ $t('user.favorites') }}</span>
@@ -81,11 +70,6 @@
         <button class="uz-row" @click="goFavorites">
           <span class="uz-row-ico"><van-icon name="like-o" size="20" /></span>
           <span class="uz-row-label">{{ $t('user.myFavorites') }}</span>
-          <svg class="uz-row-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
-        </button>
-        <button class="uz-row" @click="onToast($t('user.supportWip'))">
-          <span class="uz-row-ico"><van-icon name="service-o" size="20" /></span>
-          <span class="uz-row-label">{{ $t('user.support') }}</span>
           <svg class="uz-row-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
         </button>
       </section>
@@ -158,10 +142,6 @@ const themeOptions = computed(() => [
   { label: t('user.themeDark'), value: 'dark' as const },
 ])
 
-// 会员数据（积分/优惠券暂无后端，占位 0，UI 已就绪待接；收藏可后续接真实数）
-const stats = reactive({ points: 0, coupons: 0, favorites: 0 })
-// 会员等级：按积分档换算（1000/级），暂无后端积分故为 V1
-const memberLevel = computed(() => `V${Math.floor(stats.points / 1000) + 1}`)
 
 // 头像：oss-web 直传 S3 + walker-iam 统一落档；失败回退本地预览
 const { upload: uploadAvatar } = useAvatarUpload()
@@ -195,7 +175,6 @@ const orderTabs = computed(() => [
   { status: '', label: t('user.orderAll'), icon: 'orders-o' },
 ])
 
-function onToast(msg: string) { showToast(msg) }
 function ensureLogin(): boolean {
   if (!isLoggedIn.value) { navigateTo('/login?redirect=/user'); return false }
   return true

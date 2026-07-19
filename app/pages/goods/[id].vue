@@ -49,9 +49,6 @@
 
     <!-- 规格行 -->
     <div class="pdp-blk">
-      <div class="cell" @click="showToast($t('pdp.specWip'))">
-        <span class="k">{{ $t('pdp.specSelect') }}</span><span class="v">{{ $t('pdp.specValue') }}</span><span class="arr">›</span>
-      </div>
       <div class="cell">
         <span class="k">{{ $t('pdp.delivery') }}</span><span class="v">{{ goods.shipFree ? $t('home.tagFreeShip') : $t('pdp.express') }} · {{ $t('pdp.shipTip') }}</span>
       </div>
@@ -84,9 +81,6 @@
 
     <!-- 底部双 CTA -->
     <div class="pdp-bar">
-      <div class="bar-ic" @click="showToast($t('user.supportWip'))">
-        <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg><span>{{ $t('pdp.supportShort') }}</span>
-      </div>
       <div ref="cartIconRef" class="bar-ic" :class="{ bump: cartBump }" @click="navigateTo('/cart')">
         <svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7.2 14.6l.9-1.6h7.5c.7 0 1.4-.4 1.7-1L21 4H6.2L5.3 2H2v2h2z"/></svg><span>{{ $t('nav.cart') }}</span>
       </div>
