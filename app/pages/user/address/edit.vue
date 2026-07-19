@@ -1,48 +1,48 @@
 <template>
   <div class="lux addr-edit">
     <header class="lux-head">
-      <button class="lux-back" aria-label="返回" @click="back">
+      <button class="lux-back" :aria-label="$t('common.back')" @click="back">
         <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z" /></svg>
       </button>
-      <span class="lux-head-title">{{ isEdit ? '编辑地址' : '新增地址' }}</span>
+      <span class="lux-head-title">{{ isEdit ? $t('address.editTitle') : $t('address.add') }}</span>
     </header>
 
     <div class="lux-scroll">
       <section class="lux-card ae-card">
         <label class="ae-field">
-          <span class="ae-label">收货人</span>
-          <input v-model="form.signerName" class="ae-input" placeholder="姓名">
+          <span class="ae-label">{{ $t('address.receiver') }}</span>
+          <input v-model="form.signerName" class="ae-input" :placeholder="$t('address.name')">
         </label>
         <label class="ae-field">
-          <span class="ae-label">手机号</span>
-          <input v-model="form.signerMobile" class="ae-input" inputmode="numeric" placeholder="11 位手机号">
+          <span class="ae-label">{{ $t('address.phone') }}</span>
+          <input v-model="form.signerMobile" class="ae-input" inputmode="numeric" :placeholder="$t('address.phonePlaceholder')">
         </label>
         <label class="ae-field">
-          <span class="ae-label">省</span>
-          <input v-model="form.province" class="ae-input" placeholder="省">
+          <span class="ae-label">{{ $t('address.province') }}</span>
+          <input v-model="form.province" class="ae-input" :placeholder="$t('address.province')">
         </label>
         <label class="ae-field">
-          <span class="ae-label">市</span>
-          <input v-model="form.city" class="ae-input" placeholder="市">
+          <span class="ae-label">{{ $t('address.city') }}</span>
+          <input v-model="form.city" class="ae-input" :placeholder="$t('address.city')">
         </label>
         <label class="ae-field">
-          <span class="ae-label">区</span>
-          <input v-model="form.district" class="ae-input" placeholder="区/县">
+          <span class="ae-label">{{ $t('address.district') }}</span>
+          <input v-model="form.district" class="ae-input" :placeholder="$t('address.districtPlaceholder')">
         </label>
         <label class="ae-field ae-field--area">
-          <span class="ae-label">详细地址</span>
-          <textarea v-model="form.address" class="ae-input ae-textarea" rows="2" placeholder="街道门牌等" />
+          <span class="ae-label">{{ $t('address.detail') }}</span>
+          <textarea v-model="form.address" class="ae-input ae-textarea" rows="2" :placeholder="$t('address.detailPlaceholder')" />
         </label>
         <span class="lux-edge" />
       </section>
 
       <div class="ae-actions">
         <button class="lux-btn lux-btn--block" :disabled="saving" @click="save">
-          <span v-if="!saving">保存</span>
+          <span v-if="!saving">{{ $t('address.save') }}</span>
           <span v-else class="lux-spin" />
         </button>
         <button v-if="isEdit" class="lux-btn-ghost ae-del" :disabled="deleting" @click="remove">
-          <span v-if="!deleting">删除地址</span>
+          <span v-if="!deleting">{{ $t('address.deleteAddr') }}</span>
           <span v-else class="ae-del-spin" />
         </button>
       </div>
@@ -53,6 +53,7 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' })
 import { showToast } from 'vant'
+const { t } = useI18n()
 const { apiFetch } = useApi()
 const route = useRoute()
 const id = computed(() => route.query.id ? Number(route.query.id) : null)
@@ -71,8 +72,8 @@ onMounted(load)
 
 function valid(): boolean {
   const f = form.value
-  if (!f.signerName || !f.signerMobile || !f.province || !f.city || !f.district || !f.address) { showToast('请填完整'); return false }
-  if (!/^\d{11}$/.test(f.signerMobile)) { showToast('手机号需 11 位'); return false }
+  if (!f.signerName || !f.signerMobile || !f.province || !f.city || !f.district || !f.address) { showToast(t('address.needComplete')); return false }
+  if (!/^\d{11}$/.test(f.signerMobile)) { showToast(t('address.phoneInvalid')); return false }
   return true
 }
 async function save() {
@@ -81,14 +82,14 @@ async function save() {
   try {
     if (isEdit.value) await apiFetch(`/v1/userop/address/${id.value}`, { method:'PUT', body: form.value })
     else await apiFetch('/v1/userop/address', { method:'POST', body: form.value })
-    showToast('已保存'); back()
-  } catch (e:any) { showToast(e?.message || '保存失败') }
+    showToast(t('address.saved')); back()
+  } catch (e:any) { showToast(e?.message || t('address.saveFailed')) }
   finally { saving.value = false }
 }
 async function remove() {
   deleting.value = true
-  try { await apiFetch(`/v1/userop/address/${id.value}`, { method:'DELETE' }); showToast('已删除'); back() }
-  catch (e:any) { showToast(e?.message || '删除失败') }
+  try { await apiFetch(`/v1/userop/address/${id.value}`, { method:'DELETE' }); showToast(t('address.deleted')); back() }
+  catch (e:any) { showToast(e?.message || t('address.deleteFailed')) }
   finally { deleting.value = false }
 }
 function back() { navigateTo(`/user/address${route.query.from ? '?from=' + route.query.from : ''}`) }

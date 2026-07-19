@@ -7,7 +7,7 @@
     </div>
 
     <header class="auth-head">
-      <button class="lux-back" aria-label="返回" @click="navigateTo('/login')">
+      <button class="lux-back" :aria-label="$t('common.back')" @click="navigateTo('/login')">
         <svg viewBox="0 0 24 24"><path d="M15.5 4.5 8 12l7.5 7.5-1.4 1.4L5.2 12l8.9-8.9z" /></svg>
       </button>
     </header>
@@ -19,46 +19,46 @@
       </div>
       <div class="auth-brand">ZShop</div>
       <div class="auth-rule"><span class="auth-rule-dot" /></div>
-      <h1 class="auth-title">创建账户</h1>
-      <p class="auth-sub">开启专属于您的臻选体验</p>
+      <h1 class="auth-title">{{ $t('register.title') }}</h1>
+      <p class="auth-sub">{{ $t('register.subtitle') }}</p>
     </section>
 
     <section class="auth-card">
       <label class="auth-field">
-        <span class="auth-label">邮箱</span>
+        <span class="auth-label">{{ $t('register.email') }}</span>
         <div class="auth-inwrap">
           <svg class="auth-ico" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 4v10h16V8l-8 5z" /></svg>
-          <input v-model="email" class="auth-input" type="text" autocomplete="email" placeholder="用于登录" >
+          <input v-model="email" class="auth-input" type="text" autocomplete="email" :placeholder="$t('register.emailPlaceholder')" >
         </div>
       </label>
       <label class="auth-field">
-        <span class="auth-label">用户名</span>
+        <span class="auth-label">{{ $t('register.username') }}</span>
         <div class="auth-inwrap">
           <svg class="auth-ico" viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5 0-9 2.5-9 5.5V22h18v-2.5C21 16.5 17 14 12 14z" /></svg>
-          <input v-model="username" class="auth-input" type="text" autocomplete="nickname" placeholder="昵称 / 登录名" >
+          <input v-model="username" class="auth-input" type="text" autocomplete="nickname" :placeholder="$t('register.usernamePlaceholder')" >
         </div>
       </label>
       <label class="auth-field">
-        <span class="auth-label">密码</span>
+        <span class="auth-label">{{ $t('register.password') }}</span>
         <div class="auth-inwrap">
           <svg class="auth-ico" viewBox="0 0 24 24"><path d="M17 9V7a5 5 0 0 0-10 0v2H5v13h14V9h-2zm-8 0V7a3 3 0 0 1 6 0v2H9z" /></svg>
-          <input v-model="password" class="auth-input" type="password" autocomplete="new-password" placeholder="至少 8 位" >
+          <input v-model="password" class="auth-input" type="password" autocomplete="new-password" :placeholder="$t('register.passwordPlaceholder')" >
         </div>
       </label>
       <label class="auth-field">
-        <span class="auth-label">确认密码</span>
+        <span class="auth-label">{{ $t('register.confirm') }}</span>
         <div class="auth-inwrap">
           <svg class="auth-ico" viewBox="0 0 24 24"><path d="M17 9V7a5 5 0 0 0-10 0v2H5v13h14V9h-2zm-8 0V7a3 3 0 0 1 6 0v2H9z" /></svg>
-          <input v-model="confirm" class="auth-input" type="password" autocomplete="new-password" placeholder="再次输入密码" >
+          <input v-model="confirm" class="auth-input" type="password" autocomplete="new-password" :placeholder="$t('register.confirmPlaceholder')" >
         </div>
       </label>
 
       <button class="lux-btn lux-btn--block auth-submit" :disabled="loading" @click="onSubmit">
         <span v-if="loading" class="lux-spin" />
-        <span v-else>注册并登录</span>
+        <span v-else>{{ $t('register.submit') }}</span>
       </button>
 
-      <div class="auth-alt">已有账号？<span @click="toLogin">去登录</span></div>
+      <div class="auth-alt">{{ $t('register.haveAccount') }}<span @click="toLogin">{{ $t('register.toLogin') }}</span></div>
     </section>
   </div>
 </template>
@@ -66,6 +66,7 @@
 <script setup lang="ts">
 import { showToast } from 'vant'
 definePageMeta({ layout: 'blank' })
+const { t } = useI18n()
 const route = useRoute()
 const { register } = useAuth()
 const email = ref('')
@@ -79,16 +80,16 @@ function redirectTarget() {
   return typeof r === 'string' && r ? r : '/user'
 }
 async function onSubmit() {
-  if (!email.value || !password.value) { showToast('请填写邮箱和密码'); return }
-  if (password.value.length < 8) { showToast('密码至少 8 位'); return }
-  if (password.value !== confirm.value) { showToast('两次密码不一致'); return }
+  if (!email.value || !password.value) { showToast(t('register.needEmailPwd')); return }
+  if (password.value.length < 8) { showToast(t('register.pwdMin')); return }
+  if (password.value !== confirm.value) { showToast(t('register.pwdMismatch')); return }
   loading.value = true
   try {
     await register(email.value, username.value || email.value.split('@')[0], password.value)
-    showToast('注册成功')
+    showToast(t('register.success'))
     navigateTo(redirectTarget())
   } catch (e: any) {
-    showToast(e?.message || '注册失败')
+    showToast(e?.message || t('register.failed'))
   } finally {
     loading.value = false
   }

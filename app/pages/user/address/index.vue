@@ -1,17 +1,17 @@
 <template>
   <div class="lux addr-page">
     <header class="lux-head">
-      <button class="lux-back" aria-label="返回" @click="navigateTo('/user')">
+      <button class="lux-back" :aria-label="$t('common.back')" @click="navigateTo('/user')">
         <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z" /></svg>
       </button>
-      <span class="lux-head-title">收货地址</span>
+      <span class="lux-head-title">{{ $t('address.listTitle') }}</span>
     </header>
 
     <div class="lux-scroll">
       <!-- 空态 -->
       <div v-if="!loading && uiList.length === 0" class="lux-empty">
         <div class="lux-empty-ico">📍</div>
-        <div class="lux-empty-txt">还没有收货地址</div>
+        <div class="lux-empty-txt">{{ $t('address.empty') }}</div>
       </div>
 
       <!-- 地址卡片列表 -->
@@ -33,7 +33,7 @@
         <span
           class="addr-edit"
           role="button"
-          aria-label="编辑"
+          :aria-label="$t('address.edit')"
           @click.stop="onEdit(item)"
         >
           <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" /></svg>
@@ -45,7 +45,7 @@
     <!-- 新增地址 -->
     <div class="lux-bar">
       <button class="lux-btn lux-btn--block" @click="navigateTo('/user/address/edit')">
-        新增地址
+        {{ $t('address.add') }}
       </button>
     </div>
   </div>
@@ -54,6 +54,7 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' })
 import { showToast } from 'vant'
+const { t } = useI18n()
 interface Addr { id:number; province:string; city:string; district:string; address:string; signerName:string; signerMobile:string }
 const { apiFetch } = useApi()
 const route = useRoute()
@@ -65,7 +66,7 @@ async function load() {
   try {
     const res = await apiFetch<{ total:number; data:Addr[]|null }>('/v1/userop/address')
     list.value = res.data || []
-  } catch (e:any) { showToast(e?.message || '加载地址失败') }
+  } catch (e:any) { showToast(e?.message || t('address.loadFailed')) }
   finally { loading.value = false }
 }
 onMounted(load)

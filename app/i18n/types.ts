@@ -47,6 +47,52 @@ export interface MessageSchema {
     loginSuccess: string
     loginFailed: string
   }
+  register: {
+    title: string
+    subtitle: string
+    email: string
+    emailPlaceholder: string
+    username: string
+    usernamePlaceholder: string
+    password: string
+    passwordPlaceholder: string
+    confirm: string
+    confirmPlaceholder: string
+    submit: string
+    haveAccount: string
+    toLogin: string
+    needEmailPwd: string
+    pwdMin: string
+    pwdMismatch: string
+    success: string
+    failed: string
+  }
+  address: {
+    listTitle: string
+    empty: string
+    edit: string
+    add: string
+    loadFailed: string
+    editTitle: string
+    receiver: string
+    name: string
+    phone: string
+    phonePlaceholder: string
+    province: string
+    city: string
+    district: string
+    districtPlaceholder: string
+    detail: string
+    detailPlaceholder: string
+    save: string
+    deleteAddr: string
+    needComplete: string
+    phoneInvalid: string
+    saved: string
+    saveFailed: string
+    deleted: string
+    deleteFailed: string
+  }
   user: {
     memberBadge: string
     guestTitle: string
