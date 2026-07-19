@@ -51,6 +51,12 @@
           <span class="oc-name">{{ o.name }}</span>
           <span class="lux-price oc-total"><i>¥</i>{{ o.total?.toFixed(2) }}</span>
         </div>
+        <div v-if="availableActions(o.status).length" class="oc-actions" @click.stop>
+          <button v-if="availableActions(o.status).includes('cancel')" class="lux-btn-ghost oc-act" :disabled="acting" @click="onCancel(o)">{{ $t('order.cancelOrder') }}</button>
+          <button v-if="availableActions(o.status).includes('delete')" class="lux-btn-ghost oc-act" :disabled="acting" @click="onDelete(o)">{{ $t('order.deleteOrder') }}</button>
+          <button v-if="availableActions(o.status).includes('confirmReceipt')" class="lux-btn oc-act" :disabled="acting" @click="onConfirm(o)">{{ $t('order.confirmReceipt') }}</button>
+          <button v-if="availableActions(o.status).includes('pay')" class="lux-btn oc-act" @click="navigateTo(`/order/${o.id}?pay=1`)">{{ $t('order.payNow') }}</button>
+        </div>
         <span class="lux-edge" />
       </div>
     </div>
@@ -61,6 +67,7 @@
 definePageMeta({ middleware: 'auth' })
 import { showToast } from 'vant'
 import { orderStatusKey, orderStatusTone } from '~/utils/orderStatus'
+import { availableActions } from '~/utils/orderActions'
 const { t } = useI18n()
 interface Order { id:number; order_sn:string; status:string; total:number; name:string }
 const { apiFetch } = useApi()
@@ -72,6 +79,10 @@ const tabs = computed(() => [
 const activeStatus = ref<string>(typeof route.query.status === 'string' ? route.query.status : '')
 const orders = ref<Order[]>([])
 const loading = ref(false)
+const { busy: acting, cancel, confirmReceipt, remove } = useOrderActions()
+async function onCancel(o: Order) { if (await cancel(o.id)) await load() }
+async function onConfirm(o: Order) { if (await confirmReceipt(o.id)) await load() }
+async function onDelete(o: Order) { if (await remove(o.id)) await load() }
 
 async function load() {
   loading.value = true
@@ -127,4 +138,6 @@ onMounted(load)
 .oc-bd { display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; }
 .oc-name { font-size: 15px; font-weight: 500; color: var(--lux-text); }
 .oc-total { font-size: 20px; }
+.oc-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+.oc-act { flex: 0 0 auto; min-width: 92px; height: 38px; font-size: 13px; }
 </style>
