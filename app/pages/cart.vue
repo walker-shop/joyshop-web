@@ -1,25 +1,25 @@
 <template>
   <div class="cart-page lux">
     <header class="lux-head">
-      <button class="lux-back" aria-label="返回" @click="navigateTo('/')">
+      <button class="lux-back" :aria-label="$t('common.back')" @click="navigateTo('/')">
         <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z" /></svg>
       </button>
-      <span class="lux-head-title">购物车</span>
+      <span class="lux-head-title">{{ $t('cart.title') }}</span>
     </header>
 
     <!-- 未登录 -->
     <div v-if="!isLoggedIn" class="lux-empty">
       <div class="lux-empty-ico">🔒</div>
-      <div class="lux-empty-txt">登录后查看购物车</div>
-      <button class="lux-btn ct-empty-btn" @click="navigateTo('/login?redirect=/cart')">去登录</button>
+      <div class="lux-empty-txt">{{ $t('cart.guestEmpty') }}</div>
+      <button class="lux-btn ct-empty-btn" @click="navigateTo('/login?redirect=/cart')">{{ $t('cart.toLogin') }}</button>
     </div>
 
     <template v-else>
       <!-- 空车 -->
       <div v-if="!loading && items.length === 0" class="lux-empty">
         <div class="lux-empty-ico">🛒</div>
-        <div class="lux-empty-txt">购物车还是空的，快去挑好物吧～</div>
-        <button class="lux-btn ct-empty-btn" @click="navigateTo('/')">去逛逛</button>
+        <div class="lux-empty-txt">{{ $t('cart.empty') }}</div>
+        <button class="lux-btn ct-empty-btn" @click="navigateTo('/')">{{ $t('cart.goShopping') }}</button>
       </div>
 
       <!-- 商品列表 -->
@@ -30,7 +30,7 @@
             :class="{ 'ct-check--on': it.checked }"
             role="checkbox"
             :aria-checked="it.checked"
-            aria-label="选择商品"
+            :aria-label="$t('cart.selectItem')"
             @click="toggle(it, !it.checked)"
           >
             <svg v-if="it.checked" viewBox="0 0 24 24"><path d="m9.5 16.2-3.7-3.7L4.4 14l5.1 5.1L20 8.6l-1.4-1.4z" /></svg>
@@ -38,7 +38,7 @@
 
           <div class="ct-thumb">
             <img v-if="it.goods_image" :src="it.goods_image" :alt="it.goods_name">
-            <span v-else class="ct-thumb-ph">无图</span>
+            <span v-else class="ct-thumb-ph">{{ $t('cart.noImage') }}</span>
           </div>
 
           <div class="ct-main">
@@ -48,17 +48,17 @@
               <div class="ct-step">
                 <button
                   class="ct-step-btn"
-                  aria-label="减少"
+                  :aria-label="$t('cart.decrease')"
                   :disabled="it.nums <= 1"
                   @click="changeNums(it, Math.max(1, it.nums - 1))"
                 >−</button>
                 <span class="ct-step-val">{{ it.nums }}</span>
-                <button class="ct-step-btn" aria-label="增加" @click="changeNums(it, it.nums + 1)">＋</button>
+                <button class="ct-step-btn" :aria-label="$t('cart.increase')" @click="changeNums(it, it.nums + 1)">＋</button>
               </div>
             </div>
           </div>
 
-          <button class="ct-del" aria-label="删除" @click="remove(it)">
+          <button class="ct-del" :aria-label="$t('cart.delete')" @click="remove(it)">
             <svg viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4zM6 9h12l-1 12H7z" /></svg>
           </button>
           <span class="lux-edge" />
@@ -77,13 +77,13 @@
           <span class="ct-check ct-check--sm" :class="{ 'ct-check--on': allChecked }">
             <svg v-if="allChecked" viewBox="0 0 24 24"><path d="m9.5 16.2-3.7-3.7L4.4 14l5.1 5.1L20 8.6l-1.4-1.4z" /></svg>
           </span>
-          <span class="ct-all-txt">全选</span>
+          <span class="ct-all-txt">{{ $t('cart.selectAll') }}</span>
         </button>
         <div class="ct-bar-total">
-          <span class="ct-bar-label">合计</span>
+          <span class="ct-bar-label">{{ $t('cart.total') }}</span>
           <span class="lux-price ct-bar-price"><i>¥</i>{{ (checkedTotalCents / 100).toFixed(2) }}</span>
         </div>
-        <button class="lux-btn ct-submit" @click="goCheckout">去结算</button>
+        <button class="lux-btn ct-submit" @click="goCheckout">{{ $t('cart.checkout') }}</button>
       </div>
     </template>
   </div>
@@ -91,6 +91,7 @@
 
 <script setup lang="ts">
 import { showToast } from 'vant'
+const { t } = useI18n()
 
 interface CartItem { id:number; goods_id:number; goods_name:string; goods_image:string; goods_price:number; nums:number; checked:boolean }
 
@@ -107,7 +108,7 @@ async function load() {
   try {
     const res = await apiFetch<{ total:number; data:CartItem[]|null }>('/v1/cart')
     items.value = (res.data || []).map(it => ({ ...it, checked: !!it.checked, nums: it.nums || 1 }))
-  } catch (e:any) { showToast(e?.message || '加载购物车失败') }
+  } catch (e:any) { showToast(e?.message || t('cart.loadFailed')) }
   finally { loading.value = false }
 }
 onMounted(load)
@@ -120,24 +121,24 @@ async function put(it: CartItem) {
   await apiFetch<{ msg:string }>(`/v1/cart/${it.id}`, { method:'PUT', body:{ nums: it.nums, checked: it.checked } })
 }
 async function toggle(it: CartItem, v: boolean) {
-  it.checked = v; try { await put(it) } catch { it.checked = !v; showToast('操作失败') }
+  it.checked = v; try { await put(it) } catch { it.checked = !v; showToast(t('cart.opFailed')) }
 }
 async function toggleAll(v: boolean) {
-  for (const it of items.value) { it.checked = v; try { await put(it) } catch { showToast('操作失败') } }
+  for (const it of items.value) { it.checked = v; try { await put(it) } catch { showToast(t('cart.opFailed')) } }
 }
 async function changeNums(it: CartItem, v: number) {
   const old = it.nums; it.nums = v
-  try { await put(it) } catch { it.nums = old; showToast('修改数量失败') }
+  try { await put(it) } catch { it.nums = old; showToast(t('cart.numFailed')) }
 }
 async function remove(it: CartItem) {
   try {
     await apiFetch<{ msg:string }>(`/v1/cart/${it.id}`, { method:'DELETE' })
     items.value = items.value.filter(x=>x.id!==it.id)
     await refreshBadge()
-  } catch { showToast('删除失败') }
+  } catch { showToast(t('cart.deleteFailed')) }
 }
 function goCheckout() {
-  if (!items.value.some(i=>i.checked)) { showToast('请勾选要结算的商品'); return }
+  if (!items.value.some(i=>i.checked)) { showToast(t('cart.needSelect')); return }
   navigateTo('/checkout')
 }
 </script>

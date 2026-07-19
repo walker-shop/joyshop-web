@@ -1,10 +1,10 @@
 <template>
   <div class="checkout-page lux">
     <header class="ck-head">
-      <button class="ck-back" aria-label="返回" @click="navigateTo('/cart')">
+      <button class="ck-back" :aria-label="$t('common.back')" @click="navigateTo('/cart')">
         <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z" /></svg>
       </button>
-      <span class="ck-head-title">确认订单</span>
+      <span class="ck-head-title">{{ $t('checkout.title') }}</span>
     </header>
 
     <div class="ck-scroll">
@@ -19,8 +19,8 @@
             <div class="ck-addr-detail">{{ addr.province }}{{ addr.city }}{{ addr.district }}{{ addr.address }}</div>
           </template>
           <template v-else>
-            <div class="ck-addr-name">添加收货地址</div>
-            <div class="ck-addr-detail muted">选择或新建一个配送地址</div>
+            <div class="ck-addr-name">{{ $t('checkout.addAddr') }}</div>
+            <div class="ck-addr-detail muted">{{ $t('checkout.addAddrHint') }}</div>
           </template>
         </div>
         <svg class="ck-addr-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
@@ -32,7 +32,7 @@
         <div v-for="it in checkedItems" :key="it.id" class="ck-item">
           <div class="ck-thumb">
             <img v-if="it.goods_image" :src="it.goods_image" :alt="it.goods_name" @error="onImgErr">
-            <span v-else class="ck-thumb-ph">无图</span>
+            <span v-else class="ck-thumb-ph">{{ $t('checkout.noImage') }}</span>
           </div>
           <div class="ck-item-main">
             <div class="ck-item-name">{{ it.goods_name }}</div>
@@ -44,17 +44,17 @@
         </div>
 
         <div class="ck-note">
-          <span class="ck-note-label">备注</span>
-          <input v-model="post" class="ck-note-input" placeholder="给商家留言（选填）">
+          <span class="ck-note-label">{{ $t('checkout.note') }}</span>
+          <input v-model="post" class="ck-note-input" :placeholder="$t('checkout.notePlaceholder')">
         </div>
       </section>
 
       <!-- 金额明细 -->
       <section class="ck-card ck-summary">
-        <div class="ck-sum-row"><span>商品金额</span><span class="mono">¥{{ (totalCents / 100).toFixed(2) }}</span></div>
-        <div class="ck-sum-row"><span>运费</span><span class="ck-free">免运费</span></div>
+        <div class="ck-sum-row"><span>{{ $t('checkout.goodsAmount') }}</span><span class="mono">¥{{ (totalCents / 100).toFixed(2) }}</span></div>
+        <div class="ck-sum-row"><span>{{ $t('checkout.shipping') }}</span><span class="ck-free">{{ $t('checkout.freeShipping') }}</span></div>
         <div class="ck-sum-row ck-sum-total">
-          <span>实付款</span>
+          <span>{{ $t('checkout.actualPaid') }}</span>
           <span class="ck-sum-amount"><i>¥</i>{{ (totalCents / 100).toFixed(2) }}</span>
         </div>
       </section>
@@ -63,12 +63,12 @@
     <!-- 结算条 -->
     <div class="ck-bar">
       <div class="ck-bar-info">
-        <span class="ck-bar-label">合计</span>
+        <span class="ck-bar-label">{{ $t('checkout.total') }}</span>
         <span class="ck-bar-price"><i>¥</i>{{ (totalCents / 100).toFixed(2) }}</span>
-        <span class="ck-bar-count">共 {{ totalNums }} 件</span>
+        <span class="ck-bar-count">{{ $t('checkout.itemCount', { n: totalNums }) }}</span>
       </div>
       <button class="ck-submit" :disabled="submitting" @click="submit">
-        <span v-if="!submitting">提交订单</span>
+        <span v-if="!submitting">{{ $t('checkout.submit') }}</span>
         <span v-else class="ck-spin" />
       </button>
     </div>
@@ -78,6 +78,7 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' })
 import { showToast } from 'vant'
+const { t } = useI18n()
 interface CartItem { id:number; goods_name:string; goods_image:string; goods_price:number; nums:number; checked:boolean }
 interface Addr { id:number; province:string; city:string; district:string; address:string; signerName:string; signerMobile:string }
 
@@ -97,7 +98,7 @@ function onImgErr(e: Event) { (e.target as HTMLImageElement).style.visibility = 
 async function loadCart() {
   const res = await apiFetch<{ total:number; data:CartItem[]|null }>('/v1/cart')
   checkedItems.value = (res.data || []).filter(i => !!i.checked).map(i => ({ ...i, nums: i.nums || 1 }))
-  if (checkedItems.value.length === 0) { showToast('没有勾选的商品'); navigateTo('/cart') }
+  if (checkedItems.value.length === 0) { showToast(t('checkout.noChecked')); navigateTo('/cart') }
 }
 async function loadAddr() {
   const res = await apiFetch<{ total:number; data:Addr[]|null }>('/v1/userop/address')
@@ -111,7 +112,7 @@ onMounted(async () => { await Promise.all([loadCart(), loadAddr()]) })
 function pickAddr() { navigateTo('/user/address?from=checkout') }
 
 async function submit() {
-  if (!addr.value) { showToast('请选择收货地址'); return }
+  if (!addr.value) { showToast(t('checkout.needAddr')); return }
   submitting.value = true
   try {
     const full = `${addr.value.province}${addr.value.city}${addr.value.district}${addr.value.address}`
@@ -120,10 +121,10 @@ async function submit() {
       body: { address: full, name: addr.value.signerName, mobile: addr.value.signerMobile, post: post.value },
     })
     await refreshBadge()
-    showToast('下单成功')
+    showToast(t('checkout.orderSuccess'))
     navigateTo(`/order/${res.id}?pay=1`)
   } catch (e:any) {
-    showToast(e?.data?.msg || e?.message || '下单失败')
+    showToast(e?.data?.msg || e?.message || t('checkout.orderFailed'))
   } finally { submitting.value = false }
 }
 </script>

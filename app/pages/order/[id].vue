@@ -1,10 +1,10 @@
 <template>
   <div class="lux">
     <header class="lux-head">
-      <button class="lux-back" aria-label="返回" @click="navigateTo('/order')">
+      <button class="lux-back" :aria-label="$t('common.back')" @click="navigateTo('/order')">
         <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z" /></svg>
       </button>
-      <span class="lux-head-title">订单详情</span>
+      <span class="lux-head-title">{{ $t('order.detailTitle') }}</span>
     </header>
 
     <template v-if="detail">
@@ -13,14 +13,14 @@
         <section
           class="od-hero"
           :class="{
-            'is-amber': statusLabel(detail.order_info.status) === '待付款',
-            'is-muted': statusLabel(detail.order_info.status) === '已支付' || statusLabel(detail.order_info.status) === '已完成',
-            'is-dim': statusLabel(detail.order_info.status) === '已关闭',
+            'is-amber': orderStatusTone(detail.order_info.status) === 'amber',
+            'is-muted': orderStatusTone(detail.order_info.status) === 'muted',
+            'is-dim': orderStatusTone(detail.order_info.status) === 'dim',
           }"
         >
           <span class="od-hero-dot" />
-          <div class="od-hero-status">{{ statusLabel(detail.order_info.status) }}</div>
-          <div class="od-hero-sn">订单号 {{ detail.order_info.order_sn }}</div>
+          <div class="od-hero-status">{{ orderStatusKey(detail.order_info.status) ? $t(orderStatusKey(detail.order_info.status)) : detail.order_info.status }}</div>
+          <div class="od-hero-sn">{{ $t('order.orderNo') }} {{ detail.order_info.order_sn }}</div>
         </section>
 
         <!-- 收货信息 -->
@@ -40,7 +40,7 @@
           <div v-for="(g, i) in detail.goods" :key="i" class="od-item">
             <div class="od-thumb">
               <img v-if="g.goods_image" :src="g.goods_image" :alt="g.goods_name">
-              <span v-else class="od-thumb-ph">无图</span>
+              <span v-else class="od-thumb-ph">{{ $t('order.noImage') }}</span>
             </div>
             <div class="od-item-main">
               <div class="od-item-name">{{ g.goods_name }}</div>
@@ -52,7 +52,7 @@
           </div>
 
           <div class="od-sum">
-            <span class="od-sum-label">实付款</span>
+            <span class="od-sum-label">{{ $t('order.actualPaid') }}</span>
             <span class="lux-price od-total"><i>¥</i>{{ detail.order_info.total?.toFixed(2) }}</span>
           </div>
         </section>
@@ -61,11 +61,11 @@
       <!-- 支付条 -->
       <div v-if="isUnpaid" class="lux-bar">
         <div class="od-bar-info">
-          <span class="od-bar-label">应付</span>
+          <span class="od-bar-label">{{ $t('order.due') }}</span>
           <span class="lux-price od-bar-price"><i>¥</i>{{ detail.order_info.total?.toFixed(2) }}</span>
         </div>
         <button class="lux-btn od-pay-btn" :disabled="paying" @click="doPay">
-          <span v-if="!paying">立即支付</span>
+          <span v-if="!paying">{{ $t('order.payNow') }}</span>
           <span v-else class="lux-spin" />
         </button>
       </div>
@@ -76,14 +76,14 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' })
 import { showToast } from 'vant'
-import { orderStatusLabel } from '~/utils/orderStatus'
+import { orderStatusKey, orderStatusTone } from '~/utils/orderStatus'
+const { t } = useI18n()
 interface Detail { order_info:{ id:number; order_sn:string; status:string; total:number; name:string; mobile:string; address:string }; goods:{ goods_name:string; goods_image:string; goods_price:number; nums:number }[] }
 const { apiFetch } = useApi()
 const { pay } = usePayment()
 const route = useRoute()
 const detail = ref<Detail | null>(null)
 const paying = ref(false)
-const statusLabel = orderStatusLabel
 const isUnpaid = computed(() => ['PAYING','WAIT_BUYER_PAY'].includes(detail.value?.order_info.status || ''))
 
 async function load() {
@@ -96,9 +96,9 @@ async function doPay() {
   try {
     const oi = detail.value.order_info
     const r = await pay({ orderId: oi.id, orderSn: oi.order_sn, amount: oi.total })
-    if (r === 'paid') { showToast('支付成功'); await load() }
-    else showToast('支付未完成')
-  } catch (e:any) { showToast(e?.message || '支付失败') }
+    if (r === 'paid') { showToast(t('order.paySuccess')); await load() }
+    else showToast(t('order.payIncomplete'))
+  } catch (e:any) { showToast(e?.message || t('order.payFailed')) }
   finally { paying.value = false }
 }
 onMounted(async () => {

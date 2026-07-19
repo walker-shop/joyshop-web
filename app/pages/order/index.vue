@@ -1,22 +1,22 @@
 <template>
   <div class="lux">
     <header class="lux-head">
-      <button class="lux-back" aria-label="返回" @click="navigateTo('/user')">
+      <button class="lux-back" :aria-label="$t('common.back')" @click="navigateTo('/user')">
         <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z" /></svg>
       </button>
-      <span class="lux-head-title">我的订单</span>
+      <span class="lux-head-title">{{ $t('order.title') }}</span>
     </header>
 
     <!-- 状态筛选 tabs -->
     <nav class="od-tabs">
       <button
-        v-for="t in tabs"
-        :key="t.status"
+        v-for="tab in tabs"
+        :key="tab.status"
         class="od-tab"
-        :class="{ 'is-active': activeStatus === t.status }"
-        @click="activeStatus = t.status; load()"
+        :class="{ 'is-active': activeStatus === tab.status }"
+        @click="activeStatus = tab.status; load()"
       >
-        {{ t.label }}
+        {{ tab.label }}
         <span class="od-tab-glow" />
       </button>
     </nav>
@@ -25,7 +25,7 @@
       <!-- 空状态 -->
       <div v-if="!loading && orders.length === 0" class="lux-empty">
         <div class="lux-empty-ico">🧾</div>
-        <div class="lux-empty-txt">暂无订单</div>
+        <div class="lux-empty-txt">{{ $t('order.empty') }}</div>
       </div>
 
       <!-- 订单卡片列表 -->
@@ -37,15 +37,15 @@
         @click="navigateTo(`/order/${o.id}`)"
       >
         <div class="oc-hd">
-          <span class="oc-sn">订单号 <b>{{ o.order_sn }}</b></span>
+          <span class="oc-sn">{{ $t('order.orderNo') }} <b>{{ o.order_sn }}</b></span>
           <span
             class="oc-status"
             :class="{
-              'is-amber': statusLabel(o.status) === '待付款',
-              'is-muted': statusLabel(o.status) === '已支付' || statusLabel(o.status) === '已完成',
-              'is-dim': statusLabel(o.status) === '已关闭',
+              'is-amber': orderStatusTone(o.status) === 'amber',
+              'is-muted': orderStatusTone(o.status) === 'muted',
+              'is-dim': orderStatusTone(o.status) === 'dim',
             }"
-          >{{ statusLabel(o.status) }}</span>
+          >{{ orderStatusKey(o.status) ? $t(orderStatusKey(o.status)) : o.status }}</span>
         </div>
         <div class="oc-bd">
           <span class="oc-name">{{ o.name }}</span>
@@ -60,18 +60,18 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' })
 import { showToast } from 'vant'
-import { orderStatusLabel } from '~/utils/orderStatus'
+import { orderStatusKey, orderStatusTone } from '~/utils/orderStatus'
+const { t } = useI18n()
 interface Order { id:number; order_sn:string; status:string; total:number; name:string }
 const { apiFetch } = useApi()
 const route = useRoute()
-const tabs = [
-  { status:'', label:'全部' }, { status:'PAYING', label:'待付款' },
-  { status:'TRADE_SUCCESS', label:'已支付' }, { status:'TRADE_CLOSED', label:'已关闭' },
-]
+const tabs = computed(() => [
+  { status:'', label: t('order.statusAll') }, { status:'PAYING', label: t('order.statusPaying') },
+  { status:'TRADE_SUCCESS', label: t('order.statusPaid') }, { status:'TRADE_CLOSED', label: t('order.statusClosed') },
+])
 const activeStatus = ref<string>(typeof route.query.status === 'string' ? route.query.status : '')
 const orders = ref<Order[]>([])
 const loading = ref(false)
-const statusLabel = orderStatusLabel
 
 async function load() {
   loading.value = true
@@ -79,7 +79,7 @@ async function load() {
     const q = activeStatus.value ? `?status=${activeStatus.value}` : ''
     const res = await apiFetch<{ total:number; data:Order[]|null }>(`/v1/orders${q}`)
     orders.value = res.data || []
-  } catch (e:any) { showToast(e?.message || '加载订单失败') }
+  } catch (e:any) { showToast(e?.message || t('order.loadFailed')) }
   finally { loading.value = false }
 }
 onMounted(load)

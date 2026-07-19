@@ -93,6 +93,64 @@ export interface MessageSchema {
     deleted: string
     deleteFailed: string
   }
+  cart: {
+    title: string
+    guestEmpty: string
+    toLogin: string
+    empty: string
+    goShopping: string
+    selectItem: string
+    noImage: string
+    decrease: string
+    increase: string
+    delete: string
+    selectAll: string
+    total: string
+    checkout: string
+    loadFailed: string
+    opFailed: string
+    numFailed: string
+    deleteFailed: string
+    needSelect: string
+  }
+  checkout: {
+    title: string
+    addAddr: string
+    addAddrHint: string
+    noImage: string
+    note: string
+    notePlaceholder: string
+    goodsAmount: string
+    shipping: string
+    freeShipping: string
+    actualPaid: string
+    total: string
+    itemCount: string
+    submit: string
+    noChecked: string
+    needAddr: string
+    orderSuccess: string
+    orderFailed: string
+  }
+  order: {
+    title: string
+    empty: string
+    orderNo: string
+    statusAll: string
+    statusPaying: string
+    statusPaid: string
+    statusFinished: string
+    statusClosed: string
+    loadFailed: string
+    detailTitle: string
+    noImage: string
+    actualPaid: string
+    due: string
+    payNow: string
+    paySuccess: string
+    payIncomplete: string
+    payFailed: string
+  }
   user: {
     memberBadge: string
     guestTitle: string
