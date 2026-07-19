@@ -7,6 +7,8 @@ export interface MessageSchema {
     addedToCart: string
     addToCartFailed: string
     back: string
+    confirm: string
+    cancel: string
   }
   nav: {
     home: string
@@ -183,6 +185,16 @@ export interface MessageSchema {
     paySuccess: string
     payIncomplete: string
     payFailed: string
+    cancelOrder: string
+    confirmReceipt: string
+    deleteOrder: string
+    cancelConfirm: string
+    receiptConfirm: string
+    deleteConfirm: string
+    cancelSuccess: string
+    receiptSuccess: string
+    deleteSuccess: string
+    actionFailed: string
   }
   user: {
     memberBadge: string
