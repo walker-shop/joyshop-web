@@ -37,7 +37,9 @@
         class="cat"
         @click="navigateTo(`/category?id=${cat.id}`)"
       >
-        <img class="cat-ic" :src="cat.icon" :alt="cat.name" />
+        <span class="cat-ic" :style="{ background: cat.tint }">
+          <component :is="cat.comp" :size="24" weight="duotone" :color="cat.glyph" />
+        </span>
         <span>{{ cat.name }}</span>
       </button>
     </nav>
@@ -175,13 +177,17 @@ async function fetchBanners() {
 
 // === Categories ===
 interface Category { id: number; name: string; parentId: number; level: number; icon?: string }
-const { getIconSvg } = useCategoryIcon()
+const { getIconDef } = useCategoryIcon()
 const allCategories = ref<Category[]>([])
 const topCategories = computed(() =>
   allCategories.value
     .filter(c => !c.parentId || c.parentId === 0)
     .slice(0, 10)
-    .map(c => ({ ...c, icon: getIconSvg(c.name) })),
+    .map((c) => {
+      const def = getIconDef(c.name)
+      // tint 用低透明度铺底，亮/暗模式都成立；glyph 取较亮一档保证暗色下的对比度
+      return { ...c, comp: def.comp, tint: `${def.colors[0]}2e`, glyph: def.colors[1] }
+    }),
 )
 async function fetchCategories() {
   try {
@@ -343,9 +349,12 @@ function flyToCart(sx: number, sy: number, img?: string) {
   display: flex; flex-direction: column; align-items: center; gap: 7px;
   background: none; border: 0; padding: 4px 0; cursor: pointer;
 }
+/* 淡色底块 + Phosphor 图标。不打 drop-shadow：底块本身已提供分层，
+   再加发光只会让 46px 的小图标发糊 */
 .cat-ic {
-  width: 46px; height: 46px; display: block;
-  filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--color-primary) 30%, transparent));
+  width: 46px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 15px;
   transition: transform .18s ease;
 }
 .cat:active .cat-ic { transform: scale(.9); }

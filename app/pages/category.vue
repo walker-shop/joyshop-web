@@ -46,7 +46,9 @@
               :class="{ on: selectedSubId === sub.id }"
               @click="selectSub(sub)"
             >
-              <img class="sub-ic" :src="getSubIcon(sub)" :alt="sub.name" />
+              <span class="sub-ic">
+                <component :is="getSubIcon(sub).comp" :size="22" weight="duotone" />
+              </span>
               <span>{{ sub.name }}</span>
             </button>
           </div>
@@ -120,7 +122,7 @@ const { t } = useI18n()
 const config = useRuntimeConfig()
 const { tenantId } = useTenant()
 const route = useRoute()
-const { getIconSvg } = useCategoryIcon()
+const { getIconDef } = useCategoryIcon()
 
 interface Category { id: number; name: string; parentId: number; level: number }
 
@@ -158,8 +160,13 @@ const selectedSubName = computed(() =>
   currentSubCategories.value.find(s => s.id === selectedSubId.value)?.name || '',
 )
 
-function getSubIcon(sub: Category): string {
-  return getIconSvg(sub.name, activeParentName.value)
+/**
+ * 子分类只取图标，不取颜色。
+ * 同一父分类下的子项会共用父级色板 —— 5 个一模一样的色块，颜色不承载任何信息，
+ * 只是噪音。这里唯一需要表达的是「选中与否」，交给 CSS 用中性/主色两态处理。
+ */
+function getSubIcon(sub: Category) {
+  return { comp: getIconDef(sub.name, activeParentName.value).comp }
 }
 
 async function fetchCategories() {
@@ -360,14 +367,21 @@ onMounted(async () => {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   background: none; border: 0; padding: 6px 0; cursor: pointer;
 }
+/* 子分类图标：中性底块，图标继承 color（Phosphor 未传 :color 时用 currentColor）。
+   选中态直接把底块和图标一起换成主色，不再用悬空的 outline 圆环 ——
+   圆环是「在方块外面再套一层」，和方块本身是两套语言，拼在一起会显得生硬。 */
 .sub-ic {
-  width: 44px; height: 44px; border-radius: 14px; display: block;
-  filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--color-primary) 26%, transparent));
-  transition: transform .16s ease;
-  outline: 2px solid transparent; outline-offset: 2px;
+  width: 44px; height: 44px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+  color: var(--color-text-secondary);
+  transition: transform .16s ease, background .2s ease, color .2s ease;
 }
 .sub:active .sub-ic { transform: scale(.9); }
-.sub.on .sub-ic { outline-color: color-mix(in srgb, var(--color-primary) 60%, transparent); }
+.sub.on .sub-ic {
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  color: var(--color-primary);
+}
 .sub span {
   font-size: 11.5px; color: var(--color-text-secondary); max-width: 64px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
