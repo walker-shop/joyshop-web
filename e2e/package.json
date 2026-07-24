@@ -1,0 +1,13 @@
+{
+  "name": "zshop-e2e",
+  "private": true,
+  "type": "module",
+  "description": "ZShop 购物全流程回归脚本（独立于主应用，自带依赖）",
+  "scripts": {
+    "regression": "node purchase-regression.mjs",
+    "regression:keep": "node purchase-regression.mjs --keep"
+  },
+  "dependencies": {
+    "chrome-remote-interface": "^0.33.3"
+  }
+}
