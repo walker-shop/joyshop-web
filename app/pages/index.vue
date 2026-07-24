@@ -37,8 +37,8 @@
         class="cat"
         @click="navigateTo(`/category?id=${cat.id}`)"
       >
-        <span class="cat-ic" :style="{ background: cat.tint }">
-          <component :is="cat.comp" :size="24" weight="duotone" :color="cat.glyph" />
+        <span class="cat-ic" :style="{ background: cat.bg }">
+          <component :is="cat.comp" :size="24" weight="bold" :color="cat.glyph" />
         </span>
         <span>{{ cat.name }}</span>
       </button>
@@ -185,8 +185,13 @@ const topCategories = computed(() =>
     .slice(0, 10)
     .map((c) => {
       const def = getIconDef(c.name)
-      // tint 用低透明度铺底，亮/暗模式都成立；glyph 取较亮一档保证暗色下的对比度
-      return { ...c, comp: def.comp, tint: `${def.colors[0]}2e`, glyph: def.colors[1] }
+      // 品类分色玻璃质感：饱和渐变底块（亮档→深档，左上到右下）+ 白色图标
+      return {
+        ...c,
+        comp: def.comp,
+        bg: `linear-gradient(150deg, ${def.colors[1]} 0%, ${def.colors[0]} 100%)`,
+        glyph: '#ffffff',
+      }
     }),
 )
 async function fetchCategories() {
@@ -349,13 +354,31 @@ function flyToCart(sx: number, sy: number, img?: string) {
   display: flex; flex-direction: column; align-items: center; gap: 7px;
   background: none; border: 0; padding: 4px 0; cursor: pointer;
 }
-/* 淡色底块 + Phosphor 图标。不打 drop-shadow：底块本身已提供分层，
-   再加发光只会让 46px 的小图标发糊 */
+/* 品类分色玻璃质感：饱和渐变底块 + 顶部柔光 + 内高光边 + 立体投影，白色图标 */
 .cat-ic {
+  position: relative;
   width: 46px; height: 46px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 15px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .45),
+    inset 0 -2px 5px rgba(0, 0, 0, .16),
+    0 4px 10px rgba(0, 0, 0, .28);
   transition: transform .18s ease;
+}
+/* 左上高光，制造玻璃反光 */
+.cat-ic::before {
+  content: ""; position: absolute; inset: 0; border-radius: 15px; pointer-events: none;
+  background: radial-gradient(120% 80% at 30% 10%, rgba(255, 255, 255, .42), transparent 55%);
+}
+/* 内描边，勾出玻璃亮边 */
+.cat-ic::after {
+  content: ""; position: absolute; inset: 0; border-radius: 15px; pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .24);
+}
+.cat-ic :deep(svg) {
+  position: relative; z-index: 1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .28));
 }
 .cat:active .cat-ic { transform: scale(.9); }
 .cat span {
