@@ -175,6 +175,7 @@ const messages: MessageSchema = {
     statusAll: 'All',
     statusPaying: 'Unpaid',
     statusPaid: 'Paid',
+    statusShipped: 'Shipped',
     statusFinished: 'Completed',
     statusClosed: 'Closed',
     loadFailed: 'Failed to load orders',

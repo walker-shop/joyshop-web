@@ -88,7 +88,9 @@ interface Detail { order_info:{ id:number; order_sn:string; status:string; total
 const { apiFetch } = useApi()
 const { pay } = usePayment()
 const { busy: acting, cancel, confirmReceipt, remove } = useOrderActions()
-const barActions = computed(() => detail.value ? availableActions(detail.value.order_info.status) : [])
+// needShip 在响应顶层（与 data 同级，非嵌套在 data 内）——proto omitempty 会丢 false，顶层布尔不受影响
+const needShip = ref(true)
+const barActions = computed(() => detail.value ? availableActions(detail.value.order_info.status, needShip.value) : [])
 async function onCancel() {
   if (detail.value && await cancel(detail.value.order_info.id)) await load()
 }
@@ -104,8 +106,9 @@ const paying = ref(false)
 const isUnpaid = computed(() => ['PAYING','WAIT_BUYER_PAY'].includes(detail.value?.order_info.status || ''))
 
 async function load() {
-  const res = await apiFetch<{ data: Detail }>(`/v1/orders/${route.params.id}`)
+  const res = await apiFetch<{ data: Detail; needShip?: boolean }>(`/v1/orders/${route.params.id}`)
   detail.value = res.data
+  needShip.value = res.needShip ?? true
 }
 async function doPay() {
   if (!detail.value) return

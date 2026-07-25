@@ -51,11 +51,11 @@
           <span class="oc-name">{{ o.name }}</span>
           <span class="lux-price oc-total"><i>¥</i>{{ o.total?.toFixed(2) }}</span>
         </div>
-        <div v-if="availableActions(o.status).length" class="oc-actions" @click.stop>
-          <button v-if="availableActions(o.status).includes('cancel')" class="lux-btn-ghost oc-act" :disabled="acting" @click="onCancel(o)">{{ $t('order.cancelOrder') }}</button>
-          <button v-if="availableActions(o.status).includes('delete')" class="lux-btn-ghost oc-act" :disabled="acting" @click="onDelete(o)">{{ $t('order.deleteOrder') }}</button>
-          <button v-if="availableActions(o.status).includes('confirmReceipt')" class="lux-btn oc-act" :disabled="acting" @click="onConfirm(o)">{{ $t('order.confirmReceipt') }}</button>
-          <button v-if="availableActions(o.status).includes('pay')" class="lux-btn oc-act" @click="navigateTo(`/order/${o.id}?pay=1`)">{{ $t('order.payNow') }}</button>
+        <div v-if="availableActions(o.status, o.needShip).length" class="oc-actions" @click.stop>
+          <button v-if="availableActions(o.status, o.needShip).includes('cancel')" class="lux-btn-ghost oc-act" :disabled="acting" @click="onCancel(o)">{{ $t('order.cancelOrder') }}</button>
+          <button v-if="availableActions(o.status, o.needShip).includes('delete')" class="lux-btn-ghost oc-act" :disabled="acting" @click="onDelete(o)">{{ $t('order.deleteOrder') }}</button>
+          <button v-if="availableActions(o.status, o.needShip).includes('confirmReceipt')" class="lux-btn oc-act" :disabled="acting" @click="onConfirm(o)">{{ $t('order.confirmReceipt') }}</button>
+          <button v-if="availableActions(o.status, o.needShip).includes('pay')" class="lux-btn oc-act" @click="navigateTo(`/order/${o.id}?pay=1`)">{{ $t('order.payNow') }}</button>
         </div>
         <span class="lux-edge" />
       </div>
@@ -69,7 +69,7 @@ import { showToast } from 'vant'
 import { orderStatusKey, orderStatusTone } from '~/utils/orderStatus'
 import { availableActions } from '~/utils/orderActions'
 const { t } = useI18n()
-interface Order { id:number; order_sn:string; status:string; total:number; name:string }
+interface Order { id:number; order_sn:string; status:string; total:number; name:string; needShip?: boolean }
 const { apiFetch } = useApi()
 const route = useRoute()
 const tabs = computed(() => [

@@ -176,6 +176,7 @@ const messages: MessageSchema = {
     statusAll: 'ทั้งหมด',
     statusPaying: 'รอชำระเงิน',
     statusPaid: 'ชำระแล้ว',
+    statusShipped: 'จัดส่งแล้ว',
     statusFinished: 'เสร็จสิ้น',
     statusClosed: 'ปิดแล้ว',
     loadFailed: 'โหลดคำสั่งซื้อไม่สำเร็จ',

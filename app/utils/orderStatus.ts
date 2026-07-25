@@ -4,6 +4,7 @@ export function orderStatusKey(status: string): string {
     case 'PAYING':
     case 'WAIT_BUYER_PAY': return 'order.statusPaying'
     case 'TRADE_SUCCESS': return 'order.statusPaid'
+    case 'SHIPPED': return 'order.statusShipped'
     case 'TRADE_CLOSED': return 'order.statusClosed'
     case 'TRADE_FINISHED': return 'order.statusFinished'
     default: return ''
@@ -17,6 +18,7 @@ export function orderStatusTone(status: string): 'amber' | 'muted' | 'dim' | '' 
     case 'WAIT_BUYER_PAY': return 'amber'
     case 'TRADE_SUCCESS':
     case 'TRADE_FINISHED': return 'muted'
+    case 'SHIPPED': return 'amber'
     case 'TRADE_CLOSED': return 'dim'
     default: return ''
   }

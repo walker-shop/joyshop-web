@@ -175,6 +175,7 @@ const messages: MessageSchema = {
     statusAll: '全部',
     statusPaying: '待付款',
     statusPaid: '已支付',
+    statusShipped: '已发货',
     statusFinished: '已完成',
     statusClosed: '已关闭',
     loadFailed: '加载订单失败',
