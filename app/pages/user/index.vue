@@ -36,6 +36,11 @@
           <span class="uz-stat-num">{{ favCount }}</span>
           <span class="uz-stat-label">{{ $t('user.favorites') }}</span>
         </button>
+        <span class="uz-stat-div" />
+        <button class="uz-stat" @click="goPoints">
+          <span class="uz-stat-num">{{ pointsBalance }}</span>
+          <span class="uz-stat-label">{{ $t('user.points') }}</span>
+        </button>
       </div>
     </header>
 
@@ -133,8 +138,10 @@ const { $setAppLocale } = useNuxtApp()
 const { themeMode, setTheme } = useTheme()
 const { isLoggedIn, user, logout } = useAuth()
 const { count: favCount, refreshCount: refreshFav } = useFav()
-onMounted(refreshFav)
+const { balance: pointsBalance, refreshBalance: refreshPoints } = usePoints()
+onMounted(() => { refreshFav(); refreshPoints() })
 function goFavorites() { if (ensureLogin()) navigateTo('/user/favorites') }
+function goPoints() { if (ensureLogin()) navigateTo('/user/points') }
 
 const themeOptions = computed(() => [
   { label: t('user.themeSystem'), value: 'system' as const },
