@@ -52,7 +52,10 @@
       <!-- 金额明细 -->
       <section class="ck-card ck-summary">
         <div class="ck-sum-row"><span>{{ $t('checkout.goodsAmount') }}</span><span class="mono">¥{{ (totalCents / 100).toFixed(2) }}</span></div>
-        <div class="ck-sum-row"><span>{{ $t('checkout.shipping') }}</span><span class="ck-free">{{ $t('checkout.freeShipping') }}</span></div>
+        <div class="ck-sum-row"><span>{{ $t('checkout.shipping') }}</span>
+          <span v-if="shippingCents === 0" class="ck-free">{{ $t('checkout.freeShipping') }}</span>
+          <span v-else class="mono">¥{{ (shippingCents / 100).toFixed(2) }}</span>
+        </div>
         <div class="ck-sum-row ck-coupon-row">
           <span>{{ $t('checkout.selectCoupon') }}</span>
           <select v-if="usableCoupons.length" v-model.number="selectedCouponId" class="ck-coupon-sel">
@@ -91,7 +94,11 @@
 definePageMeta({ middleware: 'auth' })
 import { showToast } from 'vant'
 const { t } = useI18n()
-interface CartItem { id:number; goods_name:string; goods_image:string; goods_price:number; nums:number; checked:boolean }
+interface CartItem { id:number; goods_id:number; goods_name:string; goods_image:string; goods_price:number; nums:number; checked:boolean; shipFree?:boolean }
+
+// 运费规则常量（整数分），必须与后端 order_srv computeShippingCents 一致
+const SHIP_FREE_THRESHOLD_CENTS = 9900 // 满 ¥99 免运费
+const SHIP_FEE_CENTS = 1000            // 否则固定运费 ¥10
 interface Addr { id:number; province:string; city:string; district:string; address:string; signerName:string; signerMobile:string }
 
 const { apiFetch } = useApi()
@@ -114,13 +121,21 @@ const discountCents = computed(() => {
   const c = usableCoupons.value.find(c => c.id === selectedCouponId.value)
   return c ? calcDiscountCents(c, totalCents.value) : 0
 })
-const payCents = computed(() => Math.max(0, totalCents.value - discountCents.value))
+// 运费：本单全部包邮 或 商品和达免运费门槛 → 0，否则固定运费。门槛按商品和(不含券)判断。
+const allShipFree = computed(() => checkedItems.value.length > 0 && checkedItems.value.every(i => i.shipFree))
+const shippingCents = computed(() => (allShipFree.value || totalCents.value >= SHIP_FREE_THRESHOLD_CENTS) ? 0 : SHIP_FEE_CENTS)
+const payCents = computed(() => Math.max(0, totalCents.value - discountCents.value) + shippingCents.value)
 function onImgErr(e: Event) { (e.target as HTMLImageElement).style.visibility = 'hidden' }
 
 async function loadCart() {
   const res = await apiFetch<{ total:number; data:CartItem[]|null }>('/v1/cart')
   checkedItems.value = (res.data || []).filter(i => !!i.checked).map(i => ({ ...i, nums: i.nums || 1 }))
   if (checkedItems.value.length === 0) { showToast(t('checkout.noChecked')); navigateTo('/cart') }
+  // cart 不返回 shipFree，逐项从商品详情补（用于运费计算，与后端规则一致）
+  await Promise.all(checkedItems.value.map(async it => {
+    try { const g = await apiFetch<{ data?:{ shipFree?:boolean } }>(`/v1/goods/${it.goods_id}`); it.shipFree = !!g.data?.shipFree }
+    catch { it.shipFree = false }
+  }))
 }
 async function loadAddr() {
   const res = await apiFetch<{ total:number; data:Addr[]|null }>('/v1/userop/address')
