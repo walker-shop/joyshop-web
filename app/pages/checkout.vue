@@ -53,9 +53,21 @@
       <section class="ck-card ck-summary">
         <div class="ck-sum-row"><span>{{ $t('checkout.goodsAmount') }}</span><span class="mono">¥{{ (totalCents / 100).toFixed(2) }}</span></div>
         <div class="ck-sum-row"><span>{{ $t('checkout.shipping') }}</span><span class="ck-free">{{ $t('checkout.freeShipping') }}</span></div>
+        <div class="ck-sum-row ck-coupon-row">
+          <span>{{ $t('checkout.selectCoupon') }}</span>
+          <select v-if="usableCoupons.length" v-model.number="selectedCouponId" class="ck-coupon-sel">
+            <option :value="0">{{ $t('checkout.noCoupon') }}</option>
+            <option v-for="c in usableCoupons" :key="c.id" :value="c.id">{{ c.name }}</option>
+          </select>
+          <span v-else class="muted">{{ $t('checkout.noneAvailable') }}</span>
+        </div>
+        <div v-if="discountCents > 0" class="ck-sum-row">
+          <span>{{ $t('checkout.couponDiscount') }}</span>
+          <span class="ck-discount">-¥{{ (discountCents / 100).toFixed(2) }}</span>
+        </div>
         <div class="ck-sum-row ck-sum-total">
           <span>{{ $t('checkout.actualPaid') }}</span>
-          <span class="ck-sum-amount"><i>¥</i>{{ (totalCents / 100).toFixed(2) }}</span>
+          <span class="ck-sum-amount"><i>¥</i>{{ (payCents / 100).toFixed(2) }}</span>
         </div>
       </section>
     </div>
@@ -117,7 +129,10 @@ async function loadAddr() {
     : (import.meta.client ? Number(localStorage.getItem('js_last_addr')) : 0)
   addr.value = list.find(a => a.id === wantId) || list[0] || null
 }
-onMounted(async () => { await Promise.all([loadCart(), loadAddr()]) })
+async function loadMyCoupons() {
+  try { myCoupons.value = await listMine(1) } catch { myCoupons.value = [] }
+}
+onMounted(async () => { await Promise.all([loadCart(), loadAddr(), loadMyCoupons()]) })
 
 function pickAddr() { navigateTo('/user/address?from=checkout') }
 
@@ -128,7 +143,7 @@ async function submit() {
     const full = `${addr.value.province}${addr.value.city}${addr.value.district}${addr.value.address}`
     const res = await apiFetch<{ id:number; order_sn:string; total:number; msg:string }>('/v1/orders', {
       method: 'POST',
-      body: { address: full, name: addr.value.signerName, mobile: addr.value.signerMobile, post: post.value },
+      body: { address: full, name: addr.value.signerName, mobile: addr.value.signerMobile, post: post.value, coupon_id: selectedCouponId.value },
     })
     await refreshBadge()
     showToast(t('checkout.orderSuccess'))
