@@ -84,15 +84,25 @@ interface Addr { id:number; province:string; city:string; district:string; addre
 
 const { apiFetch } = useApi()
 const { refresh: refreshBadge } = useCartCount()
+const { listMine, calcDiscountCents } = useCoupons()
 const route = useRoute()
 
 const checkedItems = ref<CartItem[]>([])
 const addr = ref<Addr | null>(null)
 const post = ref('')
 const submitting = ref(false)
+const myCoupons = ref<MyCoupon[]>([])
+const selectedCouponId = ref(0)
 
 const totalCents = computed(() => Math.round(checkedItems.value.reduce((s,i)=>s + i.goods_price * i.nums, 0) * 100))
 const totalNums = computed(() => checkedItems.value.reduce((s,i)=>s + i.nums, 0))
+// 满足本单门槛且未使用的券
+const usableCoupons = computed(() => myCoupons.value.filter(c => c.status === 1 && totalCents.value >= c.thresholdCents))
+const discountCents = computed(() => {
+  const c = usableCoupons.value.find(c => c.id === selectedCouponId.value)
+  return c ? calcDiscountCents(c, totalCents.value) : 0
+})
+const payCents = computed(() => Math.max(0, totalCents.value - discountCents.value))
 function onImgErr(e: Event) { (e.target as HTMLImageElement).style.visibility = 'hidden' }
 
 async function loadCart() {
