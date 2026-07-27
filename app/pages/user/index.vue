@@ -77,6 +77,11 @@
           <span class="uz-row-label">{{ $t('user.myFavorites') }}</span>
           <svg class="uz-row-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
         </button>
+        <button class="uz-row" @click="goCoupons">
+          <span class="uz-row-ico"><van-icon name="coupon-o" size="20" /></span>
+          <span class="uz-row-label">{{ $t('user.coupons') }}</span>
+          <svg class="uz-row-arr" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" /></svg>
+        </button>
       </section>
 
       <!-- 主题切换 -->
@@ -142,6 +147,7 @@ const { balance: pointsBalance, refreshBalance: refreshPoints } = usePoints()
 onMounted(() => { refreshFav(); refreshPoints() })
 function goFavorites() { if (ensureLogin()) navigateTo('/user/favorites') }
 function goPoints() { if (ensureLogin()) navigateTo('/user/points') }
+function goCoupons() { if (ensureLogin()) navigateTo('/user/coupons') }
 
 const themeOptions = computed(() => [
   { label: t('user.themeSystem'), value: 'system' as const },
