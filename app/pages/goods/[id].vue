@@ -29,8 +29,9 @@
     <!-- 价格条 -->
     <div class="pdp-pricebar">
       <div class="pb-price">
-        <span class="pb-cur">¥</span><b>{{ priceParts(goods.shopPrice).int }}</b><span class="pb-dec">.{{ priceParts(goods.shopPrice).dec }}</span>
-        <span v-if="goods.marketPrice > goods.shopPrice" class="pb-old">¥{{ goods.marketPrice }}</span>
+        <span v-if="hasSpecs && !selectedSku" class="pb-from">{{ $t('pdp.priceFrom') }}</span>
+        <span class="pb-cur">¥</span><b>{{ priceParts(displayPrice).int }}</b><span class="pb-dec">.{{ priceParts(displayPrice).dec }}</span>
+        <span v-if="!hasSpecs && goods.marketPrice > goods.shopPrice" class="pb-old">¥{{ goods.marketPrice }}</span>
       </div>
       <div class="pb-row">
         <span v-if="goods.shipFree" class="pb-chip">{{ $t('home.tagFreeShip') }}</span>
@@ -45,6 +46,21 @@
       <div class="pdp-trust">
         <span>✓ {{ $t('login.perkGenuine') }}</span><span>✓ {{ $t('pdp.noReason7') }}</span><span>✓ {{ $t('login.perkRefund') }}</span>
       </div>
+    </div>
+
+    <!-- SKU 规格选择器（有规格才显示） -->
+    <div v-if="hasSpecs" class="pdp-blk pdp-specs">
+      <div v-for="spec in specs" :key="spec.id" class="spec-dim">
+        <div class="spec-name">{{ spec.name }}</div>
+        <div class="spec-opts">
+          <button
+            v-for="val in spec.values" :key="val.id"
+            class="spec-opt" :class="{ active: selectedValues[spec.id] === val.id }"
+            @click="selectValue(spec.id, val.id)"
+          >{{ val.value }}</button>
+        </div>
+      </div>
+      <div v-if="allSelected && !selectedSku" class="spec-unavail">{{ $t('pdp.skuUnavailable') }}</div>
     </div>
 
     <!-- 规格行 -->
@@ -149,6 +165,34 @@ const heroImages = computed(() => {
   return goods.value?.goodsFrontImage ? [goods.value.goodsFrontImage] : []
 })
 
+// ── SKU/规格 ──
+const { loadSpecs, loadSkus, matchSku } = useSkus()
+const specs = ref<GoodsSpec[]>([])
+const skus = ref<GoodsSku[]>([])
+const selectedValues = ref<Record<number, number>>({}) // spec_id -> value_id
+const hasSpecs = computed(() => specs.value.length > 0)
+const selectedValueIds = computed(() => specs.value.map(s => selectedValues.value[s.id]).filter(Boolean) as number[])
+const allSelected = computed(() => hasSpecs.value && selectedValueIds.value.length === specs.value.length)
+const selectedSku = computed(() => allSelected.value ? matchSku(skus.value, selectedValueIds.value) : null)
+const skuSpecLabel = computed(() => specs.value
+  .map(s => s.values.find(x => x.id === selectedValues.value[s.id])?.value)
+  .filter(Boolean).join(','))
+// 展示价：选中 SKU→SKU价；未选的 SKU 商品→最低价起；扁平→goods.shopPrice
+const displayPrice = computed(() => {
+  if (selectedSku.value) return selectedSku.value.shop_price
+  if (hasSpecs.value && skus.value.length) return Math.min(...skus.value.map(s => s.shop_price))
+  return goods.value?.shopPrice || 0
+})
+function selectValue(specId: number, valueId: number) {
+  selectedValues.value = { ...selectedValues.value, [specId]: valueId }
+}
+onMounted(async () => {
+  try {
+    const [sp, sk] = await Promise.all([loadSpecs(route.params.id as string), loadSkus(route.params.id as string)])
+    specs.value = sp; skus.value = sk
+  } catch (e) { console.warn('skus:', e) }
+})
+
 // 猜你喜欢：真实热卖商品
 const recos = ref<any[]>([])
 async function fetchRecos() {
@@ -208,11 +252,19 @@ function requireLogin(): boolean {
   return true
 }
 async function addToCart(): Promise<boolean> {
+  // SKU 商品必须选全规格且命中可用 SKU
+  if (hasSpecs.value) {
+    if (!allSelected.value) { showToast(t('pdp.selectSpec')); return false }
+    if (!selectedSku.value) { showToast(t('pdp.skuUnavailable')); return false }
+  }
   try {
-    await apiFetch<{ id: number; msg: string }>('/v1/cart', {
-      method: 'POST',
-      body: { goodsId: Number(route.params.id), nums: 1, checked: true },
-    })
+    const body: Record<string, unknown> = { goodsId: Number(route.params.id), nums: 1, checked: true }
+    if (selectedSku.value) {
+      body.sku_id = selectedSku.value.id
+      body.sku_spec = skuSpecLabel.value
+      body.sku_price = selectedSku.value.shop_price
+    }
+    await apiFetch<{ id: number; msg: string }>('/v1/cart', { method: 'POST', body })
     await refreshCart()
     return true
   } catch (e: any) {
@@ -297,6 +349,18 @@ async function onBuyNow() {
 
 /* 区块 */
 .pdp-blk { background: var(--color-bg-card); margin-top: 8px; padding: 14px 16px; }
+.pb-from { font-size: 12px; color: var(--color-text-secondary, #999); margin-right: 3px; align-self: flex-end; margin-bottom: 4px; }
+.pdp-specs { display: flex; flex-direction: column; gap: 14px; }
+.spec-dim { display: flex; flex-direction: column; gap: 8px; }
+.spec-name { font-size: 13px; color: var(--color-text-secondary, #888); font-weight: 600; }
+.spec-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.spec-opt {
+  border: 1px solid var(--color-border, #ddd); background: var(--color-bg-card, #fff);
+  color: var(--color-text, #222); border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer;
+  transition: all .15s;
+}
+.spec-opt.active { border-color: var(--color-primary); color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 8%, transparent); font-weight: 600; }
+.spec-unavail { font-size: 12px; color: #e33; }
 .pdp-title { font-size: 16px; font-weight: 700; line-height: 1.5; color: var(--color-text-primary); }
 .pdp-trust { display: flex; gap: 8px; margin-top: 10px; }
 .pdp-trust span { font-size: 11px; color: var(--color-primary); background: var(--color-primary-soft); padding: 3px 8px; border-radius: 4px; }
