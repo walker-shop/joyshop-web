@@ -158,6 +158,10 @@ export interface MessageSchema {
     goodsAmount: string
     shipping: string
     freeShipping: string
+    selectCoupon: string
+    couponDiscount: string
+    noCoupon: string
+    noneAvailable: string
     actualPaid: string
     total: string
     itemCount: string
@@ -202,6 +206,21 @@ export interface MessageSchema {
     guestSubtitle: string
     points: string
     coupons: string
+    couponCenter: string
+    couponAvailable: string
+    couponMine: string
+    couponClaim: string
+    couponClaimed: string
+    couponSoldOut: string
+    couponUsed: string
+    couponExpired: string
+    couponThreshold: string
+    couponNoThreshold: string
+    couponFull: string
+    couponDiscount: string
+    couponEmpty: string
+    couponClaimSuccess: string
+    couponClaimFailed: string
     favorites: string
     pointsWip: string
     couponsWip: string
