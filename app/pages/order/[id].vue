@@ -48,6 +48,10 @@
                 <span class="lux-price od-price"><i>¥</i>{{ g.goods_price?.toFixed(2) }}</span>
                 <span class="od-qty">×{{ g.nums }}</span>
               </div>
+              <div v-if="isFinished" class="od-review-line">
+                <span v-if="reviewedIds.includes(g.goods_id)" class="od-reviewed">{{ $t('review.reviewed') }}</span>
+                <button v-else class="od-review-btn" @click="openReview(g)">{{ $t('review.writeReview') }}</button>
+              </div>
             </div>
           </div>
 
@@ -75,6 +79,35 @@
         </div>
       </div>
     </template>
+
+    <!-- 评价弹窗 -->
+    <div v-if="reviewModal.open" class="rv-mask" @click.self="closeReview">
+      <div class="rv-sheet">
+        <div class="rv-title">{{ $t('review.title') }}</div>
+        <div class="rv-goods">{{ reviewModal.goodsName }}</div>
+        <div class="rv-stars">
+          <button
+            v-for="n in 5"
+            :key="n"
+            class="rv-star"
+            :class="{ on: n <= reviewModal.rating }"
+            :aria-label="`${n} star`"
+            @click="reviewModal.rating = n"
+          >★</button>
+        </div>
+        <textarea
+          v-model="reviewModal.content"
+          class="rv-textarea"
+          :placeholder="$t('review.placeholder')"
+          maxlength="500"
+          rows="4"
+        />
+        <div class="rv-actions">
+          <button class="lux-btn-ghost rv-btn" @click="closeReview">{{ $t('common.cancel') }}</button>
+          <button class="lux-btn rv-btn" :disabled="submitting" @click="submitReviewForm">{{ $t('review.submit') }}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -84,10 +117,48 @@ import { showToast } from 'vant'
 import { orderStatusKey, orderStatusTone } from '~/utils/orderStatus'
 import { availableActions } from '~/utils/orderActions'
 const { t } = useI18n()
-interface Detail { order_info:{ id:number; order_sn:string; status:string; total:number; name:string; mobile:string; address:string }; goods:{ goods_name:string; goods_image:string; goods_price:number; nums:number }[] }
+interface Detail { order_info:{ id:number; order_sn:string; status:string; total:number; name:string; mobile:string; address:string }; goods:{ goods_id:number; goods_name:string; goods_image:string; goods_price:number; nums:number }[] }
 const { apiFetch } = useApi()
 const { pay } = usePayment()
 const { busy: acting, cancel, confirmReceipt, remove } = useOrderActions()
+const { submitReview, getReviewedGoodsIds } = useReviews()
+
+// 评价（仅已完成订单）
+const reviewedIds = ref<number[]>([])
+const isFinished = computed(() => detail.value?.order_info.status === 'TRADE_FINISHED')
+const reviewModal = reactive({ open: false, goodsId: 0, goodsName: '', rating: 5, content: '' })
+const submitting = ref(false)
+function openReview(g: { goods_id: number; goods_name: string }) {
+  reviewModal.open = true
+  reviewModal.goodsId = g.goods_id
+  reviewModal.goodsName = g.goods_name
+  reviewModal.rating = 5
+  reviewModal.content = ''
+}
+function closeReview() { reviewModal.open = false }
+async function loadReviewStatus() {
+  if (!detail.value || !isFinished.value) { reviewedIds.value = []; return }
+  reviewedIds.value = await getReviewedGoodsIds(detail.value.order_info.id)
+}
+async function submitReviewForm() {
+  if (submitting.value || !detail.value) return
+  submitting.value = true
+  try {
+    await submitReview({
+      orderId: detail.value.order_info.id,
+      goodsId: reviewModal.goodsId,
+      rating: reviewModal.rating,
+      content: reviewModal.content,
+    })
+    showToast(t('review.submitted'))
+    reviewModal.open = false
+    await loadReviewStatus()
+  } catch (e: any) {
+    showToast(e?.data?.msg || e?.message || t('review.submitFailed'))
+  } finally {
+    submitting.value = false
+  }
+}
 // needShip 在响应顶层（与 data 同级，非嵌套在 data 内）——proto omitempty 会丢 false，顶层布尔不受影响
 const needShip = ref(true)
 const barActions = computed(() => detail.value ? availableActions(detail.value.order_info.status, needShip.value) : [])
@@ -134,6 +205,7 @@ async function pollPaid() {
 }
 onMounted(async () => {
   await load()
+  await loadReviewStatus()
   if (route.query.paid === '1') { pollPaid(); return }
   if (route.query.pay === '1' && isUnpaid.value) doPay()
 })
@@ -213,4 +285,40 @@ onMounted(async () => {
 .od-pay-btn { flex: 0 0 auto; min-width: 148px; height: 50px; font-size: 16px; }
 .od-bar-btns { flex: 1; display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
 .od-act-btn { flex: 0 0 auto; min-width: 116px; height: 50px; font-size: 15px; }
+
+/* ---- 评价入口（商品项内） ---- */
+.od-review-line { margin-top: 8px; display: flex; justify-content: flex-end; }
+.od-review-btn {
+  border: 1px solid color-mix(in srgb, var(--lux-gold) 46%, transparent); background: transparent; cursor: pointer;
+  color: var(--lux-gold); font-size: 12.5px; padding: 5px 14px; border-radius: 999px;
+}
+.od-review-btn:active { transform: scale(.96); }
+.od-reviewed { font-size: 12px; color: var(--lux-text-3); }
+
+/* ---- 评价弹窗 ---- */
+.rv-mask {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+  background: rgba(0, 0, 0, .55); backdrop-filter: blur(2px); padding: 24px;
+}
+.rv-sheet {
+  width: 100%; max-width: 380px; border-radius: 18px; padding: 22px 20px;
+  background: linear-gradient(160deg, var(--lux-surface-2), var(--lux-surface));
+  border: 1px solid var(--lux-hair); box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+}
+.rv-title { font-size: 17px; font-weight: 700; color: var(--lux-text); }
+.rv-goods {
+  margin-top: 6px; font-size: 12.5px; color: var(--lux-text-2);
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+}
+.rv-stars { display: flex; gap: 6px; margin: 16px 0; justify-content: center; }
+.rv-star { border: 0; background: transparent; cursor: pointer; font-size: 32px; line-height: 1; color: var(--lux-hair); transition: color .12s ease; }
+.rv-star.on { color: var(--lux-gold); }
+.rv-star:active { transform: scale(.9); }
+.rv-textarea {
+  width: 100%; box-sizing: border-box; resize: none; border-radius: 12px; padding: 12px;
+  background: var(--lux-bg); border: 1px solid var(--lux-hair-soft); color: var(--lux-text); font-size: 14px;
+}
+.rv-textarea:focus { outline: none; border-color: var(--lux-gold); }
+.rv-actions { display: flex; gap: 12px; margin-top: 18px; }
+.rv-btn { flex: 1; height: 46px; font-size: 15px; }
 </style>

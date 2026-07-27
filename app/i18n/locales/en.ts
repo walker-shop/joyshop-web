@@ -102,6 +102,18 @@ const messages: MessageSchema = {
     goods: 'Products',
     empty: 'No products in this category yet',
   },
+  review: {
+    sectionTitle: 'Reviews',
+    countLabel: '{n} reviews',
+    empty: 'No reviews yet',
+    reviewed: 'Reviewed',
+    writeReview: 'Review',
+    title: 'Write a review',
+    placeholder: 'Share your experience…',
+    submit: 'Submit',
+    submitted: 'Review submitted',
+    submitFailed: 'Failed, please retry',
+  },
   pdp: {
     navTitle: 'Product details',
     wip: 'Coming soon',

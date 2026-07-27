@@ -63,6 +63,25 @@
       <div class="pdp-desc">{{ goods.goodsDesc || goods.goodsBrief }}</div>
     </div>
 
+    <!-- 评价 -->
+    <div class="pdp-blk">
+      <div class="blk-title pdp-rv-hd">
+        <span>{{ $t('review.sectionTitle') }}</span>
+        <span v-if="reviews.total" class="pdp-rv-agg">★ {{ reviews.avgRating.toFixed(1) }} · {{ $t('review.countLabel', { n: reviews.total }) }}</span>
+      </div>
+      <div v-if="reviews.data.length" class="pdp-rv-list">
+        <div v-for="(r, i) in reviews.data" :key="i" class="pdp-rv-item">
+          <div class="pdp-rv-top">
+            <span class="pdp-rv-user">{{ r.nickname }}</span>
+            <span class="pdp-rv-stars">{{ '★'.repeat(r.rating) }}<span class="pdp-rv-off">{{ '★'.repeat(5 - r.rating) }}</span></span>
+          </div>
+          <div v-if="r.content" class="pdp-rv-content">{{ r.content }}</div>
+          <div class="pdp-rv-time">{{ r.createdAt.slice(0, 10) }}</div>
+        </div>
+      </div>
+      <div v-else class="pdp-rv-empty">{{ $t('review.empty') }}</div>
+    </div>
+
     <!-- 猜你喜欢 -->
     <div v-if="recos.length" class="pdp-reco">
       <div class="reco-title">— {{ $t('home.recommendSub') }} —</div>
@@ -144,6 +163,16 @@ async function fetchRecos() {
   } catch (e) { console.warn('recos:', e) }
 }
 onMounted(fetchRecos)
+
+// 评价列表 + 聚合
+const { getGoodsReviews } = useReviews()
+const reviews = ref<GoodsReviews>({ avgRating: 0, total: 0, data: [] })
+async function fetchReviews() {
+  try {
+    reviews.value = await getGoodsReviews(route.params.id as string, tenantId as number, 1, 20)
+  } catch (e) { console.warn('reviews:', e) }
+}
+onMounted(fetchReviews)
 
 function goDetail(id: number) { navigateTo(`/goods/${id}`) }
 
@@ -273,6 +302,20 @@ async function onBuyNow() {
 .pdp-trust span { font-size: 11px; color: var(--color-primary); background: var(--color-primary-soft); padding: 3px 8px; border-radius: 4px; }
 .blk-title { font-size: 15px; font-weight: 700; color: var(--color-text-primary); margin-bottom: 8px; }
 .pdp-desc { font-size: 14px; line-height: 1.7; color: var(--color-text-secondary); white-space: pre-wrap; word-break: break-word; }
+
+/* ---- 评价区块 ---- */
+.pdp-rv-hd { display: flex; align-items: baseline; justify-content: space-between; }
+.pdp-rv-agg { font-size: 13px; font-weight: 600; color: #d9a441; }
+.pdp-rv-list { display: flex; flex-direction: column; gap: 14px; }
+.pdp-rv-item { border-bottom: 1px solid var(--color-border, rgba(0,0,0,.06)); padding-bottom: 12px; }
+.pdp-rv-item:last-child { border-bottom: 0; padding-bottom: 0; }
+.pdp-rv-top { display: flex; align-items: center; justify-content: space-between; }
+.pdp-rv-user { font-size: 13px; color: var(--color-text-secondary); }
+.pdp-rv-stars { font-size: 13px; color: #e3ba7d; letter-spacing: 1px; }
+.pdp-rv-off { color: var(--color-border, rgba(0,0,0,.15)); }
+.pdp-rv-content { font-size: 14px; line-height: 1.6; color: var(--color-text-primary); margin-top: 7px; word-break: break-word; }
+.pdp-rv-time { font-size: 11px; color: var(--color-text-secondary); margin-top: 6px; opacity: .7; }
+.pdp-rv-empty { font-size: 13px; color: var(--color-text-secondary); text-align: center; padding: 12px 0; }
 
 .cell { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--color-border); font-size: 14px; }
 .cell:last-child { border-bottom: 0; }

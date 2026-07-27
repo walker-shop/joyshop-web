@@ -103,6 +103,18 @@ const messages: MessageSchema = {
     goods: 'สินค้า',
     empty: 'ยังไม่มีสินค้าในหมวดนี้',
   },
+  review: {
+    sectionTitle: 'รีวิว',
+    countLabel: '{n} รีวิว',
+    empty: 'ยังไม่มีรีวิว',
+    reviewed: 'รีวิวแล้ว',
+    writeReview: 'รีวิว',
+    title: 'เขียนรีวิว',
+    placeholder: 'แบ่งปันประสบการณ์ของคุณ…',
+    submit: 'ส่ง',
+    submitted: 'ส่งรีวิวแล้ว',
+    submitFailed: 'ล้มเหลว โปรดลองใหม่',
+  },
   pdp: {
     navTitle: 'รายละเอียดสินค้า',
     wip: 'กำลังพัฒนา',

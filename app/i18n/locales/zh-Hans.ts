@@ -102,6 +102,18 @@ const messages: MessageSchema = {
     goods: '商品',
     empty: '该分类暂无好物',
   },
+  review: {
+    sectionTitle: '用户评价',
+    countLabel: '{n} 条评价',
+    empty: '还没有评价',
+    reviewed: '已评价',
+    writeReview: '评价',
+    title: '发表评价',
+    placeholder: '说说你的使用感受…',
+    submit: '提交',
+    submitted: '评价成功',
+    submitFailed: '评价失败，请重试',
+  },
   pdp: {
     navTitle: '商品详情',
     wip: '功能开发中',
