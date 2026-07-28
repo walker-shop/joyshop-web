@@ -78,7 +78,7 @@
                 <template #loading><div class="mono dim">{{ monogram(item.name) }}</div></template>
                 <template #error><div class="mono">{{ monogram(item.name) }}</div></template>
               </van-image>
-              <div v-if="item.marketPrice > item.shopPrice" class="card-off">
+              <div v-if="!item.hasSku && item.marketPrice > item.shopPrice" class="card-off">
                 {{ Math.round((1 - item.shopPrice / item.marketPrice) * 100) }}% off
               </div>
             </div>
@@ -86,9 +86,9 @@
               <div class="card-title" v-html="highlight(item.name)" />
               <div class="card-foot">
                 <div class="price">
-                  <span class="cur">¥</span><span class="int">{{ priceParts(item.shopPrice).int }}</span><span class="dec">.{{ priceParts(item.shopPrice).dec }}</span>
+                  <span class="cur">¥</span><span class="int">{{ priceParts(dispPrice(item)).int }}</span><span class="dec">.{{ priceParts(dispPrice(item)).dec }}</span><span v-if="item.hasSku" class="from">起</span>
                 </div>
-                <span v-if="item.marketPrice > item.shopPrice" class="market">¥{{ item.marketPrice }}</span>
+                <span v-if="!item.hasSku && item.marketPrice > item.shopPrice" class="market">¥{{ item.marketPrice }}</span>
                 <span class="add" @click.stop="quickAdd($event, item)">
                   <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
                 </span>
@@ -124,6 +124,9 @@ const inputEl = ref<HTMLInputElement | null>(null)
 const hotTerms = HOT
 
 function monogram(name: string) { const s = (name || '').trim(); return s ? s[0] : 'Z' }
+function dispPrice(item: any): number {
+  return item?.hasSku && item?.minSkuPrice ? item.minSkuPrice : (item?.shopPrice || 0)
+}
 function priceParts(n: number) {
   const [int = '0', dec = '00'] = Number(n || 0).toFixed(2).split('.')
   return { int, dec }
@@ -348,6 +351,7 @@ onMounted(() => {
 .card-title :deep(mark) { background: none; color: var(--color-primary); font-weight: 800; }
 .card-foot { display: flex; align-items: baseline; gap: 6px; margin-top: 5px; }
 .price { color: var(--color-price); font-weight: 900; font-variant-numeric: tabular-nums; }
+.from { font-size: 11px; font-weight: 600; margin-left: 1px; }
 .cur { font-size: 12px; }
 .int { font-size: 21px; }
 .dec { font-size: 12px; }
