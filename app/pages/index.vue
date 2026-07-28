@@ -67,8 +67,8 @@
               <template #loading><div class="mono dim">{{ monogram(item.name) }}</div></template>
             </van-image>
           </div>
-          <div class="flash-price">¥{{ priceParts(item.shopPrice).int }}</div>
-          <div v-if="item.marketPrice > item.shopPrice" class="flash-old">¥{{ item.marketPrice }}</div>
+          <div class="flash-price">¥{{ priceParts(dispPrice(item)).int }}<span v-if="item.hasSku" class="from">起</span></div>
+          <div v-if="!item.hasSku && item.marketPrice > item.shopPrice" class="flash-old">¥{{ item.marketPrice }}</div>
         </button>
       </div>
     </section>
@@ -100,7 +100,7 @@
                 <template #loading><div class="mono dim">{{ monogram(item.name) }}</div></template>
                 <template #error><div class="mono">{{ monogram(item.name) }}</div></template>
               </van-image>
-              <div v-if="item.marketPrice > item.shopPrice" class="card-off">
+              <div v-if="!item.hasSku && item.marketPrice > item.shopPrice" class="card-off">
                 {{ Math.round((1 - item.shopPrice / item.marketPrice) * 100) }}% off
               </div>
             </div>
@@ -113,9 +113,9 @@
               </div>
               <div class="card-foot">
                 <div class="price">
-                  <span class="cur">¥</span><span class="int">{{ priceParts(item.shopPrice).int }}</span><span class="dec">.{{ priceParts(item.shopPrice).dec }}</span>
+                  <span class="cur">¥</span><span class="int">{{ priceParts(dispPrice(item)).int }}</span><span class="dec">.{{ priceParts(dispPrice(item)).dec }}</span><span v-if="item.hasSku" class="from">起</span>
                 </div>
-                <span v-if="item.marketPrice > item.shopPrice" class="market">¥{{ item.marketPrice }}</span>
+                <span v-if="!item.hasSku && item.marketPrice > item.shopPrice" class="market">¥{{ item.marketPrice }}</span>
                 <span class="add" @click.stop="quickAdd($event, item)">
                   <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
                 </span>
@@ -214,6 +214,10 @@ function priceParts(n: number) {
   const v = Number(n || 0).toFixed(2)
   const [int = '0', dec = '00'] = v.split('.')
   return { int, dec }
+}
+// 有 SKU 的商品显示最低 SKU 价（列表参考价"从¥X起"），否则用扁平价
+function dispPrice(item: any): number {
+  return item?.hasSku && item?.minSkuPrice ? item.minSkuPrice : (item?.shopPrice || 0)
 }
 
 async function fetchProducts() {
@@ -411,6 +415,7 @@ function flyToCart(sx: number, sy: number, img?: string) {
 .flash-item { flex: 0 0 82px; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
 .flash-thumb { width: 82px; height: 82px; border-radius: 12px; overflow: hidden; }
 .flash-price { color: var(--color-price); font-weight: 900; font-size: 14px; margin-top: 6px; }
+.from { font-size: 11px; font-weight: 600; margin-left: 1px; }
 .flash-old { color: var(--color-text-tertiary); font-size: 10px; text-decoration: line-through; }
 
 /* ---------- 为你推荐 ---------- */
