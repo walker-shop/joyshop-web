@@ -35,6 +35,23 @@
           <span class="lux-edge" />
         </section>
 
+        <!-- 送达信息 -->
+        <section v-if="['SHIPPED','TRADE_FINISHED'].includes(detail.order_info.status) && detail.order_info.tracking_no" class="lux-card od-delivery">
+          <h3 class="od-delivery-title">{{ $t('order.deliveryInfo') }}</h3>
+          <div class="od-delivery-row">
+            <span>{{ $t('order.shippingCompany') }}</span>
+            <span>{{ detail.order_info.express_company }}</span>
+          </div>
+          <div class="od-delivery-row">
+            <span>{{ $t('order.trackingNumber') }}</span>
+            <span>{{ detail.order_info.tracking_no }}</span>
+          </div>
+          <div class="od-delivery-row">
+            <span>{{ $t('order.shippedAt') }}</span>
+            <span>{{ detail.order_info.shipped_at }}</span>
+          </div>
+        </section>
+
         <!-- 商品 -->
         <section class="lux-card od-goods">
           <div v-for="(g, i) in detail.goods" :key="i" class="od-item">
@@ -117,7 +134,7 @@ import { showToast } from 'vant'
 import { orderStatusKey, orderStatusTone } from '~/utils/orderStatus'
 import { availableActions } from '~/utils/orderActions'
 const { t } = useI18n()
-interface Detail { order_info:{ id:number; order_sn:string; status:string; total:number; name:string; mobile:string; address:string }; goods:{ goods_id:number; goods_name:string; goods_image:string; goods_price:number; nums:number }[] }
+interface Detail { order_info:{ id:number; order_sn:string; status:string; total:number; name:string; mobile:string; address:string; express_company?:string; tracking_no?:string; shipped_at?:string }; goods:{ goods_id:number; goods_name:string; goods_image:string; goods_price:number; nums:number }[] }
 const { apiFetch } = useApi()
 const { pay } = usePayment()
 const { busy: acting, cancel, confirmReceipt, remove } = useOrderActions()
@@ -251,6 +268,12 @@ onMounted(async () => {
 .od-name { font-size: 16px; font-weight: 600; color: var(--lux-text); display: flex; align-items: baseline; gap: 10px; }
 .od-tel { font-size: 13px; font-weight: 400; color: var(--lux-text-2); letter-spacing: 1px; font-variant-numeric: tabular-nums; }
 .od-detail { font-size: 13px; color: var(--lux-text-2); margin-top: 5px; line-height: 1.5; }
+
+/* ---- Delivery info ---- */
+.od-delivery { padding: 16px; }
+.od-delivery-title { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--lux-text); }
+.od-delivery-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; font-size: 13px; color: var(--lux-text-2); }
+.od-delivery-row span:last-child { color: var(--lux-text); font-weight: 500; }
 
 /* ---- Goods ---- */
 .od-goods { padding: 4px 16px 16px; }

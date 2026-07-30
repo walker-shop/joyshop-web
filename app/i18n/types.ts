@@ -178,6 +178,7 @@ export interface MessageSchema {
     statusAll: string
     statusPaying: string
     statusPaid: string
+    statusShipped: string
     statusFinished: string
     statusClosed: string
     loadFailed: string
@@ -199,6 +200,10 @@ export interface MessageSchema {
     receiptSuccess: string
     deleteSuccess: string
     actionFailed: string
+    deliveryInfo: string
+    shippingCompany: string
+    trackingNumber: string
+    shippedAt: string
   }
   user: {
     memberBadge: string

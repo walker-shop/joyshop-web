@@ -217,6 +217,10 @@ const messages: MessageSchema = {
     receiptSuccess: 'ยืนยันรับสินค้าแล้ว',
     deleteSuccess: 'ลบแล้ว',
     actionFailed: 'ดำเนินการไม่สำเร็จ โปรดลองใหม่',
+    deliveryInfo: 'ข้อมูลการจัดส่ง',
+    shippingCompany: 'บริษัทขนส่ง',
+    trackingNumber: 'เลขพัสดุ',
+    shippedAt: 'เวลาจัดส่ง',
   },
   user: {
     memberBadge: 'สมาชิก',

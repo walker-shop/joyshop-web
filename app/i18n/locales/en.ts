@@ -216,6 +216,10 @@ const messages: MessageSchema = {
     receiptSuccess: 'Receipt confirmed',
     deleteSuccess: 'Order deleted',
     actionFailed: 'Action failed, please try again',
+    deliveryInfo: 'Delivery info',
+    shippingCompany: 'Courier',
+    trackingNumber: 'Tracking No.',
+    shippedAt: 'Shipped at',
   },
   user: {
     memberBadge: 'Member',

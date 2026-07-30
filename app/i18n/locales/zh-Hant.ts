@@ -216,6 +216,10 @@ const messages: MessageSchema = {
     receiptSuccess: '已確認收貨',
     deleteSuccess: '已刪除',
     actionFailed: '操作失敗，請重試',
+    deliveryInfo: '送達資訊',
+    shippingCompany: '快遞公司',
+    trackingNumber: '運單號',
+    shippedAt: '發貨時間',
   },
   user: {
     memberBadge: '尊享會員',

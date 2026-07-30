@@ -51,6 +51,9 @@
           <span class="oc-name">{{ o.name }}</span>
           <span class="lux-price oc-total"><i>¥</i>{{ o.total?.toFixed(2) }}</span>
         </div>
+        <div v-if="o.status === 'SHIPPED' && o.tracking_no" class="oc-tracking">
+          {{ $t('order.trackingNumber') }}: {{ o.tracking_no }}
+        </div>
         <div v-if="availableActions(o.status, o.needShip).length" class="oc-actions" @click.stop>
           <button v-if="availableActions(o.status, o.needShip).includes('cancel')" class="lux-btn-ghost oc-act" :disabled="acting" @click="onCancel(o)">{{ $t('order.cancelOrder') }}</button>
           <button v-if="availableActions(o.status, o.needShip).includes('delete')" class="lux-btn-ghost oc-act" :disabled="acting" @click="onDelete(o)">{{ $t('order.deleteOrder') }}</button>
@@ -69,7 +72,7 @@ import { showToast } from 'vant'
 import { orderStatusKey, orderStatusTone } from '~/utils/orderStatus'
 import { availableActions } from '~/utils/orderActions'
 const { t } = useI18n()
-interface Order { id:number; order_sn:string; status:string; total:number; name:string; needShip?: boolean }
+interface Order { id:number; order_sn:string; status:string; total:number; name:string; needShip?: boolean; tracking_no?: string }
 const { apiFetch } = useApi()
 const route = useRoute()
 const tabs = computed(() => [
@@ -136,6 +139,7 @@ onMounted(load)
 .oc-status.is-muted { color: var(--lux-text-2); }
 .oc-status.is-dim { color: var(--lux-text-3); border-color: var(--lux-hair-soft); }
 .oc-bd { display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; }
+.oc-tracking { margin-top: 8px; font-size: 12px; color: var(--lux-text-3); font-variant-numeric: tabular-nums; }
 .oc-name { font-size: 15px; font-weight: 500; color: var(--lux-text); }
 .oc-total { font-size: 20px; }
 .oc-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
