@@ -205,7 +205,8 @@ function selectParent(index: number) {
   selectedSubId.value = null
   contentEl.value?.scrollTo({ top: 0 })
   const subs = currentSubCategories.value
-  if (subs.length) { selectSub(subs[0]); return }
+  const firstSub = subs[0]
+  if (firstSub) { selectSub(firstSub); return }
   const parent = parentCategories.value[index]
   if (parent) fetchProducts(parent.id)
   else loadingProducts.value = false

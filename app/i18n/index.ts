@@ -17,7 +17,7 @@ const messages: Record<LocaleCode, MessageSchema> = {
 }
 
 export function createAppI18n(locale: LocaleCode) {
-  return createI18n({
+  return createI18n<[MessageSchema], LocaleCode>({
     legacy: false,
     globalInjection: true,
     locale,

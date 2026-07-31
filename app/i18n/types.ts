@@ -101,11 +101,26 @@ export interface MessageSchema {
     goods: string
     empty: string
   }
+  review: {
+    sectionTitle: string
+    countLabel: string
+    empty: string
+    reviewed: string
+    writeReview: string
+    title: string
+    placeholder: string
+    submit: string
+    submitted: string
+    submitFailed: string
+  }
   pdp: {
     navTitle: string
     wip: string
     noImage: string
     noReason7: string
+    priceFrom: string
+    selectSpec: string
+    skuUnavailable: string
     delivery: string
     express: string
     shipTip: string
@@ -236,6 +251,11 @@ export interface MessageSchema {
     guestTitle: string
     guestSubtitle: string
     points: string
+    myPoints: string
+    pointsBalance: string
+    pointsEmpty: string
+    pointsFromOrder: string
+    pointsMore: string
     coupons: string
     couponCenter: string
     couponAvailable: string

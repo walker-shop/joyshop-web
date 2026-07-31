@@ -85,7 +85,7 @@ async function onSubmit() {
   if (password.value !== confirm.value) { showToast(t('register.pwdMismatch')); return }
   loading.value = true
   try {
-    await register(email.value, username.value || email.value.split('@')[0], password.value)
+    await register(email.value, username.value || email.value.split('@')[0] || email.value, password.value)
     showToast(t('register.success'))
     navigateTo(redirectTarget())
   } catch (e: any) {
