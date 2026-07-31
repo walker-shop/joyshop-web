@@ -140,20 +140,27 @@ async function main() {
     if (st === 'TRADE_SUCCESS') ok('webhook 入账 → TRADE_SUCCESS'); else fail('webhook 入账', '最终状态: ' + st)
   } catch (e) { fail('webhook 入账', e.message) }
 
-  // 8. 确认收货 → TRADE_FINISHED
-  try {
-    await api(`/v1/orders/${orderId}`, { method: 'PUT', body: { status: 'TRADE_FINISHED' } })
-    const st = (await api(`/v1/orders/${orderId}`)).data?.data?.order_info?.status
-    if (st === 'TRADE_FINISHED') ok('确认收货 → TRADE_FINISHED'); else fail('确认收货', '状态: ' + st)
-  } catch (e) { fail('确认收货', e.message) }
-
-  // 8b. admin 登录（退货审核/退款需要 admin 权限）
+  // 7b. admin 登录（发货/退货审核/退款都需要 admin 权限）
   let ADMIN_TOKEN = ''
   try {
     const r = await api('/api/auth/login', { base: IAM, auth: false, method: 'POST', body: ADMIN_CREDS })
     if (r.data?.code === 0 && r.data.data?.access_token) { ADMIN_TOKEN = r.data.data.access_token; ok('登录 joyadmin') }
     else { fail('登录 joyadmin', JSON.stringify(r.data)); return summary() }
   } catch (e) { fail('登录 joyadmin', e.message); return summary() }
+
+  // 7c. admin 发货（实体商品必须先发货才能确认收货，见 2026-07-30 发货物流设计）
+  try {
+    await api(`/v1/orders/${orderId}/ship`, { method: 'POST', token: ADMIN_TOKEN, body: { express_company: '顺丰速运', tracking_no: 'SF' + Date.now() } })
+    const st = (await api(`/v1/orders/${orderId}`)).data?.data?.order_info?.status
+    if (st === 'SHIPPED') ok('admin 发货 → SHIPPED'); else fail('admin 发货', '状态: ' + st)
+  } catch (e) { fail('admin 发货', e.message) }
+
+  // 8. 确认收货 → TRADE_FINISHED
+  try {
+    await api(`/v1/orders/${orderId}`, { method: 'PUT', body: { status: 'TRADE_FINISHED' } })
+    const st = (await api(`/v1/orders/${orderId}`)).data?.data?.order_info?.status
+    if (st === 'TRADE_FINISHED') ok('确认收货 → TRADE_FINISHED'); else fail('确认收货', '状态: ' + st)
+  } catch (e) { fail('确认收货', e.message) }
 
   // 8c. 买家发起退货申请 → RETURN_REQUESTED
   try {
