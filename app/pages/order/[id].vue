@@ -52,6 +52,40 @@
           </div>
         </section>
 
+        <!-- 退货被拒通知 -->
+        <section v-if="detail.order_info.status === 'TRADE_FINISHED' && detail.order_info.return_reject_reason" class="lux-card od-return-notice">
+          {{ $t('order.returnRejectedNotice', { reason: detail.order_info.return_reject_reason }) }}
+        </section>
+
+        <!-- 退货信息 -->
+        <section v-if="detail.order_info.return_reason" class="lux-card od-delivery">
+          <h3 class="od-delivery-title">{{ $t('order.returnInfo') }}</h3>
+          <div class="od-delivery-row">
+            <span>{{ $t('order.returnReasonLabel') }}</span>
+            <span>{{ returnReasonText(detail.order_info.return_reason) }}</span>
+          </div>
+          <div v-if="detail.order_info.return_reason_note" class="od-delivery-row">
+            <span>{{ $t('order.returnReasonNoteLabel') }}</span>
+            <span>{{ detail.order_info.return_reason_note }}</span>
+          </div>
+          <template v-if="detail.order_info.status === 'RETURN_REQUESTED'">
+            <div class="od-delivery-row"><span>{{ $t('order.returnRequestedNotice') }}</span></div>
+          </template>
+          <template v-if="detail.order_info.return_express_company">
+            <div class="od-delivery-row">
+              <span>{{ $t('order.returnExpressCompanyLabel') }}</span>
+              <span>{{ detail.order_info.return_express_company }}</span>
+            </div>
+            <div class="od-delivery-row">
+              <span>{{ $t('order.returnTrackingNoLabel') }}</span>
+              <span>{{ detail.order_info.return_tracking_no }}</span>
+            </div>
+          </template>
+          <template v-if="detail.order_info.status === 'RETURN_SHIPPED'">
+            <div class="od-delivery-row"><span>{{ $t('order.returnShippedNotice') }}</span></div>
+          </template>
+        </section>
+
         <!-- 商品 -->
         <section class="lux-card od-goods">
           <div v-for="(g, i) in detail.goods" :key="i" class="od-item">
@@ -89,6 +123,8 @@
           <button v-if="barActions.includes('cancel')" class="lux-btn-ghost od-act-btn" :disabled="acting" @click="onCancel">{{ $t('order.cancelOrder') }}</button>
           <button v-if="barActions.includes('delete')" class="lux-btn-ghost od-act-btn" :disabled="acting" @click="onDelete">{{ $t('order.deleteOrder') }}</button>
           <button v-if="barActions.includes('confirmReceipt')" class="lux-btn od-act-btn" :disabled="acting" @click="onConfirm">{{ $t('order.confirmReceipt') }}</button>
+          <button v-if="barActions.includes('requestReturn')" class="lux-btn-ghost od-act-btn" @click="openReturnRequest">{{ $t('order.requestReturn') }}</button>
+          <button v-if="barActions.includes('submitReturnShipping')" class="lux-btn od-act-btn" @click="openReturnShipping">{{ $t('order.submitReturnShipping') }}</button>
           <button v-if="barActions.includes('pay')" class="lux-btn od-pay-btn" :disabled="paying" @click="doPay">
             <span v-if="!paying">{{ $t('order.payNow') }}</span>
             <span v-else class="lux-spin" />
@@ -125,6 +161,57 @@
         </div>
       </div>
     </div>
+
+    <!-- 申请退货弹窗 -->
+    <div v-if="returnRequestModal.open" class="rv-mask" @click.self="closeReturnRequest">
+      <div class="rv-sheet">
+        <div class="rv-title">{{ $t('order.requestReturnTitle') }}</div>
+        <div class="rr-field">
+          <label class="rr-label">{{ $t('order.returnReasonLabel') }}</label>
+          <select v-model="returnRequestModal.reason" class="rr-select">
+            <option value="" disabled>{{ $t('order.returnReasonPlaceholder') }}</option>
+            <option value="QUALITY">{{ $t('order.returnReasonQuality') }}</option>
+            <option value="MISDESCRIBED">{{ $t('order.returnReasonMisdescribed') }}</option>
+            <option value="WRONG_ITEM">{{ $t('order.returnReasonWrongItem') }}</option>
+            <option value="NO_LONGER_WANTED">{{ $t('order.returnReasonNoLongerWanted') }}</option>
+            <option value="OTHER">{{ $t('order.returnReasonOther') }}</option>
+          </select>
+        </div>
+        <div class="rr-field">
+          <label class="rr-label">{{ $t('order.returnReasonNoteLabel') }}</label>
+          <textarea
+            v-model="returnRequestModal.note"
+            class="rv-textarea"
+            :placeholder="$t('order.returnReasonNotePlaceholder')"
+            maxlength="500"
+            rows="3"
+          />
+        </div>
+        <div class="rv-actions">
+          <button class="lux-btn-ghost rv-btn" @click="closeReturnRequest">{{ $t('common.cancel') }}</button>
+          <button class="lux-btn rv-btn" :disabled="returnSubmitting || !returnRequestModal.reason" @click="submitReturnRequestForm">{{ $t('common.confirm') }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 寄回物流弹窗 -->
+    <div v-if="returnShippingModal.open" class="rv-mask" @click.self="closeReturnShipping">
+      <div class="rv-sheet">
+        <div class="rv-title">{{ $t('order.submitReturnShippingTitle') }}</div>
+        <div class="rr-field">
+          <label class="rr-label">{{ $t('order.returnExpressCompanyLabel') }}</label>
+          <input v-model="returnShippingModal.expressCompany" class="rr-input" :placeholder="$t('order.returnExpressCompanyPlaceholder')">
+        </div>
+        <div class="rr-field">
+          <label class="rr-label">{{ $t('order.returnTrackingNoLabel') }}</label>
+          <input v-model="returnShippingModal.trackingNo" class="rr-input" :placeholder="$t('order.returnTrackingNoPlaceholder')">
+        </div>
+        <div class="rv-actions">
+          <button class="lux-btn-ghost rv-btn" @click="closeReturnShipping">{{ $t('common.cancel') }}</button>
+          <button class="lux-btn rv-btn" :disabled="returnSubmitting || !returnShippingModal.expressCompany.trim() || !returnShippingModal.trackingNo.trim()" @click="submitReturnShippingForm">{{ $t('common.confirm') }}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -134,11 +221,70 @@ import { showToast } from 'vant'
 import { orderStatusKey, orderStatusTone } from '~/utils/orderStatus'
 import { availableActions } from '~/utils/orderActions'
 const { t } = useI18n()
-interface Detail { order_info:{ id:number; order_sn:string; status:string; total:number; name:string; mobile:string; address:string; express_company?:string; tracking_no?:string; shipped_at?:string }; goods:{ goods_id:number; goods_name:string; goods_image:string; goods_price:number; nums:number }[] }
+interface Detail { order_info:{ id:number; order_sn:string; status:string; total:number; name:string; mobile:string; address:string; express_company?:string; tracking_no?:string; shipped_at?:string; return_reason?:string; return_reason_note?:string; return_reject_reason?:string; return_express_company?:string; return_tracking_no?:string }; goods:{ goods_id:number; goods_name:string; goods_image:string; goods_price:number; nums:number }[] }
 const { apiFetch } = useApi()
 const { pay } = usePayment()
 const { busy: acting, cancel, confirmReceipt, remove } = useOrderActions()
 const { submitReview, getReviewedGoodsIds } = useReviews()
+const { requestReturn, submitReturnShipping } = useReturns()
+
+function returnReasonText(reason: string): string {
+  const map: Record<string, string> = {
+    QUALITY: t('order.returnReasonQuality'),
+    MISDESCRIBED: t('order.returnReasonMisdescribed'),
+    WRONG_ITEM: t('order.returnReasonWrongItem'),
+    NO_LONGER_WANTED: t('order.returnReasonNoLongerWanted'),
+    OTHER: t('order.returnReasonOther'),
+  }
+  return map[reason] || reason
+}
+
+// 申请退货
+const returnRequestModal = reactive({ open: false, reason: '', note: '' })
+const returnSubmitting = ref(false)
+function openReturnRequest() {
+  returnRequestModal.open = true
+  returnRequestModal.reason = ''
+  returnRequestModal.note = ''
+}
+function closeReturnRequest() { returnRequestModal.open = false }
+async function submitReturnRequestForm() {
+  if (!detail.value || !returnRequestModal.reason) return
+  returnSubmitting.value = true
+  try {
+    await requestReturn(detail.value.order_info.id, returnRequestModal.reason, returnRequestModal.note)
+    showToast(t('order.requestReturnSuccess'))
+    returnRequestModal.open = false
+    await load()
+  } catch (e: any) {
+    showToast(e?.data?.msg || e?.message || t('order.actionFailed'))
+  } finally {
+    returnSubmitting.value = false
+  }
+}
+
+// 提交寄回物流
+const returnShippingModal = reactive({ open: false, expressCompany: '', trackingNo: '' })
+function openReturnShipping() {
+  returnShippingModal.open = true
+  returnShippingModal.expressCompany = ''
+  returnShippingModal.trackingNo = ''
+}
+function closeReturnShipping() { returnShippingModal.open = false }
+async function submitReturnShippingForm() {
+  if (!detail.value) return
+  returnSubmitting.value = true
+  try {
+    await submitReturnShipping(detail.value.order_info.id, returnShippingModal.expressCompany.trim(), returnShippingModal.trackingNo.trim())
+    showToast(t('order.submitReturnShippingSuccess'))
+    returnShippingModal.open = false
+    await load()
+  } catch (e: any) {
+    showToast(e?.data?.msg || e?.message || t('order.actionFailed'))
+  } finally {
+    returnSubmitting.value = false
+  }
+}
 
 // 评价（仅已完成订单）
 const reviewedIds = ref<number[]>([])
@@ -274,6 +420,23 @@ onMounted(async () => {
 .od-delivery-title { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--lux-text); }
 .od-delivery-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; font-size: 13px; color: var(--lux-text-2); }
 .od-delivery-row span:last-child { color: var(--lux-text); font-weight: 500; }
+
+/* ---- Return rejected notice ---- */
+.od-return-notice {
+  padding: 14px 16px; font-size: 13px; line-height: 1.5; color: var(--lux-gold);
+  border: 1px solid color-mix(in srgb, var(--lux-gold) 38%, transparent);
+}
+
+/* ---- Return request / shipping form fields ---- */
+.rr-field { margin: 14px 0; text-align: left; }
+.rr-label { display: block; font-size: 12.5px; color: var(--lux-text-2); margin-bottom: 6px; }
+.rr-select,
+.rr-input {
+  width: 100%; box-sizing: border-box; border-radius: 12px; padding: 11px 12px;
+  background: var(--lux-bg); border: 1px solid var(--lux-hair-soft); color: var(--lux-text); font-size: 14px;
+}
+.rr-select:focus,
+.rr-input:focus { outline: none; border-color: var(--lux-gold); }
 
 /* ---- Goods ---- */
 .od-goods { padding: 4px 16px 16px; }

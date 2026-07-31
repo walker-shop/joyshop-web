@@ -15,9 +15,18 @@ describe('availableActions', () => {
   it('虚拟已付款 → 直接确认收货', () => {
     expect(availableActions('TRADE_SUCCESS', false)).toEqual(['confirmReceipt'])
   })
-  it('终态 → 删除', () => {
+  it('已取消 → 仅删除', () => {
     expect(availableActions('TRADE_CLOSED')).toEqual(['delete'])
-    expect(availableActions('TRADE_FINISHED')).toEqual(['delete'])
+  })
+  it('已完成 → 删除 + 申请退货', () => {
+    expect(availableActions('TRADE_FINISHED')).toEqual(['delete', 'requestReturn'])
+  })
+  it('退货已同意 → 提交寄回物流', () => {
+    expect(availableActions('RETURN_APPROVED')).toEqual(['submitReturnShipping'])
+  })
+  it('退货申请中/已寄出 → 等待 admin 处理，无动作', () => {
+    expect(availableActions('RETURN_REQUESTED')).toEqual([])
+    expect(availableActions('RETURN_SHIPPED')).toEqual([])
   })
   it('未知/空状态 → 无动作', () => {
     expect(availableActions('')).toEqual([])

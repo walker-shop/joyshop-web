@@ -7,6 +7,9 @@ export function orderStatusKey(status: string): string {
     case 'SHIPPED': return 'order.statusShipped'
     case 'TRADE_CLOSED': return 'order.statusClosed'
     case 'TRADE_FINISHED': return 'order.statusFinished'
+    case 'RETURN_REQUESTED': return 'order.statusReturnRequested'
+    case 'RETURN_APPROVED': return 'order.statusReturnApproved'
+    case 'RETURN_SHIPPED': return 'order.statusReturnShipped'
     default: return ''
   }
 }
@@ -20,6 +23,9 @@ export function orderStatusTone(status: string): 'amber' | 'muted' | 'dim' | '' 
     case 'TRADE_FINISHED': return 'muted'
     case 'SHIPPED': return 'amber'
     case 'TRADE_CLOSED': return 'dim'
+    case 'RETURN_REQUESTED':
+    case 'RETURN_APPROVED':
+    case 'RETURN_SHIPPED': return 'amber'
     default: return ''
   }
 }

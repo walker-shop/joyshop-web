@@ -2,7 +2,8 @@
  * ZShop 购物全流程回归脚本（prod, Stripe 测试模式）
  *
  * 覆盖：登录 → 收货地址 → 加购 → 下单 → Stripe 收银台付款(4242) → webhook 入账
- *       → TRADE_SUCCESS → 确认收货 → TRADE_FINISHED，逐步 ✅/❌，最后自动清理。
+ *       → TRADE_SUCCESS → 确认收货 → TRADE_FINISHED → 退货申请 → admin同意
+ *       → 寄回物流 → admin确认收货并退款 → REFUNDED，逐步 ✅/❌，最后自动清理。
  *
  * 订单生命周期用 API 驱动（稳定）；Stripe 收银台必须真浏览器，用 CDP 驱动 walker Chrome(9222)。
  *
@@ -23,6 +24,7 @@ const API = 'https://zshop-admin.zwlab.app/api'
 const CDP_PORT = 9222
 const KEEP = process.argv.includes('--keep')
 const CREDS = { account: 'zshopbuyer', password: 'ZshopBuyer2026!@#', tenant_code: 'joyshop' }
+const ADMIN_CREDS = { account: 'joyadmin', password: 'JoyadminSuperz1981!@#', tenant_code: 'joyshop' }
 const GOODS_ID = 1
 const CARD = { number: '4242424242424242', exp: '1234', cvc: '123', email: 'zshopbuyer@zwlab.app', name: 'Test Buyer' }
 const ADDR = { signerName: '回归测试', signerMobile: '13800138000', province: '广东省', city: '深圳市', district: '南山区', address: '回归测试大厦1栋101' }
@@ -33,9 +35,9 @@ const results = []
 function ok(name, extra = '') { results.push({ name, pass: true }); console.log(`✅ ${name}${extra ? '  ' + extra : ''}`) }
 function fail(name, err) { results.push({ name, pass: false }); console.log(`❌ ${name}  ${err}`); }
 
-async function api(path, { method = 'GET', body, base = API, auth = true } = {}) {
+async function api(path, { method = 'GET', body, base = API, auth = true, token } = {}) {
   const headers = { 'Content-Type': 'application/json' }
-  if (auth && TOKEN) headers.Authorization = `Bearer ${TOKEN}`
+  if (auth && (token || TOKEN)) headers.Authorization = `Bearer ${token || TOKEN}`
   const res = await fetch(base + path, { method, headers, body: body ? JSON.stringify(body) : undefined })
   let data = null
   try { data = await res.json() } catch { /* empty */ }
@@ -144,6 +146,42 @@ async function main() {
     const st = (await api(`/v1/orders/${orderId}`)).data?.data?.order_info?.status
     if (st === 'TRADE_FINISHED') ok('确认收货 → TRADE_FINISHED'); else fail('确认收货', '状态: ' + st)
   } catch (e) { fail('确认收货', e.message) }
+
+  // 8b. admin 登录（退货审核/退款需要 admin 权限）
+  let ADMIN_TOKEN = ''
+  try {
+    const r = await api('/api/auth/login', { base: IAM, auth: false, method: 'POST', body: ADMIN_CREDS })
+    if (r.data?.code === 0 && r.data.data?.access_token) { ADMIN_TOKEN = r.data.data.access_token; ok('登录 joyadmin') }
+    else { fail('登录 joyadmin', JSON.stringify(r.data)); return summary() }
+  } catch (e) { fail('登录 joyadmin', e.message); return summary() }
+
+  // 8c. 买家发起退货申请 → RETURN_REQUESTED
+  try {
+    await api(`/v1/orders/${orderId}/return/request`, { method: 'POST', body: { return_reason: 'OTHER', return_reason_note: '回归测试退货' } })
+    const st = (await api(`/v1/orders/${orderId}`)).data?.data?.order_info?.status
+    if (st === 'RETURN_REQUESTED') ok('申请退货 → RETURN_REQUESTED'); else fail('申请退货', '状态: ' + st)
+  } catch (e) { fail('申请退货', e.message) }
+
+  // 8d. admin 同意退货 → RETURN_APPROVED
+  try {
+    await api(`/v1/orders/${orderId}/return/review`, { method: 'POST', token: ADMIN_TOKEN, body: { approve: true } })
+    const st = (await api(`/v1/orders/${orderId}`)).data?.data?.order_info?.status
+    if (st === 'RETURN_APPROVED') ok('admin 同意退货 → RETURN_APPROVED'); else fail('admin 同意退货', '状态: ' + st)
+  } catch (e) { fail('admin 同意退货', e.message) }
+
+  // 8e. 买家提交寄回物流 → RETURN_SHIPPED
+  try {
+    await api(`/v1/orders/${orderId}/return/ship`, { method: 'POST', body: { return_express_company: '顺丰速运', return_tracking_no: 'SF' + Date.now() } })
+    const st = (await api(`/v1/orders/${orderId}`)).data?.data?.order_info?.status
+    if (st === 'RETURN_SHIPPED') ok('提交寄回物流 → RETURN_SHIPPED'); else fail('提交寄回物流', '状态: ' + st)
+  } catch (e) { fail('提交寄回物流', e.message) }
+
+  // 8f. admin 确认收货并退款（复用现有 /refund）→ REFUNDED
+  try {
+    const r = await api(`/v1/orders/${orderId}/refund`, { method: 'POST', token: ADMIN_TOKEN })
+    const st = (await api(`/v1/orders/${orderId}`)).data?.data?.order_info?.status
+    if (st === 'REFUNDED') ok('确认收货并退款 → REFUNDED'); else fail('确认收货并退款', '状态: ' + st + ' resp=' + JSON.stringify(r.data))
+  } catch (e) { fail('确认收货并退款', e.message) }
 
   // 9. 清理（--keep 跳过）
   if (!KEEP && orderId) {

@@ -204,6 +204,32 @@ export interface MessageSchema {
     shippingCompany: string
     trackingNumber: string
     shippedAt: string
+    statusReturnRequested: string
+    statusReturnApproved: string
+    statusReturnShipped: string
+    requestReturn: string
+    requestReturnTitle: string
+    returnReasonLabel: string
+    returnReasonPlaceholder: string
+    returnReasonQuality: string
+    returnReasonMisdescribed: string
+    returnReasonWrongItem: string
+    returnReasonNoLongerWanted: string
+    returnReasonOther: string
+    returnReasonNoteLabel: string
+    returnReasonNotePlaceholder: string
+    requestReturnSuccess: string
+    returnRequestedNotice: string
+    returnRejectedNotice: string
+    submitReturnShipping: string
+    submitReturnShippingTitle: string
+    returnExpressCompanyLabel: string
+    returnExpressCompanyPlaceholder: string
+    returnTrackingNoLabel: string
+    returnTrackingNoPlaceholder: string
+    submitReturnShippingSuccess: string
+    returnShippedNotice: string
+    returnInfo: string
   }
   user: {
     memberBadge: string
