@@ -2,7 +2,7 @@
  * ZShop 购物全流程回归脚本（prod, Stripe 测试模式）
  *
  * 覆盖：登录 → 收货地址 → 加购 → 下单 → Stripe 收银台付款(4242) → webhook 入账
- *       → TRADE_SUCCESS → 确认收货 → TRADE_FINISHED → 退货申请 → admin同意
+ *       → TRADE_SUCCESS → 确认收货 → TRADE_FINISHED → 评价 → 商家回复/审核 → 退货申请 → admin同意
  *       → 寄回物流 → admin确认收货并退款 → REFUNDED，逐步 ✅/❌，最后自动清理。
  *
  * 订单生命周期用 API 驱动（稳定）；Stripe 收银台必须真浏览器，用 CDP 驱动 walker Chrome(9222)。
@@ -75,7 +75,7 @@ async function payOnStripe(payUrl) {
 
 async function main() {
   console.log(`\n=== ZShop 购物全流程回归 (${new Date().toISOString()}) ===\n`)
-  let orderId = null, cartId = null
+  let orderId = null, cartId = null, reviewId = null
 
   // 1. 登录
   try {
@@ -162,6 +162,42 @@ async function main() {
     if (st === 'TRADE_FINISHED') ok('确认收货 → TRADE_FINISHED'); else fail('确认收货', '状态: ' + st)
   } catch (e) { fail('确认收货', e.message) }
 
+  // 8a. 完成订单后评价（带图）→ PDP 可见
+  const reviewMarker = `E2E评价-${Date.now()}`
+  try {
+    const detail = await api(`/v1/orders/${orderId}`)
+    const image = detail.data?.data?.goods?.[0]?.goods_image
+    const body = { orderId, goodsId: GOODS_ID, rating: 5, content: reviewMarker, images: image ? [image] : [] }
+    const created = await api('/v1/goods/review', { method: 'POST', body })
+    if (created.status !== 200) throw new Error(JSON.stringify(created.data))
+    const list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=1`, { auth: false })
+    const row = list.data?.data?.data?.find?.(item => item.content === reviewMarker)
+    reviewId = row?.id
+    if (reviewId) ok('完成订单后评价 → PDP 可见', `reviewId=${reviewId}`)
+    else fail('完成订单后评价', 'PDP 未找到新评价')
+  } catch (e) { fail('完成订单后评价', e.message) }
+
+  // 8b. admin 回复，并验证隐藏/恢复审核闭环
+  if (reviewId) {
+    try {
+      const reply = await api(`/v1/goods/reviews/${reviewId}/reply`, { method: 'POST', token: ADMIN_TOKEN, body: { reply: '感谢你的真实反馈。' } })
+      if (reply.status !== 200) throw new Error(JSON.stringify(reply.data))
+      let list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=1`, { auth: false })
+      let row = list.data?.data?.data?.find?.(item => item.id === reviewId)
+      if (row?.merchantReply) ok('商家回复评价 → PDP 可见'); else throw new Error('PDP 未显示商家回复')
+
+      await api(`/v1/goods/reviews/${reviewId}/status`, { method: 'PUT', token: ADMIN_TOKEN, body: { status: 'HIDDEN' } })
+      list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=1`, { auth: false })
+      row = list.data?.data?.data?.find?.(item => item.id === reviewId)
+      if (!row) ok('隐藏评价 → PDP 不可见'); else throw new Error('隐藏评价仍公开')
+
+      await api(`/v1/goods/reviews/${reviewId}/status`, { method: 'PUT', token: ADMIN_TOKEN, body: { status: 'PUBLISHED' } })
+      list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=1`, { auth: false })
+      row = list.data?.data?.data?.find?.(item => item.id === reviewId)
+      if (row) ok('恢复评价 → PDP 重新可见'); else throw new Error('恢复后评价仍不可见')
+    } catch (e) { fail('评价回复/审核', e.message) }
+  }
+
   // 8c. 买家发起退货申请 → RETURN_REQUESTED
   try {
     await api(`/v1/orders/${orderId}/return/request`, { method: 'POST', body: { return_reason: 'OTHER', return_reason_note: '回归测试退货' } })
@@ -193,6 +229,7 @@ async function main() {
   // 9. 清理（--keep 跳过）
   if (!KEEP && orderId) {
     try {
+	  if (reviewId) await api(`/v1/goods/reviews/${reviewId}/status`, { method: 'PUT', token: ADMIN_TOKEN, body: { status: 'HIDDEN' } })
       await api(`/v1/orders/${orderId}`, { method: 'DELETE' })
       const list = await api('/v1/cart')
       for (const it of (list.data?.data || [])) await api(`/v1/cart/${it.id}`, { method: 'DELETE' })

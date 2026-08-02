@@ -4,6 +4,9 @@ export interface ReviewItem {
   content: string
   nickname: string
   createdAt: string
+	images: string[]
+	merchantReply: string
+	repliedAt: string
 }
 export interface GoodsReviews {
   avgRating: number
@@ -17,7 +20,7 @@ export function useReviews() {
   const { apiFetch } = useApi()
 
   // 提交评价
-  async function submitReview(body: { orderId: number; goodsId: number; rating: number; content: string }) {
+  async function submitReview(body: { orderId: number; goodsId: number; rating: number; content: string; images?: string[] }) {
     return apiFetch('/v1/goods/review', { method: 'POST', body })
   }
 
@@ -41,6 +44,9 @@ export function useReviews() {
         content: r.content ?? '',
         nickname: r.nickname ?? '',
         createdAt: r.createdAt ?? '',
+		images: r.images ?? [],
+		merchantReply: r.merchantReply ?? '',
+		repliedAt: r.repliedAt ?? '',
       })),
     }
   }

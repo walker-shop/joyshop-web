@@ -15,8 +15,9 @@ export function useAvatarUpload() {
 
     // 1. 取预签名上传地址 + 最终 CDN URL
     const tok = await $fetch<{ data: { uploadUrl: string; fileUrl: string } }>(
-      `${apiBase}/v1/upload/token`, { params: { filename } },
-    )
+	  `${apiBase}/v1/upload/token`,
+	  { params: { filename }, headers: { Authorization: `Bearer ${token.value}` } },
+	)
     const { uploadUrl, fileUrl } = tok.data
     if (!uploadUrl || !fileUrl) throw new Error('获取上传地址失败')
 

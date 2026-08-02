@@ -4,7 +4,7 @@
 
 覆盖 prod 上的完整购物闭环，逐步 ✅/❌，跑完自动清理：
 
-登录(zshopbuyer) → 收货地址 → 加购+勾选 → 下单 → **发起支付(真出 Stripe `cs_test` 收银台)** → 4242 测试卡付款 → 回跳 → webhook 入账 `TRADE_SUCCESS` → 确认收货 `TRADE_FINISHED` → 清理。
+登录(zshopbuyer) → 收货地址 → 加购+勾选 → 下单 → **发起支付(真出 Stripe `cs_test` 收银台)** → 4242 测试卡付款 → 回跳 → webhook 入账 `TRADE_SUCCESS` → 发货 → 确认收货 `TRADE_FINISHED` → 带图评价 → 商家回复 → 隐藏/恢复 → 退货退款 → 清理。
 
 订单生命周期用 API 驱动（稳定、不依赖易碎 UI 选择器）；Stripe 收银台必须真浏览器，用 CDP 驱动 walker Chrome。
 
