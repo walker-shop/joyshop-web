@@ -113,6 +113,10 @@ const messages: MessageSchema = {
     submit: 'Submit',
     submitted: 'Review submitted',
     submitFailed: 'Failed, please retry',
+    addPhotos: 'Add photos',
+    photoHint: 'Up to 5 JPG, PNG or WebP images',
+    uploadFailed: 'Photo upload failed, please retry',
+    merchantReply: 'Merchant reply',
   },
   pdp: {
     navTitle: 'Product details',

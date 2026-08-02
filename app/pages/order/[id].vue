@@ -155,6 +155,17 @@
           maxlength="500"
           rows="4"
         />
+        <div class="rv-upload">
+          <div v-if="reviewModal.previews.length" class="rv-preview-list">
+            <div v-for="(src, index) in reviewModal.previews" :key="src" class="rv-preview">
+              <img :src="src" alt="">
+              <button :aria-label="$t('common.delete')" @click="removeReviewImage(index)">×</button>
+            </div>
+          </div>
+          <input ref="reviewFileInput" class="rv-file" type="file" accept="image/jpeg,image/png,image/webp" multiple @change="onReviewFiles">
+          <button v-if="reviewModal.files.length < 5" class="rv-add-photo" @click="reviewFileInput?.click()">＋ {{ $t('review.addPhotos') }}</button>
+          <span>{{ $t('review.photoHint') }}</span>
+        </div>
         <div class="rv-actions">
           <button class="lux-btn-ghost rv-btn" @click="closeReview">{{ $t('common.cancel') }}</button>
           <button class="lux-btn rv-btn" :disabled="submitting" @click="submitReviewForm">{{ $t('review.submit') }}</button>
@@ -226,6 +237,7 @@ const { apiFetch } = useApi()
 const { pay } = usePayment()
 const { busy: acting, cancel, confirmReceipt, remove } = useOrderActions()
 const { submitReview, getReviewedGoodsIds } = useReviews()
+const { upload: uploadReviewImage } = useReviewImageUpload()
 const { requestReturn, submitReturnShipping } = useReturns()
 
 function returnReasonText(reason: string): string {
@@ -289,7 +301,8 @@ async function submitReturnShippingForm() {
 // 评价（仅已完成订单）
 const reviewedIds = ref<number[]>([])
 const isFinished = computed(() => detail.value?.order_info.status === 'TRADE_FINISHED')
-const reviewModal = reactive({ open: false, goodsId: 0, goodsName: '', rating: 5, content: '' })
+const reviewModal = reactive<{ open: boolean; goodsId: number; goodsName: string; rating: number; content: string; files: File[]; previews: string[] }>({ open: false, goodsId: 0, goodsName: '', rating: 5, content: '', files: [], previews: [] })
+const reviewFileInput = ref<HTMLInputElement | null>(null)
 const submitting = ref(false)
 function openReview(g: { goods_id: number; goods_name: string }) {
   reviewModal.open = true
@@ -297,8 +310,16 @@ function openReview(g: { goods_id: number; goods_name: string }) {
   reviewModal.goodsName = g.goods_name
   reviewModal.rating = 5
   reviewModal.content = ''
+  clearReviewImages()
 }
-function closeReview() { reviewModal.open = false }
+function clearReviewImages() { reviewModal.previews.forEach(URL.revokeObjectURL); reviewModal.files = []; reviewModal.previews = []; if (reviewFileInput.value) reviewFileInput.value.value = '' }
+function closeReview() { reviewModal.open = false; clearReviewImages() }
+function onReviewFiles(event: Event) {
+  const input = event.target as HTMLInputElement
+  const next = Array.from(input.files || []).filter(file => ['image/jpeg', 'image/png', 'image/webp'].includes(file.type) && file.size <= 5 * 1024 * 1024).slice(0, 5 - reviewModal.files.length)
+  reviewModal.files.push(...next); reviewModal.previews.push(...next.map(URL.createObjectURL)); input.value = ''
+}
+function removeReviewImage(index: number) { URL.revokeObjectURL(reviewModal.previews[index]!); reviewModal.files.splice(index, 1); reviewModal.previews.splice(index, 1) }
 async function loadReviewStatus() {
   if (!detail.value || !isFinished.value) { reviewedIds.value = []; return }
   reviewedIds.value = await getReviewedGoodsIds(detail.value.order_info.id)
@@ -307,17 +328,19 @@ async function submitReviewForm() {
   if (submitting.value || !detail.value) return
   submitting.value = true
   try {
+    const images = await Promise.all(reviewModal.files.map(uploadReviewImage))
     await submitReview({
       orderId: detail.value.order_info.id,
       goodsId: reviewModal.goodsId,
       rating: reviewModal.rating,
       content: reviewModal.content,
+      images,
     })
     showToast(t('review.submitted'))
-    reviewModal.open = false
+    closeReview()
     await loadReviewStatus()
   } catch (e: any) {
-    showToast(e?.data?.msg || e?.message || t('review.submitFailed'))
+    showToast(e?.data?.msg || e?.message || (reviewModal.files.length ? t('review.uploadFailed') : t('review.submitFailed')))
   } finally {
     submitting.value = false
   }
@@ -505,6 +528,14 @@ onMounted(async () => {
   background: var(--lux-bg); border: 1px solid var(--lux-hair-soft); color: var(--lux-text); font-size: 14px;
 }
 .rv-textarea:focus { outline: none; border-color: var(--lux-gold); }
+.rv-upload { margin-top: 12px; }
+.rv-file { display: none; }
+.rv-upload > span { display: block; margin-top: 6px; color: var(--lux-text-3); font-size: 11px; }
+.rv-add-photo { padding: 8px 12px; border: 1px dashed var(--lux-hair); border-radius: 10px; background: transparent; color: var(--lux-text-2); cursor: pointer; }
+.rv-preview-list { display: flex; gap: 8px; margin-bottom: 9px; overflow-x: auto; }
+.rv-preview { position: relative; flex: 0 0 58px; width: 58px; height: 58px; }
+.rv-preview img { width: 100%; height: 100%; border-radius: 9px; object-fit: cover; }
+.rv-preview button { position: absolute; top: -5px; right: -5px; width: 19px; height: 19px; padding: 0; border: 0; border-radius: 50%; background: #2a2b2e; color: #fff; line-height: 19px; }
 .rv-actions { display: flex; gap: 12px; margin-top: 18px; }
 .rv-btn { flex: 1; height: 46px; font-size: 15px; }
 </style>

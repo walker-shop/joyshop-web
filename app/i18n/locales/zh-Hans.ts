@@ -113,6 +113,10 @@ const messages: MessageSchema = {
     submit: '提交',
     submitted: '评价成功',
     submitFailed: '评价失败，请重试',
+    addPhotos: '添加图片',
+    photoHint: '最多 5 张，支持 JPG、PNG、WebP',
+    uploadFailed: '图片上传失败，请重试',
+    merchantReply: '商家回复',
   },
   pdp: {
     navTitle: '商品详情',

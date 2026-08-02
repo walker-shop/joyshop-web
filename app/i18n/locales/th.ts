@@ -114,6 +114,10 @@ const messages: MessageSchema = {
     submit: 'ส่ง',
     submitted: 'ส่งรีวิวแล้ว',
     submitFailed: 'ล้มเหลว โปรดลองใหม่',
+    addPhotos: 'เพิ่มรูปภาพ',
+    photoHint: 'สูงสุด 5 รูป รองรับ JPG, PNG และ WebP',
+    uploadFailed: 'อัปโหลดรูปไม่สำเร็จ โปรดลองใหม่',
+    merchantReply: 'คำตอบจากร้านค้า',
   },
   pdp: {
     navTitle: 'รายละเอียดสินค้า',

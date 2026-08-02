@@ -112,6 +112,10 @@ export interface MessageSchema {
     submit: string
     submitted: string
     submitFailed: string
+    addPhotos: string
+    photoHint: string
+    uploadFailed: string
+    merchantReply: string
   }
   pdp: {
     navTitle: string

@@ -92,6 +92,10 @@
             <span class="pdp-rv-stars">{{ '★'.repeat(r.rating) }}<span class="pdp-rv-off">{{ '★'.repeat(5 - r.rating) }}</span></span>
           </div>
           <div v-if="r.content" class="pdp-rv-content">{{ r.content }}</div>
+          <div v-if="r.images?.length" class="pdp-rv-images">
+            <van-image v-for="url in r.images" :key="url" :src="url" fit="cover" @click="showReviewImages(r.images, url)" />
+          </div>
+          <div v-if="r.merchantReply" class="pdp-rv-reply"><strong>{{ $t('review.merchantReply') }}</strong><span>{{ r.merchantReply }}</span></div>
           <div class="pdp-rv-time">{{ r.createdAt.slice(0, 10) }}</div>
         </div>
       </div>
@@ -126,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { showToast } from 'vant'
+import { showImagePreview, showToast } from 'vant'
 
 definePageMeta({ layout: 'blank' })
 
@@ -219,6 +223,7 @@ async function fetchReviews() {
 onMounted(fetchReviews)
 
 function goDetail(id: number) { navigateTo(`/goods/${id}`) }
+function showReviewImages(images: string[], current: string) { showImagePreview({ images, startPosition: Math.max(0, images.indexOf(current)), closeable: true }) }
 
 useSeoMeta({
   title: () => `${goods.value?.name || '商品'} - ZShop`,
@@ -378,6 +383,10 @@ async function onBuyNow() {
 .pdp-rv-stars { font-size: 13px; color: #e3ba7d; letter-spacing: 1px; }
 .pdp-rv-off { color: var(--color-border, rgba(0,0,0,.15)); }
 .pdp-rv-content { font-size: 14px; line-height: 1.6; color: var(--color-text-primary); margin-top: 7px; word-break: break-word; }
+.pdp-rv-images { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-top: 9px; }
+.pdp-rv-images :deep(.van-image) { aspect-ratio: 1; border-radius: 8px; overflow: hidden; }
+.pdp-rv-reply { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; padding: 10px 12px; border-left: 2px solid #d5ac6d; background: rgba(213,172,109,.08); color: var(--color-text-secondary); font-size: 13px; line-height: 1.5; }
+.pdp-rv-reply strong { color: #b18444; font-size: 11px; }
 .pdp-rv-time { font-size: 11px; color: var(--color-text-secondary); margin-top: 6px; opacity: .7; }
 .pdp-rv-empty { font-size: 13px; color: var(--color-text-secondary); text-align: center; padding: 12px 0; }
 
