@@ -31,6 +31,7 @@ const ADDR = { signerName: '回归测试', signerMobile: '13800138000', province
 
 const sleep = ms => new Promise(r => setTimeout(r, ms))
 let TOKEN = ''
+let TENANT_ID = 0
 const results = []
 function ok(name, extra = '') { results.push({ name, pass: true }); console.log(`✅ ${name}${extra ? '  ' + extra : ''}`) }
 function fail(name, err) { results.push({ name, pass: false }); console.log(`❌ ${name}  ${err}`); }
@@ -80,7 +81,13 @@ async function main() {
   // 1. 登录
   try {
     const r = await api('/api/auth/login', { base: IAM, auth: false, method: 'POST', body: CREDS })
-    if (r.data?.code === 0 && r.data.data?.access_token) { TOKEN = r.data.data.access_token; ok('登录 zshopbuyer', `user_id=${r.data.data.user?.id}`) }
+    if (r.data?.code === 0 && r.data.data?.access_token) {
+      TOKEN = r.data.data.access_token
+      const claims = JSON.parse(Buffer.from(TOKEN.split('.')[1], 'base64url').toString())
+      TENANT_ID = Number(claims.tenant_id ?? claims.tenantId ?? r.data.data.user?.tenant_id ?? 0)
+      if (!TENANT_ID) throw new Error('JWT 缺少 tenant_id')
+      ok('登录 zshopbuyer', `user_id=${r.data.data.user?.id} tenant_id=${TENANT_ID}`)
+    }
     else { fail('登录 zshopbuyer', JSON.stringify(r.data)); return summary() }
   } catch (e) { fail('登录 zshopbuyer', e.message); return summary() }
 
@@ -148,6 +155,14 @@ async function main() {
     else { fail('登录 joyadmin', JSON.stringify(r.data)); return summary() }
   } catch (e) { fail('登录 joyadmin', e.message); return summary() }
 
+  // 清理上次异常中断残留的 E2E 评价，保证回归幂等。
+  try {
+    const old = await api(`/v1/goods/reviews?tenant_id=${TENANT_ID}&pageSize=100`, { token: ADMIN_TOKEN })
+    for (const row of (old.data?.data?.data || []).filter(item => item.content?.startsWith('E2E评价-'))) {
+      await api(`/v1/goods/reviews/${row.id}/status?tenant_id=${TENANT_ID}`, { method: 'PUT', token: ADMIN_TOKEN, body: { status: 'HIDDEN' } })
+    }
+  } catch { /* 不影响主流程 */ }
+
   // 7c. admin 发货（实体商品必须先发货才能确认收货，见 2026-07-30 发货物流设计）
   try {
     await api(`/v1/orders/${orderId}/ship`, { method: 'POST', token: ADMIN_TOKEN, body: { express_company: '顺丰速运', tracking_no: 'SF' + Date.now() } })
@@ -170,7 +185,7 @@ async function main() {
     const body = { orderId, goodsId: GOODS_ID, rating: 5, content: reviewMarker, images: image ? [image] : [] }
     const created = await api('/v1/goods/review', { method: 'POST', body })
     if (created.status !== 200) throw new Error(JSON.stringify(created.data))
-    const list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=1`, { auth: false })
+    const list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=${TENANT_ID}`, { auth: false })
     const row = list.data?.data?.data?.find?.(item => item.content === reviewMarker)
     reviewId = row?.id
     if (reviewId) ok('完成订单后评价 → PDP 可见', `reviewId=${reviewId}`)
@@ -180,19 +195,19 @@ async function main() {
   // 8b. admin 回复，并验证隐藏/恢复审核闭环
   if (reviewId) {
     try {
-      const reply = await api(`/v1/goods/reviews/${reviewId}/reply`, { method: 'POST', token: ADMIN_TOKEN, body: { reply: '感谢你的真实反馈。' } })
+      const reply = await api(`/v1/goods/reviews/${reviewId}/reply?tenant_id=${TENANT_ID}`, { method: 'POST', token: ADMIN_TOKEN, body: { reply: '感谢你的真实反馈。' } })
       if (reply.status !== 200) throw new Error(JSON.stringify(reply.data))
-      let list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=1`, { auth: false })
+      let list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=${TENANT_ID}`, { auth: false })
       let row = list.data?.data?.data?.find?.(item => item.id === reviewId)
       if (row?.merchantReply) ok('商家回复评价 → PDP 可见'); else throw new Error('PDP 未显示商家回复')
 
-      await api(`/v1/goods/reviews/${reviewId}/status`, { method: 'PUT', token: ADMIN_TOKEN, body: { status: 'HIDDEN' } })
-      list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=1`, { auth: false })
+      await api(`/v1/goods/reviews/${reviewId}/status?tenant_id=${TENANT_ID}`, { method: 'PUT', token: ADMIN_TOKEN, body: { status: 'HIDDEN' } })
+      list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=${TENANT_ID}`, { auth: false })
       row = list.data?.data?.data?.find?.(item => item.id === reviewId)
       if (!row) ok('隐藏评价 → PDP 不可见'); else throw new Error('隐藏评价仍公开')
 
-      await api(`/v1/goods/reviews/${reviewId}/status`, { method: 'PUT', token: ADMIN_TOKEN, body: { status: 'PUBLISHED' } })
-      list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=1`, { auth: false })
+      await api(`/v1/goods/reviews/${reviewId}/status?tenant_id=${TENANT_ID}`, { method: 'PUT', token: ADMIN_TOKEN, body: { status: 'PUBLISHED' } })
+      list = await api(`/v1/goods/${GOODS_ID}/reviews?tenant_id=${TENANT_ID}`, { auth: false })
       row = list.data?.data?.data?.find?.(item => item.id === reviewId)
       if (row) ok('恢复评价 → PDP 重新可见'); else throw new Error('恢复后评价仍不可见')
     } catch (e) { fail('评价回复/审核', e.message) }
@@ -229,7 +244,7 @@ async function main() {
   // 9. 清理（--keep 跳过）
   if (!KEEP && orderId) {
     try {
-	  if (reviewId) await api(`/v1/goods/reviews/${reviewId}/status`, { method: 'PUT', token: ADMIN_TOKEN, body: { status: 'HIDDEN' } })
+	  if (reviewId) await api(`/v1/goods/reviews/${reviewId}/status?tenant_id=${TENANT_ID}`, { method: 'PUT', token: ADMIN_TOKEN, body: { status: 'HIDDEN' } })
       await api(`/v1/orders/${orderId}`, { method: 'DELETE' })
       const list = await api('/v1/cart')
       for (const it of (list.data?.data || [])) await api(`/v1/cart/${it.id}`, { method: 'DELETE' })
