@@ -116,9 +116,9 @@ onMounted(load)
   cursor: pointer; transition: color .18s ease, border-color .18s ease, background .18s ease;
 }
 .od-tab.is-active {
-  color: #1a0d05; font-weight: 700; border-color: transparent;
-  background: linear-gradient(135deg, var(--lux-gold), var(--lux-accent-2) 45%, var(--lux-accent));
-  box-shadow: 0 6px 18px rgba(224, 190, 120, .38), inset 0 1px 0 rgba(255, 255, 255, .35);
+  color: var(--color-text-inverse); font-weight: 700; border-color: transparent;
+  background: var(--color-primary-dark);
+  box-shadow: 0 6px 18px color-mix(in oklch, var(--color-primary) 30%, transparent), inset 0 1px 0 rgba(255, 255, 255, .24);
 }
 .od-tab-glow { display: none; }
 
@@ -135,7 +135,7 @@ onMounted(load)
   font-size: 12px; font-weight: 600; letter-spacing: 1px; padding: 4px 12px; border-radius: 999px;
   border: 1px solid var(--lux-hair-soft); color: var(--lux-text-2);
 }
-.oc-status.is-amber { color: var(--lux-gold); border-color: rgba(227, 186, 125, .35); background: rgba(227, 186, 125, .1); }
+.oc-status.is-amber { color: var(--color-price); border-color: color-mix(in oklch, var(--color-accent-warm) 35%, transparent); background: color-mix(in oklch, var(--color-accent-warm) 10%, transparent); }
 .oc-status.is-muted { color: var(--lux-text-2); }
 .oc-status.is-dim { color: var(--lux-text-3); border-color: var(--lux-hair-soft); }
 .oc-bd { display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; }

@@ -213,15 +213,16 @@ function onLogout() { logout(); showToast(t('user.loggedOut')) }
   border-radius: 22px;
   overflow: hidden;
   background:
-    linear-gradient(120deg, rgba(16, 11, 3, .30), rgba(16, 11, 3, .62)),
+    linear-gradient(120deg, color-mix(in oklch, var(--color-primary-dark) 66%, transparent), color-mix(in oklch, var(--color-accent-ink) 88%, transparent)),
     var(--lux-auth-bg) center / cover no-repeat;
+  background-blend-mode: color, normal;
   border: 1px solid color-mix(in srgb, var(--lux-gold) 34%, transparent);
   box-shadow: 0 12px 32px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 246, 223, .12);
 }
 .uz-hero-glow {
   position: absolute; top: -70px; right: -30px; pointer-events: none;
   width: 240px; height: 200px;
-  background: radial-gradient(60% 60% at 60% 40%, rgba(230, 205, 143, .38), transparent 70%);
+  background: radial-gradient(60% 60% at 60% 40%, color-mix(in oklch, var(--color-primary-light) 48%, transparent), transparent 70%);
   filter: blur(4px);
 }
 .uz-id {
@@ -233,7 +234,7 @@ function onLogout() { logout(); showToast(t('user.loggedOut')) }
 .uz-avatar {
   position: relative; flex: 0 0 62px; width: 62px; height: 62px; border-radius: 50%;
   display: grid; place-items: center;
-  background: linear-gradient(140deg, rgba(30, 22, 10, .72), rgba(16, 11, 4, .82));
+  background: color-mix(in oklch, var(--color-accent-ink) 82%, transparent);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 246, 223, .18);
   box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
@@ -251,26 +252,26 @@ function onLogout() { logout(); showToast(t('user.loggedOut')) }
 .uz-avatar-cam {
   position: absolute; right: -2px; bottom: -2px; z-index: 2;
   width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
-  background: linear-gradient(135deg, #e6cd8f, #a9822f); border: 2px solid rgba(16, 11, 4, .9);
+  background: var(--color-primary); border: 2px solid color-mix(in oklch, var(--color-accent-ink) 90%, transparent);
   box-shadow: 0 2px 6px rgba(0, 0, 0, .5);
 }
-.uz-avatar-cam svg { width: 12px; height: 12px; fill: #2a1f0a; }
+.uz-avatar-cam svg { width: 12px; height: 12px; fill: var(--color-text-inverse); }
 
 .uz-id-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .uz-tags { display: flex; align-items: center; gap: 7px; }
 .uz-level {
   display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 7px;
   font-size: 12px; font-weight: 900; font-style: italic; letter-spacing: .5px;
-  color: #2a1f0a; background: linear-gradient(135deg, #fbe9bd, #d9b876 55%, #b8963f);
-  box-shadow: 0 2px 8px rgba(184, 150, 63, .5);
+  color: var(--color-text-inverse); background: var(--color-primary-dark);
+  box-shadow: 0 2px 8px color-mix(in oklch, var(--color-primary) 36%, transparent);
 }
 .uz-name { font-size: 21px; font-weight: 800; color: #fdf6e6; letter-spacing: .5px; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
 .uz-sub { font-size: 12.5px; color: rgba(253, 246, 230, .78); letter-spacing: .3px; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
 .uz-badge {
   display: inline-flex; align-items: center; gap: 4px;
   padding: 3px 11px; border-radius: 999px; font-size: 11.5px; font-weight: 800; letter-spacing: .5px;
-  color: #2a1f0a; background: linear-gradient(135deg, #f0dca6, #d9b876 52%, #c39f52);
-  box-shadow: 0 3px 10px rgba(195, 159, 82, .5);
+  color: var(--color-text-inverse); background: var(--color-accent-warm);
+  box-shadow: 0 3px 10px color-mix(in oklch, var(--color-accent-warm) 38%, transparent);
 }
 .uz-id-arr { width: 20px; height: 20px; fill: none; stroke: var(--lux-text-3); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -352,9 +353,9 @@ function onLogout() { logout(); showToast(t('user.loggedOut')) }
   transition: color .15s ease, background .15s ease;
 }
 .uz-switch-opt.active {
-  color: #1a0d05; font-weight: 700;
-  background: linear-gradient(135deg, var(--lux-gold), var(--lux-accent-2) 55%, var(--lux-accent));
-  box-shadow: 0 4px 12px rgba(224, 190, 120, .4);
+  color: var(--color-text-inverse); font-weight: 700;
+  background: var(--color-primary-dark);
+  box-shadow: 0 4px 12px color-mix(in oklch, var(--color-primary) 30%, transparent);
 }
 
 /* ---- Logout ---- */

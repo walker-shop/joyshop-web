@@ -152,7 +152,7 @@ html.dark .lux {
   .lux-btn, .lux-spin { transition: none; animation: none; }
 }
 
-/* ZShop retail refresh: keep legacy transaction markup on the shared production tokens. */
+/* ZShop 2026 retail palette: keep transaction markup on the shared production tokens. */
 .lux {
   --lux-bg: var(--color-bg-page);
   --lux-surface: var(--color-bg-card);
@@ -164,11 +164,11 @@ html.dark .lux {
   --lux-text-3: var(--color-text-tertiary);
   --lux-accent: var(--color-primary-dark);
   --lux-accent-2: var(--color-primary);
-  --lux-gold: var(--color-primary-dark);
+  --lux-gold: var(--color-primary);
   --lux-price: var(--color-price);
   --lux-btn-grad: var(--color-accent-ink);
   --lux-btn-text: var(--color-text-inverse);
-  --lux-btn-glow: transparent;
+  --lux-btn-glow: color-mix(in oklch, var(--color-accent-ink) 22%, transparent);
   --lux-thumb-bg: var(--color-search-bg);
   --lux-chip-bg: var(--color-primary-soft);
   background: var(--lux-bg);

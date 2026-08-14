@@ -200,7 +200,7 @@ async function submit() {
 .ck-addr-pin {
   flex: 0 0 42px; width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center;
   background: linear-gradient(140deg, var(--lux-accent-2), var(--lux-accent));
-  box-shadow: 0 6px 16px rgba(224,190,120,.45);
+  box-shadow: 0 6px 16px color-mix(in oklch, var(--color-primary) 34%, transparent);
 }
 .ck-addr-pin svg { width: 23px; height: 23px; fill: #fff; }
 .ck-addr-body { flex: 1; min-width: 0; }
@@ -280,7 +280,7 @@ async function submit() {
 }
 .ck-submit:active { transform: translateY(1px) scale(.99); }
 .ck-submit:disabled { opacity: .85; }
-.ck-spin { width: 20px; height: 20px; border: 2.5px solid rgba(26,13,5,.35); border-top-color: #1a0d05; border-radius: 50%; animation: ck-rot .7s linear infinite; }
+.ck-spin { width: 20px; height: 20px; border: 2.5px solid color-mix(in oklch, var(--color-text-inverse) 35%, transparent); border-top-color: var(--color-text-inverse); border-radius: 50%; animation: ck-rot .7s linear infinite; }
 @keyframes ck-rot { to { transform: rotate(360deg); } }
 
 @media (max-width: 767px) {

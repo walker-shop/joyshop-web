@@ -105,7 +105,7 @@ onMounted(loadAvail)
 <style scoped>
 .cp-tabs { display: flex; gap: 8px; padding: 12px 14px 0; }
 .cp-tab { flex: 1; height: 40px; border: 1px solid var(--lux-hair); border-radius: 999px; background: var(--lux-surface); color: var(--lux-text-2); font-size: 14px; }
-.cp-tab.on { color: #1a0d05; font-weight: 700; background: linear-gradient(135deg, var(--lux-gold), var(--lux-accent)); border-color: transparent; }
+.cp-tab.on { color: var(--color-text-inverse); font-weight: 700; background: var(--color-primary-dark); border-color: transparent; }
 .cp-card { display: flex; gap: 0; margin: 12px 14px; border: 1px solid var(--lux-hair); border-radius: 16px; overflow: hidden; background: var(--lux-surface); }
 .cp-card.used { opacity: .5; }
 .cp-card-left { flex: 0 0 116px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 18px 8px; background: linear-gradient(140deg, var(--lux-surface-2), var(--lux-surface)); border-right: 1px dashed var(--lux-hair); }
@@ -114,7 +114,7 @@ onMounted(loadAvail)
 .cp-card-right { flex: 1; min-width: 0; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; position: relative; }
 .cp-name { font-size: 15px; font-weight: 600; color: var(--lux-text); }
 .cp-valid { font-size: 12px; color: var(--lux-text-3); }
-.cp-btn { align-self: flex-end; min-width: 72px; height: 34px; border: 0; border-radius: 999px; color: #1a0d05; font-weight: 700; background: linear-gradient(135deg, var(--lux-gold), var(--lux-accent)); }
+.cp-btn { align-self: flex-end; min-width: 72px; height: 34px; border: 0; border-radius: 999px; color: var(--color-text-inverse); font-weight: 700; background: var(--color-accent-ink); }
 .cp-btn:disabled { opacity: .5; background: var(--lux-chip-bg); color: var(--lux-text-3); }
 .cp-status { position: absolute; right: 16px; top: 14px; font-size: 12px; color: var(--lux-text-3); }
 

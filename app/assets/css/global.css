@@ -6,27 +6,30 @@
 
 :root {
   color-scheme: light;
-  --color-primary: oklch(0.56 0.105 75);
-  --color-primary-dark: oklch(0.43 0.085 73);
-  --color-primary-light: oklch(0.72 0.09 78);
-  --color-primary-soft: oklch(0.94 0.035 82);
-  --color-accent-ink: oklch(0.25 0.025 66);
+  /* 2026 retail palette: Cool Blue + Plum Noir + Persimmon on porcelain. */
+  --color-primary: oklch(0.6 0.145 242);
+  --color-primary-dark: oklch(0.43 0.13 244);
+  --color-primary-light: oklch(0.78 0.09 235);
+  --color-primary-soft: oklch(0.94 0.035 238);
+  --color-accent-ink: oklch(0.25 0.055 315);
+  --color-accent-warm: oklch(0.57 0.18 33);
+  --color-success: oklch(0.52 0.105 165);
 
-  --color-bg-viewport: oklch(0.965 0.012 84);
-  --color-bg-page: oklch(0.975 0.01 84);
-  --color-bg-card: oklch(0.995 0.006 84);
-  --color-bg-sidebar: oklch(0.95 0.012 84);
-  --color-search-bg: oklch(0.945 0.012 84);
-  --color-navbar-bg: oklch(0.99 0.007 84);
-  --color-tabbar-bg: oklch(0.99 0.007 84);
+  --color-bg-viewport: oklch(0.965 0.01 245);
+  --color-bg-page: oklch(0.977 0.008 245);
+  --color-bg-card: oklch(0.995 0.004 245);
+  --color-bg-sidebar: oklch(0.95 0.014 242);
+  --color-search-bg: oklch(0.945 0.016 242);
+  --color-navbar-bg: oklch(0.99 0.006 245);
+  --color-tabbar-bg: oklch(0.99 0.006 245);
 
-  --color-text-primary: oklch(0.22 0.018 64);
-  --color-text-secondary: oklch(0.43 0.018 64);
-  --color-text-tertiary: oklch(0.55 0.015 64);
-  --color-text-inverse: oklch(0.98 0.008 84);
-  --color-border: oklch(0.84 0.018 78);
-  --color-border-strong: oklch(0.72 0.025 75);
-  --color-price: oklch(0.48 0.12 45);
+  --color-text-primary: oklch(0.23 0.03 310);
+  --color-text-secondary: oklch(0.43 0.025 300);
+  --color-text-tertiary: oklch(0.56 0.018 285);
+  --color-text-inverse: oklch(0.985 0.006 245);
+  --color-border: oklch(0.85 0.018 242);
+  --color-border-strong: oklch(0.72 0.035 242);
+  --color-price: oklch(0.5 0.18 33);
   --color-coupon: var(--color-price);
   --color-header-gradient-start: var(--color-primary-light);
   --color-header-gradient-end: var(--color-primary);
@@ -46,8 +49,8 @@
   --radius-md: 12px;
   --radius-lg: 18px;
   --radius-xl: 24px;
-  --shadow-soft: 0 12px 36px oklch(0.26 0.02 64 / 0.08);
-  --shadow-float: 0 20px 60px oklch(0.2 0.02 64 / 0.12);
+  --shadow-soft: 0 12px 36px oklch(0.25 0.04 300 / 0.08);
+  --shadow-float: 0 20px 60px oklch(0.2 0.04 300 / 0.12);
   --page-max: 1600px;
   --theme-transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
 
@@ -62,27 +65,29 @@
 
 html.dark {
   color-scheme: dark;
-  --color-primary: oklch(0.74 0.09 78);
-  --color-primary-dark: oklch(0.82 0.075 80);
-  --color-primary-light: oklch(0.66 0.08 76);
-  --color-primary-soft: oklch(0.3 0.035 70);
-  --color-accent-ink: oklch(0.94 0.016 82);
-  --color-bg-viewport: oklch(0.17 0.01 66);
-  --color-bg-page: oklch(0.19 0.012 66);
-  --color-bg-card: oklch(0.23 0.012 66);
-  --color-bg-sidebar: oklch(0.205 0.012 66);
-  --color-search-bg: oklch(0.27 0.012 66);
-  --color-navbar-bg: oklch(0.205 0.012 66);
-  --color-tabbar-bg: oklch(0.205 0.012 66);
-  --color-text-primary: oklch(0.94 0.008 82);
-  --color-text-secondary: oklch(0.75 0.012 78);
-  --color-text-tertiary: oklch(0.64 0.012 76);
-  --color-text-inverse: oklch(0.19 0.012 66);
-  --color-border: oklch(0.36 0.014 70);
-  --color-border-strong: oklch(0.48 0.02 72);
-  --color-price: oklch(0.79 0.105 65);
-  --shadow-soft: 0 12px 36px oklch(0.08 0.01 66 / 0.24);
-  --shadow-float: 0 20px 60px oklch(0.08 0.01 66 / 0.34);
+  --color-primary: oklch(0.74 0.115 238);
+  --color-primary-dark: oklch(0.82 0.085 235);
+  --color-primary-light: oklch(0.66 0.13 242);
+  --color-primary-soft: oklch(0.3 0.055 247);
+  --color-accent-ink: oklch(0.76 0.09 315);
+  --color-accent-warm: oklch(0.74 0.16 38);
+  --color-success: oklch(0.73 0.11 165);
+  --color-bg-viewport: oklch(0.155 0.025 305);
+  --color-bg-page: oklch(0.18 0.026 305);
+  --color-bg-card: oklch(0.225 0.026 305);
+  --color-bg-sidebar: oklch(0.2 0.026 305);
+  --color-search-bg: oklch(0.265 0.03 305);
+  --color-navbar-bg: oklch(0.195 0.026 305);
+  --color-tabbar-bg: oklch(0.195 0.026 305);
+  --color-text-primary: oklch(0.95 0.01 245);
+  --color-text-secondary: oklch(0.76 0.018 260);
+  --color-text-tertiary: oklch(0.65 0.02 270);
+  --color-text-inverse: oklch(0.17 0.025 305);
+  --color-border: oklch(0.36 0.035 300);
+  --color-border-strong: oklch(0.49 0.05 285);
+  --color-price: oklch(0.76 0.15 38);
+  --shadow-soft: 0 12px 36px oklch(0.07 0.02 305 / 0.28);
+  --shadow-float: 0 20px 60px oklch(0.07 0.02 305 / 0.38);
 }
 
 html {

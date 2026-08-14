@@ -103,7 +103,11 @@ function onSocialError(message: string) {
 <style scoped>
 .auth-page {
   min-height: 100vh; position: relative;
-  background: var(--lux-auth-bg) center top / cover no-repeat, var(--lux-bg);
+  background:
+    linear-gradient(135deg, color-mix(in oklch, var(--color-primary) 34%, transparent), color-mix(in oklch, var(--color-accent-ink) 30%, transparent)),
+    var(--lux-auth-bg) center top / cover no-repeat,
+    var(--lux-bg);
+  background-blend-mode: color, normal, normal;
 }
 /* 顶部/底部柔化，保证文字可读 + 底部融入页面 */
 .auth-page::before {
@@ -127,7 +131,7 @@ function onSocialError(message: string) {
 .auth-mark { position: relative; display: inline-grid; place-items: center; margin-bottom: 12px; }
 .auth-mark-glow {
   position: absolute; width: 150px; height: 150px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(224, 190, 120, .5), rgba(227, 186, 125, .14) 45%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-primary) 46%, transparent), color-mix(in oklch, var(--color-primary) 14%, transparent) 45%, transparent 70%);
   filter: blur(10px); pointer-events: none;
 }
 .auth-logo-img {
@@ -151,7 +155,7 @@ function onSocialError(message: string) {
   background: color-mix(in srgb, var(--lux-surface) 80%, transparent);
   backdrop-filter: saturate(160%) blur(22px);
   border: 1px solid var(--lux-hair); border-radius: 24px;
-  box-shadow: 0 20px 50px rgba(30, 18, 8, .14), inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent);
+  box-shadow: 0 20px 50px color-mix(in oklch, var(--color-accent-ink) 14%, transparent), inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent);
 }
 .auth-field { display: block; margin-bottom: 16px; }
 .auth-label { display: block; font-size: 11px; letter-spacing: 2px; color: var(--lux-text-3); margin-bottom: 8px; text-transform: uppercase; }
@@ -168,7 +172,7 @@ function onSocialError(message: string) {
 .auth-input:focus {
   outline: none;
   border-color: var(--lux-accent);
-  box-shadow: 0 0 0 3px rgba(224, 190, 120, .16);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 18%, transparent);
 }
 
 .auth-submit { margin-top: 24px; }
@@ -183,7 +187,7 @@ function onSocialError(message: string) {
 .auth-perks li { display: flex; align-items: center; gap: 5px; font-size: 12px; letter-spacing: .5px; color: var(--lux-text-2); }
 .auth-perks i {
   font-style: normal; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center;
-  font-size: 10px; color: #fff; background: linear-gradient(135deg, var(--lux-accent-2), var(--lux-accent));
+  font-size: 10px; color: var(--color-text-inverse); background: var(--color-primary-dark);
 }
 
 @media (min-width: 1024px) {

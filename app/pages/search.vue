@@ -211,7 +211,7 @@ function flyToCart(sx: number, sy: number, img?: string) {
   const dx = (cart.left + cart.width / 2) - sx
   const dy = (cart.top + cart.height / 2 - 8) - sy
   const ball = document.createElement('div')
-  ball.style.cssText = `position:fixed;left:${sx}px;top:${sy}px;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;z-index:9999;pointer-events:none;overflow:hidden;box-shadow:0 5px 16px rgba(169,130,47,.6);${img ? `background:#000 center/cover url('${img}')` : 'background:linear-gradient(135deg,#e6cd8f,#a9822f)'};border:2px solid #f0dca6;`
+  ball.style.cssText = `position:fixed;left:${sx}px;top:${sy}px;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;z-index:9999;pointer-events:none;overflow:hidden;box-shadow:0 5px 16px color-mix(in oklch,var(--color-primary) 48%,transparent);${img ? `background:#000 center/cover url('${img}')` : 'background:var(--color-primary)'};border:2px solid var(--color-primary-light);`
   document.body.appendChild(ball)
   const anim = ball.animate([
     { transform: 'translate(0,0) scale(1)', opacity: 1, offset: 0 },
@@ -276,8 +276,8 @@ onMounted(() => {
 .clear svg { width: 13px; height: 13px; fill: var(--color-bg-card); }
 .go {
   flex-shrink: 0; border: 0; cursor: pointer; height: 34px; padding: 0 14px; border-radius: 18px;
-  font-size: 14px; font-weight: 700; color: #2a1f0a;
-  background: linear-gradient(135deg, #e6cd8f, #c9a24c 52%, #a9822f);
+  font-size: 14px; font-weight: 700; color: var(--color-text-inverse);
+  background: var(--color-accent-ink);
   box-shadow: 0 3px 10px color-mix(in srgb, var(--color-primary) 34%, transparent);
   transition: transform .12s ease;
 }
@@ -332,8 +332,8 @@ onMounted(() => {
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 .card-thumb { position: relative; width: 100%; aspect-ratio: 1 / 1; background: var(--color-search-bg); }
 .card-off {
-  position: absolute; top: 8px; left: 8px; z-index: 2; font-size: 10px; font-weight: 800; color: #2a1f0a;
-  background: linear-gradient(135deg, #e6cd8f, #c9a24c); border-radius: 7px; padding: 3px 6px;
+  position: absolute; top: 8px; left: 8px; z-index: 2; font-size: 10px; font-weight: 800; color: var(--color-text-inverse);
+  background: var(--color-accent-warm); border-radius: 7px; padding: 3px 6px;
 }
 .fill { width: 100%; height: 100%; display: block; }
 .mono {
@@ -359,12 +359,12 @@ onMounted(() => {
 .add {
   margin-left: auto; align-self: flex-end;
   width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
-  background: linear-gradient(135deg, #e6cd8f, #c9a24c 52%, #a9822f);
+  background: var(--color-primary-dark);
   box-shadow: 0 3px 9px color-mix(in srgb, var(--color-primary) 42%, transparent);
   transition: transform .14s ease;
 }
 .add:active { transform: scale(.86); }
-.add svg { width: 15px; height: 15px; fill: #2a1f0a; }
+.add svg { width: 15px; height: 15px; fill: var(--color-text-inverse); }
 
 /* 骨架 */
 .skel {
@@ -380,8 +380,8 @@ onMounted(() => {
 .empty .tip { color: var(--color-text-tertiary); font-size: 12px; }
 .empty-mark {
   width: 76px; height: 76px; border-radius: 22px; display: grid; place-items: center;
-  font-size: 40px; font-weight: 900; font-style: italic; color: #2a1f0a;
-  background: linear-gradient(135deg, #e6cd8f, #c9a24c 52%, #a9822f);
+  font-size: 40px; font-weight: 900; font-style: italic; color: var(--color-text-inverse);
+  background: var(--color-primary-dark);
   box-shadow: 0 8px 22px color-mix(in srgb, var(--color-primary) 34%, transparent);
 }
 

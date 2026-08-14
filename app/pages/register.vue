@@ -115,7 +115,11 @@ function onSocialError(message: string) {
 <style scoped>
 .auth-page {
   min-height: 100vh; position: relative;
-  background: var(--lux-auth-bg) center top / cover no-repeat, var(--lux-bg);
+  background:
+    linear-gradient(135deg, color-mix(in oklch, var(--color-primary) 34%, transparent), color-mix(in oklch, var(--color-accent-ink) 30%, transparent)),
+    var(--lux-auth-bg) center top / cover no-repeat,
+    var(--lux-bg);
+  background-blend-mode: color, normal, normal;
 }
 .auth-page::before {
   content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
@@ -137,7 +141,7 @@ function onSocialError(message: string) {
 .auth-mark { position: relative; display: inline-grid; place-items: center; margin-bottom: 10px; }
 .auth-mark-glow {
   position: absolute; width: 140px; height: 140px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(224, 190, 120, .5), rgba(227, 186, 125, .14) 45%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-primary) 46%, transparent), color-mix(in oklch, var(--color-primary) 14%, transparent) 45%, transparent 70%);
   filter: blur(10px); pointer-events: none;
 }
 .auth-logo-img {
@@ -160,7 +164,7 @@ function onSocialError(message: string) {
   background: color-mix(in srgb, var(--lux-surface) 80%, transparent);
   backdrop-filter: saturate(160%) blur(22px);
   border: 1px solid var(--lux-hair); border-radius: 24px;
-  box-shadow: 0 20px 50px rgba(30, 18, 8, .14), inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent);
+  box-shadow: 0 20px 50px color-mix(in oklch, var(--color-accent-ink) 14%, transparent), inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent);
 }
 .auth-field { display: block; margin-bottom: 14px; }
 .auth-label { display: block; font-size: 11px; letter-spacing: 2px; color: var(--lux-text-3); margin-bottom: 7px; text-transform: uppercase; }
@@ -177,7 +181,7 @@ function onSocialError(message: string) {
 .auth-input:focus {
   outline: none;
   border-color: var(--lux-accent);
-  box-shadow: 0 0 0 3px rgba(224, 190, 120, .16);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 18%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

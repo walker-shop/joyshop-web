@@ -105,7 +105,7 @@ function onEdit(item: any) { navigateTo(`/user/address/edit?id=${item.id}`) }
 .addr-pin {
   flex: 0 0 42px; width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center;
   background: linear-gradient(140deg, var(--lux-accent-2), var(--lux-accent));
-  box-shadow: 0 6px 16px rgba(224, 190, 120, .45);
+  box-shadow: 0 6px 16px color-mix(in oklch, var(--color-primary) 34%, transparent);
 }
 .addr-pin svg { width: 23px; height: 23px; fill: #fff; }
 .addr-body { flex: 1; min-width: 0; }

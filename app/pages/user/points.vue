@@ -100,7 +100,7 @@ onMounted(() => load(true))
 .pts-hero-glow {
   position: absolute; top: -60px; right: -20px; pointer-events: none;
   width: 200px; height: 180px;
-  background: radial-gradient(60% 60% at 60% 40%, rgba(230, 205, 143, .34), transparent 70%);
+  background: radial-gradient(60% 60% at 60% 40%, color-mix(in oklch, var(--color-primary-light) 42%, transparent), transparent 70%);
   filter: blur(4px);
 }
 .pts-hero-label { font-size: 13px; color: var(--lux-text-2); letter-spacing: .5px; }

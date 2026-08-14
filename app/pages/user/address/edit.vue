@@ -127,7 +127,7 @@ function back() { navigateTo(`/user/address${route.query.from ? '?from=' + route
 }
 .ae-del:disabled { opacity: .6; }
 .ae-del-spin {
-  width: 18px; height: 18px; border: 2.5px solid rgba(224, 190, 120, .25);
+  width: 18px; height: 18px; border: 2.5px solid color-mix(in oklch, var(--color-primary) 25%, transparent);
   border-top-color: var(--lux-accent); border-radius: 50%; animation: ae-rot .7s linear infinite;
 }
 @keyframes ae-rot { to { transform: rotate(360deg); } }
