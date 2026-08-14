@@ -367,4 +367,115 @@ function onLogout() { logout(); showToast(t('user.loggedOut')) }
 @media (prefers-reduced-motion: reduce) {
   .uz-order-ico, .uz-switch-opt { transition: none; }
 }
+
+@media (min-width: 1024px) {
+  .user-page {
+    width: min(calc(100% - 48px), 1400px);
+    min-height: calc(100vh - 72px);
+    margin-inline: auto;
+    padding: var(--space-xl) 0 var(--space-3xl);
+    display: grid;
+    grid-template-columns: minmax(280px, 330px) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-lg);
+    background: transparent;
+  }
+
+  .uz-hero {
+    position: sticky;
+    top: 104px;
+    min-height: 520px;
+    margin: 0;
+    padding: 38px 30px 28px;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-xl);
+  }
+
+  .uz-id {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-lg);
+  }
+
+  .uz-avatar {
+    width: 88px;
+    height: 88px;
+    flex-basis: 88px;
+  }
+
+  .uz-avatar svg { width: 44px; height: 44px; }
+  .uz-avatar-cam { width: 28px; height: 28px; }
+  .uz-avatar-cam svg { width: 14px; height: 14px; }
+  .uz-name { font-size: 27px; }
+  .uz-sub { max-width: 24ch; font-size: 14px; line-height: 1.6; }
+  .uz-id-arr { position: absolute; right: 0; top: 34px; }
+
+  .uz-stats {
+    width: 100%;
+    margin-top: auto;
+    padding-top: var(--space-lg);
+  }
+
+  .uz-stat-num { font-size: 26px; }
+  .uz-stat-label { margin-top: 4px; font-size: 12px; }
+
+  .uz-scroll {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-md);
+  }
+
+  .uz-scroll > * { margin: 0; }
+  .uz-orders { grid-column: 1; padding: 24px 20px 26px; }
+  .uz-orders-hd { padding: 0 4px 22px; }
+  .uz-orders-title { font-family: var(--font-display); font-size: 21px; font-weight: 680; }
+  .uz-orders-all { min-height: 44px; padding-inline: 10px; }
+  .uz-order-item { min-height: 112px; border-radius: var(--radius-md); }
+  .uz-order-item:hover { background: var(--color-primary-soft); }
+  .uz-order-ico { width: 52px; height: 52px; }
+  .uz-order-label { font-size: 13px; }
+
+  .uz-menu {
+    grid-column: 1;
+    min-height: 296px;
+    display: grid;
+    align-content: start;
+    padding: 8px;
+  }
+
+  .uz-row { min-height: 82px; padding-inline: 18px; border-radius: var(--radius-md); }
+  .uz-row:hover { background: var(--color-primary-soft); }
+  .uz-row-ico { width: 42px; height: 42px; flex-basis: 42px; }
+  .uz-theme {
+    min-height: 88px;
+    align-items: center;
+    padding: 18px;
+  }
+
+  .uz-theme-hd { flex: 0 1 auto; }
+  .uz-switch { margin-left: auto; }
+  .uz-switch-opt { min-height: 36px; padding-inline: 10px; }
+  .uz-logout { grid-column: 1; min-height: 52px; }
+}
+
+@media (min-width: 1280px) {
+  .uz-scroll {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto auto auto;
+  }
+  .uz-orders { grid-column: 1 / -1; }
+  .uz-menu { grid-column: 1; grid-row: 2 / span 3; }
+  .uz-menu + .uz-theme { grid-column: 2; grid-row: 2; }
+  .uz-menu + .uz-theme + .uz-theme { grid-column: 2; grid-row: 3; }
+  .uz-logout { grid-column: 2; grid-row: 4; }
+}
+
+@media (min-width: 1440px) {
+  .user-page { grid-template-columns: 350px minmax(0, 1fr); gap: var(--space-xl); }
+  .uz-scroll { gap: var(--space-lg); }
+}
 </style>

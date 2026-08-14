@@ -117,4 +117,19 @@ onMounted(loadAvail)
 .cp-btn { align-self: flex-end; min-width: 72px; height: 34px; border: 0; border-radius: 999px; color: #1a0d05; font-weight: 700; background: linear-gradient(135deg, var(--lux-gold), var(--lux-accent)); }
 .cp-btn:disabled { opacity: .5; background: var(--lux-chip-bg); color: var(--lux-text-3); }
 .cp-status { position: absolute; right: 16px; top: 14px; font-size: 12px; color: var(--lux-text-3); }
+
+@media (min-width: 1024px) {
+  .cp-tabs {
+    width: min(calc(100% - 48px), 1200px);
+    margin-inline: auto;
+    padding: 20px 0 0;
+  }
+  .cp-tab { flex: 0 0 180px; min-height: 44px; }
+  .lux-scroll { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: var(--space-md); }
+  .lux-scroll > * { margin: 0; }
+  .lux-scroll > .lux-empty { grid-column: 1 / -1; }
+  .cp-card { min-height: 148px; border-radius: var(--radius-lg); }
+  .cp-card-left { flex-basis: 142px; }
+  .cp-card:hover { border-color: var(--color-border-strong); box-shadow: var(--shadow-soft); }
+}
 </style>

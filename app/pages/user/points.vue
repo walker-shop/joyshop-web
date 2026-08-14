@@ -107,8 +107,7 @@ onMounted(() => load(true))
 .pts-hero-num {
   font-size: 40px; font-weight: 800; letter-spacing: .5px;
   font-variant-numeric: tabular-nums;
-  background: linear-gradient(135deg, var(--lux-gold), var(--lux-accent-2) 55%, var(--lux-accent));
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  color: var(--lux-price);
 }
 
 /* 流水列表 */
@@ -129,4 +128,14 @@ onMounted(() => load(true))
   font-size: 13px; color: var(--lux-text-2);
 }
 .pts-more:disabled { opacity: .6; }
+
+@media (min-width: 1024px) {
+  .lux-scroll { display: grid; grid-template-columns: 320px minmax(0, 1fr); align-items: start; gap: var(--space-lg); }
+  .lux-scroll > * { margin: 0; }
+  .pts-hero { position: sticky; top: 168px; min-height: 280px; justify-content: center; border-radius: var(--radius-xl); }
+  .pts-hero-num { font-size: 56px; }
+  .pts-list { padding: 8px; }
+  .pts-row { min-height: 76px; padding-inline: 18px; }
+  .lux-empty { grid-column: 2; }
+}
 </style>

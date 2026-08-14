@@ -24,7 +24,7 @@ function applyTheme(dark: boolean) {
 }
 
 export function useTheme() {
-  const themeMode = useState<ThemeMode>('theme-mode', () => 'system')
+  const themeMode = useState<ThemeMode>('theme-mode', () => 'light')
   const isDark = useState<boolean>('theme-dark', () => false)
 
   if (import.meta.client) {

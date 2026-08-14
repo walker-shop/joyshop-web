@@ -217,7 +217,7 @@ function flyToCart(sx: number, sy: number, img?: string) {
     { transform: 'translate(0,0) scale(1)', opacity: 1, offset: 0 },
     { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 100}px) scale(.9)`, opacity: 1, offset: 0.55 },
     { transform: `translate(${dx}px,${dy}px) scale(.2)`, opacity: .3, offset: 1 },
-  ], { duration: 720, easing: 'cubic-bezier(.45,-0.2,.7,1)' })
+  ], { duration: 520, easing: 'cubic-bezier(.22,.72,.24,1)' })
   anim.onfinish = () => {
     ball.remove()
     cartTab?.classList.add('cart-bumped')

@@ -144,4 +144,20 @@ onMounted(load)
 .oc-total { font-size: 20px; }
 .oc-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
 .oc-act { flex: 0 0 auto; min-width: 92px; height: 38px; font-size: 13px; }
+
+@media (min-width: 1024px) {
+  .od-tabs {
+    top: 136px;
+    width: min(calc(100% - 48px), 1200px);
+    margin-inline: auto;
+    padding: 16px 0 4px;
+    background: color-mix(in oklch, var(--lux-bg) 94%, transparent);
+  }
+  .od-tab { min-height: 42px; padding-inline: 22px; }
+  .lux-scroll { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-md); }
+  .lux-scroll > * { margin: 0; }
+  .lux-scroll > .lux-empty { grid-column: 1 / -1; }
+  .od-card { min-height: 178px; padding: 20px; }
+  .od-card:hover { border-color: var(--color-border-strong); box-shadow: var(--shadow-soft); }
+}
 </style>

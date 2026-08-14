@@ -98,4 +98,13 @@ async function onRemove(g: FavGoods) {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 38px;
 }
 .fav-price { font-size: 17px; margin-top: 6px; }
+
+@media (min-width: 1024px) {
+  .fav-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-lg); }
+  .fav-card { border-radius: var(--radius-lg); }
+  .fav-card:hover { transform: translateY(-3px); border-color: var(--color-border-strong); box-shadow: var(--shadow-soft); }
+  .fav-body { padding: 14px 16px 17px; }
+  .fav-name { font-size: 14px; }
+  .fav-price { font-size: 20px; }
+}
 </style>

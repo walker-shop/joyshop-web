@@ -120,4 +120,13 @@ function onEdit(item: any) { navigateTo(`/user/address/edit?id=${item.id}`) }
 }
 .addr-edit:active { background: var(--lux-surface-2); }
 .addr-edit svg { width: 17px; height: 17px; fill: var(--lux-gold); }
+
+@media (min-width: 1024px) {
+  .lux-scroll { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: var(--space-md); }
+  .lux-scroll > * { margin: 0; }
+  .lux-scroll > .lux-empty { grid-column: 1 / -1; }
+  .addr-card { min-height: 132px; padding: 22px; border-radius: var(--radius-lg); }
+  .addr-card:hover { border-color: var(--color-border-strong); box-shadow: var(--shadow-soft); }
+  .addr-edit { width: 44px; height: 44px; flex-basis: 44px; }
+}
 </style>

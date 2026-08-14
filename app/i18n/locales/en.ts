@@ -10,6 +10,8 @@ const messages: MessageSchema = {
     back: 'Back',
     confirm: 'Confirm',
     cancel: 'Cancel',
+    retry: 'Try again',
+    loadFailed: 'Unable to load right now. Please try again.',
   },
   nav: {
     home: 'Home',
@@ -70,6 +72,12 @@ const messages: MessageSchema = {
     success: 'Registered',
     failed: 'Registration failed',
   },
+  socialAuth: {
+    orContinueWith: 'Or continue with',
+    continueTelegram: 'Continue with Telegram',
+    popupBlocked: 'Popup blocked — please allow popups and try again',
+    failed: 'Sign-in failed',
+  },
   address: {
     listTitle: 'Shipping address',
     empty: 'No shipping address yet',
@@ -101,6 +109,9 @@ const messages: MessageSchema = {
     subCount: '{n} subcategories',
     goods: 'Products',
     empty: 'No products in this category yet',
+    recommended: 'Recommended',
+    priceLow: 'Price: low to high',
+    priceHigh: 'Price: high to low',
   },
   review: {
     sectionTitle: 'Reviews',

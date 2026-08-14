@@ -9,6 +9,8 @@ export interface MessageSchema {
     back: string
     confirm: string
     cancel: string
+    retry: string
+    loadFailed: string
   }
   nav: {
     home: string
@@ -69,6 +71,12 @@ export interface MessageSchema {
     success: string
     failed: string
   }
+  socialAuth: {
+    orContinueWith: string
+    continueTelegram: string
+    popupBlocked: string
+    failed: string
+  }
   address: {
     listTitle: string
     empty: string
@@ -100,6 +108,9 @@ export interface MessageSchema {
     subCount: string
     goods: string
     empty: string
+    recommended: string
+    priceLow: string
+    priceHigh: string
   }
   review: {
     sectionTitle: string

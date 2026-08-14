@@ -69,17 +69,29 @@ export function useAuth() {
     persist(res.data) // 注册即自动登录
   }
 
+  async function socialLogin(provider: 'google' | 'telegram', payload: Record<string, unknown>) {
+    const res = await $fetch<IamEnvelope<IamLoginData>>(`${iamBase}/api/auth/social-login`, {
+      method: 'POST',
+      body: { provider, tenant_code: tenantCode, ...payload },
+    })
+    if (res.code !== 0 || !res.data?.access_token) {
+      throw new Error(res.message || '登录失败')
+    }
+    persist(res.data)
+  }
+
   function logout() {
     token.value = null
     user.value = null
   }
 
-  return { token, user, isLoggedIn, login, register, logout } as {
+  return { token, user, isLoggedIn, login, register, socialLogin, logout } as {
     token: Ref<string | null>
     user: Ref<AuthUser | null>
     isLoggedIn: ComputedRef<boolean>
     login: (a: string, p: string) => Promise<void>
     register: (e: string, u: string, p: string) => Promise<void>
+    socialLogin: (provider: 'google' | 'telegram', payload: Record<string, unknown>) => Promise<void>
     logout: () => void
   }
 }

@@ -1,135 +1,184 @@
 <template>
-  <div class="pdp">
-    <!-- 顶栏 -->
-    <div class="pdp-nav">
-      <div class="nav-btn" @click="$router.back()">
-        <svg viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg>
-      </div>
-      <div class="nav-title">{{ $t('pdp.navTitle') }}</div>
-      <div class="nav-btn" :class="{ 'is-faved': faved }" :aria-label="$t('user.favorites')" @click="onToggleFav">
-        <svg v-if="faved" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.8-10-9.3C.6 8.9 2 5.5 5.2 5.5c1.8 0 3.1 1 3.8 2.1.7-1.1 2-2.1 3.8-2.1 3.2 0 4.6 3.4 3.2 6.2C19.5 16.2 12 21 12 21z"/></svg>
-        <svg v-else viewBox="0 0 24 24"><path d="M12 20.3l-.1.1-.11-.1C7.14 15.99 4 13.14 4 10.25 4 8.25 5.5 6.75 7.5 6.75c1.54 0 3.04.99 3.57 2.36h1.87C13.46 7.74 14.96 6.75 16.5 6.75c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>
-      </div>
-    </div>
+  <div class="pdp-page">
+    <header class="pdp-nav">
+      <button type="button" class="nav-button" :aria-label="$t('common.back')" @click="$router.back()">
+        <PhArrowLeft :size="21" />
+      </button>
+      <NuxtLink to="/" class="nav-brand">
+        <img src="/logo.png" alt="" width="30" height="30">
+        <span>ZShop</span>
+      </NuxtLink>
+      <span class="nav-title">{{ $t('pdp.navTitle') }}</span>
+      <button
+        type="button"
+        class="nav-button"
+        :class="{ active: faved }"
+        :aria-label="$t('user.favorites')"
+        :aria-pressed="faved"
+        @click="onToggleFav"
+      >
+        <PhHeart :size="21" :weight="faved ? 'fill' : 'regular'" />
+      </button>
+    </header>
 
-    <!-- Hero 图 -->
-    <div class="pdp-hero">
-      <van-swipe :autoplay="4000" lazy-render @change="onSwipe">
-        <van-swipe-item v-for="(img, idx) in heroImages" :key="idx">
-          <van-image class="hero-img" :src="img" fit="cover">
-            <template #loading><van-loading type="spinner" /></template>
-            <template #error><div class="hero-ph">{{ $t('pdp.noImage') }}</div></template>
-          </van-image>
-        </van-swipe-item>
-        <template #indicator><span /></template>
-      </van-swipe>
-      <div v-if="heroImages.length" class="hero-pager">{{ heroIdx + 1 }}/{{ heroImages.length }}</div>
-    </div>
+    <main class="pdp-shell">
+      <div v-if="status === 'pending'" class="pdp-loading" aria-busy="true">
+        <div class="loading-media" />
+        <div class="loading-copy"><span /><span /><span /></div>
+      </div>
 
-    <!-- 价格条 -->
-    <div class="pdp-pricebar">
-      <div class="pb-price">
-        <span v-if="hasSpecs && !selectedSku" class="pb-from">{{ $t('pdp.priceFrom') }}</span>
-        <span class="pb-cur">¥</span><b>{{ priceParts(displayPrice).int }}</b><span class="pb-dec">.{{ priceParts(displayPrice).dec }}</span>
-        <span v-if="!hasSpecs && goods.marketPrice > goods.shopPrice" class="pb-old">¥{{ goods.marketPrice }}</span>
+      <div v-else-if="!goods.name" class="state-panel" role="alert">
+        <PhCloudSlash :size="38" />
+        <p>{{ $t('common.loadFailed') }}</p>
+        <button type="button" @click="refresh()">{{ $t('common.retry') }}</button>
       </div>
-      <div class="pb-row">
-        <span v-if="goods.shipFree" class="pb-chip">{{ $t('home.tagFreeShip') }}</span>
-        <span v-if="goods.isHot" class="pb-chip">{{ $t('home.tagHot') }}</span>
-        <span v-if="goods.isNew" class="pb-chip">{{ $t('home.tagNew') }}</span>
-      </div>
-    </div>
 
-    <!-- 标题 + 信任徽章 -->
-    <div class="pdp-blk">
-      <div class="pdp-title">{{ goods.name || $t('common.loading') }}</div>
-      <div class="pdp-trust">
-        <span>✓ {{ $t('login.perkGenuine') }}</span><span>✓ {{ $t('pdp.noReason7') }}</span><span>✓ {{ $t('login.perkRefund') }}</span>
-      </div>
-    </div>
-
-    <!-- SKU 规格选择器（有规格才显示） -->
-    <div v-if="hasSpecs" class="pdp-blk pdp-specs">
-      <div v-for="spec in specs" :key="spec.id" class="spec-dim">
-        <div class="spec-name">{{ spec.name }}</div>
-        <div class="spec-opts">
-          <button
-            v-for="val in spec.values" :key="val.id"
-            class="spec-opt" :class="{ active: selectedValues[spec.id] === val.id }"
-            @click="selectValue(spec.id, val.id)"
-          >{{ val.value }}</button>
-        </div>
-      </div>
-      <div v-if="allSelected && !selectedSku" class="spec-unavail">{{ $t('pdp.skuUnavailable') }}</div>
-    </div>
-
-    <!-- 规格行 -->
-    <div class="pdp-blk">
-      <div class="cell">
-        <span class="k">{{ $t('pdp.delivery') }}</span><span class="v">{{ goods.shipFree ? $t('home.tagFreeShip') : $t('pdp.express') }} · {{ $t('pdp.shipTip') }}</span>
-      </div>
-      <div class="cell">
-        <span class="k">{{ $t('pdp.service') }}</span><span class="v">{{ $t('pdp.serviceDesc') }}</span>
-      </div>
-    </div>
-
-    <!-- 商品详情 -->
-    <div v-if="goods.goodsDesc || goods.goodsBrief" class="pdp-blk">
-      <div class="blk-title">{{ $t('pdp.navTitle') }}</div>
-      <div class="pdp-desc">{{ goods.goodsDesc || goods.goodsBrief }}</div>
-    </div>
-
-    <!-- 评价 -->
-    <div class="pdp-blk">
-      <div class="blk-title pdp-rv-hd">
-        <span>{{ $t('review.sectionTitle') }}</span>
-        <span v-if="reviews.total" class="pdp-rv-agg">★ {{ reviews.avgRating.toFixed(1) }} · {{ $t('review.countLabel', { n: reviews.total }) }}</span>
-      </div>
-      <div v-if="reviews.data.length" class="pdp-rv-list">
-        <div v-for="(r, i) in reviews.data" :key="i" class="pdp-rv-item">
-          <div class="pdp-rv-top">
-            <span class="pdp-rv-user">{{ r.nickname }}</span>
-            <span class="pdp-rv-stars">{{ '★'.repeat(r.rating) }}<span class="pdp-rv-off">{{ '★'.repeat(5 - r.rating) }}</span></span>
+      <template v-else>
+        <section class="product-primary">
+          <div class="product-gallery">
+            <van-swipe v-if="heroImages.length" :autoplay="heroImages.length > 1 ? 5000 : 0" lazy-render @change="onSwipe">
+              <van-swipe-item v-for="(image, index) in heroImages" :key="index">
+                <van-image class="hero-image" :src="image" fit="contain" :alt="goods.name">
+                  <template #loading><div class="gallery-placeholder"><van-loading type="spinner" /></div></template>
+                  <template #error><div class="gallery-placeholder">{{ $t('pdp.noImage') }}</div></template>
+                </van-image>
+              </van-swipe-item>
+              <template #indicator><span /></template>
+            </van-swipe>
+            <div v-else class="gallery-placeholder">{{ $t('pdp.noImage') }}</div>
+            <span v-if="heroImages.length > 1" class="hero-pager">{{ heroIdx + 1 }} / {{ heroImages.length }}</span>
           </div>
-          <div v-if="r.content" class="pdp-rv-content">{{ r.content }}</div>
-          <div v-if="r.images?.length" class="pdp-rv-images">
-            <van-image v-for="url in r.images" :key="url" :src="url" fit="cover" @click="showReviewImages(r.images, url)" />
-          </div>
-          <div v-if="r.merchantReply" class="pdp-rv-reply"><strong>{{ $t('review.merchantReply') }}</strong><span>{{ r.merchantReply }}</span></div>
-          <div class="pdp-rv-time">{{ r.createdAt.slice(0, 10) }}</div>
-        </div>
-      </div>
-      <div v-else class="pdp-rv-empty">{{ $t('review.empty') }}</div>
-    </div>
 
-    <!-- 猜你喜欢 -->
-    <div v-if="recos.length" class="pdp-reco">
-      <div class="reco-title">— {{ $t('home.recommendSub') }} —</div>
-      <div class="reco-grid">
-        <div v-for="r in recos" :key="r.id" class="rcard" @click="goDetail(r.id)">
-          <van-image class="rcard-img" :src="r.goodsFrontImage" fit="cover">
-            <template #error><div class="hero-ph sm">{{ $t('pdp.noImage') }}</div></template>
-          </van-image>
-          <div class="rcard-body">
-            <div class="rcard-title">{{ r.name }}</div>
-            <div class="rcard-price"><span class="pp-cur">¥</span><span class="pp-int">{{ priceParts(r.shopPrice).int }}</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
+          <div class="purchase-panel">
+            <div v-if="goods.isHot || goods.isNew || goods.shipFree" class="product-tags">
+              <span v-if="goods.isHot">{{ $t('home.tagHot') }}</span>
+              <span v-if="goods.isNew">{{ $t('home.tagNew') }}</span>
+              <span v-if="goods.shipFree">{{ $t('home.tagFreeShip') }}</span>
+            </div>
 
-    <!-- 底部双 CTA -->
-    <div class="pdp-bar">
-      <div ref="cartIconRef" class="bar-ic" :class="{ bump: cartBump }" @click="navigateTo('/cart')">
-        <svg viewBox="0 0 24 24"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7.2 14.6l.9-1.6h7.5c.7 0 1.4-.4 1.7-1L21 4H6.2L5.3 2H2v2h2z"/></svg><span>{{ $t('nav.cart') }}</span>
-      </div>
-      <button ref="addBtnRef" class="btn-cart" @click="onAddCart">{{ $t('common.addToCart') }}</button>
-      <button class="btn-buy" @click="onBuyNow">{{ $t('pdp.buyNow') }}</button>
+            <h1>{{ goods.name }}</h1>
+
+            <div class="price-row">
+              <span v-if="hasSpecs && !selectedSku" class="price-from">{{ $t('pdp.priceFrom') }}</span>
+              <span class="price"><small>¥</small>{{ priceParts(displayPrice).int }}<sup>.{{ priceParts(displayPrice).dec }}</sup></span>
+              <del v-if="!hasSpecs && goods.marketPrice > goods.shopPrice">¥{{ goods.marketPrice }}</del>
+            </div>
+
+            <ul class="trust-list">
+              <li><PhShieldCheck :size="20" /><span>{{ $t('login.perkGenuine') }}</span></li>
+              <li><PhArrowUUpLeft :size="20" /><span>{{ $t('login.perkRefund') }}</span></li>
+              <li><PhTruck :size="20" /><span>{{ $t('pdp.shipTip') }}</span></li>
+            </ul>
+
+            <section v-if="hasSpecs" class="specs" :aria-label="$t('pdp.selectSpec')">
+              <div v-for="spec in specs" :key="spec.id" class="spec-group">
+                <h2>{{ spec.name }}</h2>
+                <div class="spec-options">
+                  <button
+                    v-for="value in spec.values"
+                    :key="value.id"
+                    type="button"
+                    :class="{ active: selectedValues[spec.id] === value.id }"
+                    :aria-pressed="selectedValues[spec.id] === value.id"
+                    @click="selectValue(spec.id, value.id)"
+                  >{{ value.value }}</button>
+                </div>
+              </div>
+              <p v-if="allSelected && !selectedSku" class="spec-error" role="alert">{{ $t('pdp.skuUnavailable') }}</p>
+            </section>
+
+            <dl class="fulfilment-list">
+              <div><dt>{{ $t('pdp.delivery') }}</dt><dd>{{ goods.shipFree ? $t('home.tagFreeShip') : $t('pdp.express') }} · {{ $t('pdp.shipTip') }}</dd></div>
+              <div><dt>{{ $t('pdp.service') }}</dt><dd>{{ $t('pdp.serviceDesc') }}</dd></div>
+            </dl>
+
+            <div class="desktop-purchase-actions">
+              <button type="button" class="button-secondary" @click="onAddCart">{{ $t('common.addToCart') }}</button>
+              <button type="button" class="button-primary" @click="onBuyNow">{{ $t('pdp.buyNow') }}</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="details-layout">
+          <article class="detail-section">
+            <span class="section-eyebrow">PRODUCT INFORMATION</span>
+            <h2>{{ $t('pdp.navTitle') }}</h2>
+            <p v-if="goods.goodsDesc || goods.goodsBrief" class="product-description">{{ goods.goodsDesc || goods.goodsBrief }}</p>
+            <p v-else class="empty-copy">{{ $t('pdp.noImage') }}</p>
+          </article>
+
+          <article class="detail-section reviews-section">
+            <div class="review-heading">
+              <div>
+                <span class="section-eyebrow">REVIEWS</span>
+                <h2>{{ $t('review.sectionTitle') }}</h2>
+              </div>
+              <span v-if="reviews.total" class="review-score">★ {{ reviews.avgRating.toFixed(1) }} · {{ $t('review.countLabel', { n: reviews.total }) }}</span>
+            </div>
+
+            <div v-if="reviews.data.length" class="review-list">
+              <article v-for="(review, index) in reviews.data" :key="index" class="review-item">
+                <div class="review-meta">
+                  <strong>{{ review.nickname }}</strong>
+                  <span :aria-label="`${review.rating}/5`">{{ '★'.repeat(review.rating) }}<i>{{ '★'.repeat(5 - review.rating) }}</i></span>
+                </div>
+                <p v-if="review.content">{{ review.content }}</p>
+                <div v-if="review.images?.length" class="review-images">
+                  <button
+                    v-for="url in review.images"
+                    :key="url"
+                    type="button"
+                    :aria-label="$t('review.addPhotos')"
+                    @click="showReviewImages(review.images, url)"
+                  ><van-image :src="url" fit="cover" :alt="$t('review.addPhotos')" /></button>
+                </div>
+                <div v-if="review.merchantReply" class="merchant-reply">
+                  <strong>{{ $t('review.merchantReply') }}</strong>
+                  <span>{{ review.merchantReply }}</span>
+                </div>
+                <time>{{ (review.createdAt || '').slice(0, 10) }}</time>
+              </article>
+            </div>
+            <p v-else class="empty-copy">{{ $t('review.empty') }}</p>
+          </article>
+        </section>
+
+        <section v-if="recos.length" class="recommendations">
+          <div class="recommendation-heading">
+            <span class="section-eyebrow">YOU MAY ALSO LIKE</span>
+            <h2>{{ $t('home.recommendSub') }}</h2>
+          </div>
+          <div class="recommendation-grid">
+            <NuxtLink v-for="item in recos" :key="item.id" :to="`/goods/${item.id}`" class="recommendation-card">
+              <van-image class="recommendation-image" :src="item.goodsFrontImage" fit="cover" :alt="item.name">
+                <template #error><div class="gallery-placeholder small">{{ $t('pdp.noImage') }}</div></template>
+              </van-image>
+              <h3>{{ item.name }}</h3>
+              <span class="recommendation-price">¥{{ priceParts(item.shopPrice).int }}</span>
+            </NuxtLink>
+          </div>
+        </section>
+      </template>
+    </main>
+
+    <div v-if="goods.name" class="mobile-purchase-bar">
+      <NuxtLink to="/cart" class="cart-link" :aria-label="$t('nav.cart')"><PhShoppingBag :size="22" /><span>{{ $t('nav.cart') }}</span></NuxtLink>
+      <button type="button" class="button-secondary" @click="onAddCart">{{ $t('common.addToCart') }}</button>
+      <button type="button" class="button-primary" @click="onBuyNow">{{ $t('pdp.buyNow') }}</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import {
+  PhArrowLeft,
+  PhArrowUUpLeft,
+  PhCloudSlash,
+  PhHeart,
+  PhShieldCheck,
+  PhShoppingBag,
+  PhTruck,
+} from '@phosphor-icons/vue'
 import { showImagePreview, showToast } from 'vant'
 
 definePageMeta({ layout: 'blank' })
@@ -140,64 +189,51 @@ const { tenantId } = useTenant()
 const route = useRoute()
 
 const heroIdx = ref(0)
-function onSwipe(i: number) { heroIdx.value = i }
-
-function priceParts(n: number) {
-  const v = Number(n || 0).toFixed(2)
-  const [int = '0', dec = '00'] = v.split('.')
+function onSwipe(index: number) { heroIdx.value = index }
+function priceParts(value: number) {
+  const [int = '0', dec = '00'] = Number(value || 0).toFixed(2).split('.')
   return { int, dec }
 }
 
-// 真实商品数据
-const { data: goods } = await useAsyncData(`goods-${route.params.id}`, async () => {
-  try {
-    const res = await $fetch<{ code: number; data: any }>(
-      `${config.public.apiBase}/v1/goods/${route.params.id}`,
-      { params: { tenant_id: tenantId } },
-    )
-    if (res.code === 200 && res.data) return res.data
-  } catch (e) { console.warn('goods detail:', e) }
-  return {}
+const { data: goods, status, refresh } = await useAsyncData(`goods-${route.params.id}`, async () => {
+  const res = await $fetch<{ code: number; data: any }>(
+    `${config.public.apiBase}/v1/goods/${route.params.id}`,
+    { params: { tenant_id: tenantId } },
+  )
+  if (res.code === 200 && res.data) return res.data
+  throw new Error('Product unavailable')
 }, {
-  server: false, // 客户端拉取（走 Vite dev 代理到本地网关；SSR 相对路径拿不到）
+  server: false,
   default: () => ({ name: '', shopPrice: 0, marketPrice: 0, images: [], goodsFrontImage: '' }),
 })
 
 const heroImages = computed(() => {
-  const imgs = (goods.value?.images || []).filter(Boolean)
-  if (imgs.length) return imgs
+  const images = (goods.value?.images || []).filter(Boolean)
+  if (images.length) return images
   return goods.value?.goodsFrontImage ? [goods.value.goodsFrontImage] : []
 })
 
-// ── SKU/规格 ──
 const { loadSpecs, loadSkus, matchSku } = useSkus()
 const specs = ref<GoodsSpec[]>([])
 const skus = ref<GoodsSku[]>([])
-const selectedValues = ref<Record<number, number>>({}) // spec_id -> value_id
+const selectedValues = ref<Record<number, number>>({})
 const hasSpecs = computed(() => specs.value.length > 0)
-const selectedValueIds = computed(() => specs.value.map(s => selectedValues.value[s.id]).filter(Boolean) as number[])
+const selectedValueIds = computed(() => specs.value.map(spec => selectedValues.value[spec.id]).filter(Boolean) as number[])
 const allSelected = computed(() => hasSpecs.value && selectedValueIds.value.length === specs.value.length)
 const selectedSku = computed(() => allSelected.value ? matchSku(skus.value, selectedValueIds.value) : null)
 const skuSpecLabel = computed(() => specs.value
-  .map(s => s.values.find(x => x.id === selectedValues.value[s.id])?.value)
-  .filter(Boolean).join(','))
-// 展示价：选中 SKU→SKU价；未选的 SKU 商品→最低价起；扁平→goods.shopPrice
+  .map(spec => spec.values.find(value => value.id === selectedValues.value[spec.id])?.value)
+  .filter(Boolean)
+  .join(','))
 const displayPrice = computed(() => {
   if (selectedSku.value) return selectedSku.value.shop_price
-  if (hasSpecs.value && skus.value.length) return Math.min(...skus.value.map(s => s.shop_price))
+  if (hasSpecs.value && skus.value.length) return Math.min(...skus.value.map(sku => sku.shop_price))
   return goods.value?.shopPrice || 0
 })
 function selectValue(specId: number, valueId: number) {
   selectedValues.value = { ...selectedValues.value, [specId]: valueId }
 }
-onMounted(async () => {
-  try {
-    const [sp, sk] = await Promise.all([loadSpecs(route.params.id as string), loadSkus(route.params.id as string)])
-    specs.value = sp; skus.value = sk
-  } catch (e) { console.warn('skus:', e) }
-})
 
-// 猜你喜欢：真实热卖商品
 const recos = ref<any[]>([])
 async function fetchRecos() {
   try {
@@ -206,58 +242,64 @@ async function fetchRecos() {
       { params: { page: 1, pageSize: 6, isHot: true, tenant_id: tenantId } },
     )
     if (res.code === 200 && res.data?.data) {
-      recos.value = res.data.data.filter((g: any) => String(g.id) !== String(route.params.id)).slice(0, 4)
+      recos.value = res.data.data.filter(item => String(item.id) !== String(route.params.id)).slice(0, 4)
     }
-  } catch (e) { console.warn('recos:', e) }
+  } catch {
+    recos.value = []
+  }
 }
-onMounted(fetchRecos)
 
-// 评价列表 + 聚合
 const { getGoodsReviews } = useReviews()
 const reviews = ref<GoodsReviews>({ avgRating: 0, total: 0, data: [] })
 async function fetchReviews() {
   try {
     reviews.value = await getGoodsReviews(route.params.id as string, tenantId as number, 1, 20)
-  } catch (e) { console.warn('reviews:', e) }
+  } catch {
+    reviews.value = { avgRating: 0, total: 0, data: [] }
+  }
 }
-onMounted(fetchReviews)
 
-function goDetail(id: number) { navigateTo(`/goods/${id}`) }
-function showReviewImages(images: string[], current: string) { showImagePreview({ images, startPosition: Math.max(0, images.indexOf(current)), closeable: true }) }
+function showReviewImages(images: string[], current: string) {
+  showImagePreview({ images, startPosition: Math.max(0, images.indexOf(current)), closeable: true })
+}
 
 useSeoMeta({
-  title: () => `${goods.value?.name || '商品'} - ZShop`,
+  title: () => `${goods.value?.name || t('pdp.navTitle')} - ZShop`,
   ogImage: () => heroImages.value[0] ?? '',
 })
 
-// 加购/购买：真实对接 order-web /v1/cart
 const { apiFetch } = useApi()
 const { isLoggedIn } = useAuth()
 const { refresh: refreshCart } = useCartCount()
-
-// 收藏
 const { check: checkFav, add: addFav, remove: removeFav } = useFav()
 const faved = ref(false)
-onMounted(async () => { faved.value = await checkFav(Number(route.params.id)) })
+
+function requireLogin(): boolean {
+  if (isLoggedIn.value) return true
+  showToast(t('common.loginRequired'))
+  navigateTo(`/login?redirect=/goods/${route.params.id}`)
+  return false
+}
+
 async function onToggleFav() {
   if (!requireLogin()) return
   const id = Number(route.params.id)
   try {
-    if (faved.value) { await removeFav(id); faved.value = false; showToast(t('user.favRemoved')) }
-    else { await addFav(id); faved.value = true; showToast(t('user.favAdded')) }
-  } catch (e: any) { showToast(e?.data?.msg || e?.message || t('user.favActionFailed')) }
+    if (faved.value) {
+      await removeFav(id)
+      faved.value = false
+      showToast(t('user.favRemoved'))
+    } else {
+      await addFav(id)
+      faved.value = true
+      showToast(t('user.favAdded'))
+    }
+  } catch (error: any) {
+    showToast(error?.data?.msg || error?.message || t('user.favActionFailed'))
+  }
 }
 
-function requireLogin(): boolean {
-  if (!isLoggedIn.value) {
-    showToast(t('common.loginRequired'))
-    navigateTo(`/login?redirect=/goods/${route.params.id}`)
-    return false
-  }
-  return true
-}
 async function addToCart(): Promise<boolean> {
-  // SKU 商品必须选全规格且命中可用 SKU
   if (hasSpecs.value) {
     if (!allSelected.value) { showToast(t('pdp.selectSpec')); return false }
     if (!selectedSku.value) { showToast(t('pdp.skuUnavailable')); return false }
@@ -272,164 +314,166 @@ async function addToCart(): Promise<boolean> {
     await apiFetch<{ id: number; msg: string }>('/v1/cart', { method: 'POST', body })
     await refreshCart()
     return true
-  } catch (e: any) {
-    showToast(e?.data?.msg || e?.message || t('common.addToCartFailed'))
+  } catch (error: any) {
+    showToast(error?.data?.msg || error?.message || t('common.addToCartFailed'))
     return false
   }
 }
-// 飞入购物车动画
-const cartIconRef = ref<HTMLElement | null>(null)
-const addBtnRef = ref<HTMLElement | null>(null)
-const cartBump = ref(false)
-function flyToCart() {
-  if (!import.meta.client) return
-  const cart = cartIconRef.value?.getBoundingClientRect()
-  const btn = addBtnRef.value?.getBoundingClientRect()
-  if (!cart || !btn) return
-  const sx = btn.left + btn.width / 2
-  const sy = btn.top + btn.height / 2
-  const dx = (cart.left + cart.width / 2) - sx
-  const dy = (cart.top + cart.height / 2) - sy
-  const ball = document.createElement('div')
-  ball.style.cssText = `position:fixed;left:${sx}px;top:${sy}px;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:linear-gradient(135deg,#e6cd8f,#a9822f);box-shadow:0 5px 14px rgba(169,130,47,.6);z-index:9999;pointer-events:none;`
-  document.body.appendChild(ball)
-  const anim = ball.animate([
-    { transform: 'translate(0,0) scale(1)', opacity: 1, offset: 0 },
-    { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 90}px) scale(.95)`, opacity: 1, offset: 0.5 },
-    { transform: `translate(${dx}px,${dy}px) scale(.25)`, opacity: .35, offset: 1 },
-  ], { duration: 680, easing: 'cubic-bezier(.45,-0.25,.7,1)' })
-  anim.onfinish = () => {
-    ball.remove()
-    cartBump.value = true
-    setTimeout(() => { cartBump.value = false }, 420)
-  }
-}
+
 async function onAddCart() {
   if (!requireLogin()) return
-  if (await addToCart()) { flyToCart(); showToast(t('common.addedToCart')) }
+  if (await addToCart()) showToast(t('common.addedToCart'))
 }
 async function onBuyNow() {
   if (!requireLogin()) return
   if (await addToCart()) navigateTo('/cart')
 }
+
+onMounted(async () => {
+  await Promise.all([
+    fetchRecos(),
+    fetchReviews(),
+    (async () => {
+      try {
+        const [loadedSpecs, loadedSkus] = await Promise.all([
+          loadSpecs(route.params.id as string),
+          loadSkus(route.params.id as string),
+        ])
+        specs.value = loadedSpecs
+        skus.value = loadedSkus
+      } catch {
+        specs.value = []
+        skus.value = []
+      }
+    })(),
+  ])
+  faved.value = await checkFav(Number(route.params.id))
+})
 </script>
 
 <style scoped>
-.pdp {
-  background-color: var(--color-bg-page);
-  min-height: 100vh;
-  padding-bottom: 66px;
-  transition: var(--theme-transition);
-}
-
-/* 顶栏 */
+.pdp-page { min-height: 100vh; padding-bottom: 76px; background: var(--color-bg-page); }
 .pdp-nav {
-  position: sticky; top: 0; z-index: 20;
-  height: 48px; display: flex; align-items: center; padding: 0 12px; gap: 8px;
-  background: var(--color-bg-card); border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  height: 60px;
+  display: grid;
+  grid-template-columns: 44px auto 1fr 44px;
+  align-items: center;
+  gap: var(--space-xs);
+  padding-inline: var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in oklch, var(--color-bg-card) 94%, transparent);
+  backdrop-filter: blur(16px);
 }
-.nav-btn { width: 34px; height: 34px; border-radius: 50%; background: var(--color-bg-page); display: flex; align-items: center; justify-content: center; }
-.nav-btn svg { width: 18px; height: 18px; fill: var(--color-text-primary); }
-.nav-btn.is-faved { background: var(--color-primary-soft); }
-.nav-btn.is-faved svg { fill: var(--color-primary); }
-.nav-btn:active { transform: scale(.9); }
-.nav-title { flex: 1; text-align: center; font-weight: 700; font-size: 15px; color: var(--color-text-primary); }
+.nav-button { width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid var(--color-border); border-radius: 50%; background: var(--color-bg-card); color: var(--color-text-primary); cursor: pointer; }
+.nav-button.active { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-primary-dark); }
+.nav-brand { display: none; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 760; }
+.nav-brand img { border-radius: 9px; }
+.nav-title { min-width: 0; text-align: center; font-family: var(--font-display); font-size: 17px; font-weight: 670; }
+.pdp-shell { width: min(100%, var(--page-max)); margin-inline: auto; padding: var(--space-sm) var(--space-sm) var(--space-2xl); }
+.product-primary { display: grid; gap: var(--space-sm); }
+.product-gallery { position: relative; min-width: 0; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-card); }
+.hero-image,
+.gallery-placeholder { width: 100%; aspect-ratio: 1; display: grid; place-items: center; }
+.hero-image :deep(img) { padding: var(--space-md); }
+.gallery-placeholder { background: var(--color-search-bg); color: var(--color-text-secondary); }
+.gallery-placeholder.small { height: 100%; aspect-ratio: auto; font-size: 12px; }
+.hero-pager { position: absolute; right: var(--space-sm); bottom: var(--space-sm); padding: 5px 9px; border: 1px solid var(--color-border); border-radius: 14px; background: var(--color-bg-card); color: var(--color-text-secondary); font-size: 11px; font-variant-numeric: tabular-nums; }
+.purchase-panel { padding: var(--space-lg) var(--space-md); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-card); }
+.product-tags { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-bottom: var(--space-sm); }
+.product-tags span { color: var(--color-primary-dark); font-size: 12px; font-weight: 670; }
+.product-tags span + span::before { content: '·'; margin-right: 12px; color: var(--color-border-strong); }
+.purchase-panel h1 { margin: 0; font-family: var(--font-display); font-size: clamp(24px, 6vw, 36px); font-weight: 640; line-height: 1.22; letter-spacing: -0.035em; overflow-wrap: anywhere; }
+.price-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px 10px; margin-top: var(--space-lg); }
+.price { color: var(--color-price); font-family: var(--font-display); font-size: 36px; font-weight: 740; line-height: 1; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.price small,
+.price sup { font-size: 15px; font-weight: 650; }
+.price-from { color: var(--color-text-secondary); font-size: 12px; }
+.price-row del { color: var(--color-text-tertiary); font-size: 13px; }
+.trust-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin: var(--space-lg) 0 0; padding: 0; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-border); list-style: none; }
+.trust-list li { min-width: 0; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 8px 5px; background: var(--color-bg-page); color: var(--color-text-secondary); text-align: center; font-size: 11px; }
+.trust-list svg { color: var(--color-primary-dark); flex: 0 0 auto; }
+.specs { display: flex; flex-direction: column; gap: var(--space-md); margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--color-border); }
+.spec-group h2 { margin: 0 0 var(--space-xs); color: var(--color-text-secondary); font-size: 13px; font-weight: 650; }
+.spec-options { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.spec-options button { min-height: 44px; padding: 8px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg-card); color: var(--color-text-primary); cursor: pointer; font-size: 13px; }
+.spec-options button.active { border-color: var(--color-primary-dark); background: var(--color-primary-soft); color: var(--color-primary-dark); font-weight: 650; }
+.spec-error { margin: 0; color: var(--color-price); font-size: 13px; }
+.fulfilment-list { margin: var(--space-lg) 0 0; border-top: 1px solid var(--color-border); }
+.fulfilment-list div { display: grid; grid-template-columns: 64px 1fr; gap: var(--space-sm); padding: var(--space-sm) 0; border-bottom: 1px solid var(--color-border); }
+.fulfilment-list dt { color: var(--color-text-secondary); font-size: 13px; }
+.fulfilment-list dd { margin: 0; color: var(--color-text-primary); font-size: 13px; line-height: 1.5; }
+.desktop-purchase-actions { display: none; grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); margin-top: var(--space-lg); }
+.button-primary,
+.button-secondary { min-height: 48px; padding-inline: var(--space-md); border-radius: var(--radius-md); cursor: pointer; font-weight: 700; }
+.button-primary { border: 1px solid var(--color-accent-ink); background: var(--color-accent-ink); color: var(--color-text-inverse); }
+.button-secondary { border: 1px solid var(--color-border-strong); background: var(--color-bg-card); color: var(--color-primary-dark); }
+.details-layout { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+.detail-section { padding: var(--space-lg) var(--space-md); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-card); }
+.section-eyebrow { color: var(--color-primary-dark); font-family: var(--font-display); font-size: 10px; font-weight: 720; letter-spacing: .12em; }
+.detail-section h2,
+.recommendation-heading h2 { margin: 5px 0 0; font-family: var(--font-display); font-size: 24px; letter-spacing: -0.035em; }
+.product-description { max-width: 72ch; margin: var(--space-md) 0 0; color: var(--color-text-secondary); font-size: 14px; line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; }
+.empty-copy { margin: var(--space-md) 0 0; color: var(--color-text-secondary); font-size: 14px; }
+.review-heading { display: flex; align-items: end; justify-content: space-between; gap: var(--space-md); }
+.review-score { color: var(--color-primary-dark); font-size: 13px; font-weight: 650; }
+.review-list { display: flex; flex-direction: column; gap: var(--space-md); margin-top: var(--space-lg); }
+.review-item { padding-bottom: var(--space-md); border-bottom: 1px solid var(--color-border); }
+.review-item:last-child { padding-bottom: 0; border-bottom: 0; }
+.review-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+.review-meta strong { font-size: 13px; }
+.review-meta > span { color: var(--color-primary-dark); font-size: 12px; letter-spacing: 1px; }
+.review-meta i { color: var(--color-border-strong); font-style: normal; }
+.review-item > p { margin: var(--space-xs) 0 0; font-size: 14px; line-height: 1.65; }
+.review-item time { display: block; margin-top: var(--space-xs); color: var(--color-text-tertiary); font-size: 11px; }
+.review-images { display: grid; grid-template-columns: repeat(4, minmax(0, 72px)); gap: var(--space-xs); margin-top: var(--space-sm); }
+.review-images button { aspect-ratio: 1; overflow: hidden; padding: 0; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-search-bg); cursor: pointer; }
+.review-images :deep(.van-image) { width: 100%; height: 100%; }
+.merchant-reply { display: flex; flex-direction: column; gap: 4px; margin-top: var(--space-sm); padding: var(--space-sm); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-primary-soft); color: var(--color-text-secondary); font-size: 13px; line-height: 1.55; }
+.merchant-reply strong { color: var(--color-primary-dark); font-size: 11px; }
+.recommendations { margin-top: var(--space-xl); }
+.recommendation-heading { margin-bottom: var(--space-md); }
+.recommendation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm); }
+.recommendation-card { min-width: 0; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-card); }
+.recommendation-image { width: 100%; aspect-ratio: 1; display: block; background: var(--color-search-bg); }
+.recommendation-card h3 { min-height: 42px; margin: var(--space-sm) var(--space-sm) 0; font-size: 14px; font-weight: 560; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.recommendation-price { display: block; margin: var(--space-xs) var(--space-sm) var(--space-sm); color: var(--color-price); font-family: var(--font-display); font-size: 19px; font-weight: 720; }
+.mobile-purchase-bar { position: fixed; inset-inline: 0; bottom: 0; z-index: 100; min-height: 68px; display: grid; grid-template-columns: 52px 1fr 1fr; align-items: center; gap: var(--space-xs); padding: 9px var(--space-sm) calc(9px + env(safe-area-inset-bottom)); border-top: 1px solid var(--color-border); background: color-mix(in oklch, var(--color-bg-card) 96%, transparent); backdrop-filter: blur(16px); }
+.mobile-purchase-bar .button-primary,
+.mobile-purchase-bar .button-secondary { min-width: 0; min-height: 46px; padding-inline: var(--space-xs); font-size: 14px; }
+.cart-link { min-width: 44px; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--color-text-secondary); font-size: 10px; }
+.pdp-loading { display: grid; gap: var(--space-sm); }
+.loading-media { aspect-ratio: 1; border-radius: var(--radius-lg); background: var(--color-search-bg); }
+.loading-copy { display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-lg); border-radius: var(--radius-lg); background: var(--color-bg-card); }
+.loading-copy span { height: 18px; border-radius: 5px; background: var(--color-search-bg); }
+.loading-copy span:nth-child(2) { width: 72%; }
+.loading-copy span:nth-child(3) { width: 48%; }
+.state-panel { min-height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-sm); color: var(--color-text-secondary); text-align: center; }
+.state-panel p { margin: 0; }
+.state-panel button { min-height: 44px; padding-inline: 18px; border: 0; border-radius: var(--radius-md); background: var(--color-accent-ink); color: var(--color-text-inverse); cursor: pointer; font-weight: 680; }
 
-/* Hero */
-.pdp-hero { position: relative; background: var(--color-bg-card); }
-.hero-img { width: 100%; height: 390px; display: block; }
-.hero-ph { width: 100%; height: 390px; display: flex; align-items: center; justify-content: center; color: var(--color-text-tertiary); background: var(--color-bg-page); }
-.hero-ph.sm { height: 100%; }
-.hero-pager { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,.45); color: #fff; font-size: 11px; padding: 3px 10px; border-radius: 20px; }
-
-/* 价格条 */
-.pdp-pricebar { background: linear-gradient(120deg, var(--color-primary), var(--color-primary-light)); color: #fff; padding: 14px 16px; }
-.pb-price { display: flex; align-items: baseline; }
-.pb-cur { font-size: 15px; font-weight: 700; }
-.pb-price b { font-size: 30px; font-weight: 800; }
-.pb-dec { font-size: 14px; font-weight: 700; }
-.pb-old { text-decoration: line-through; opacity: .85; font-size: 13px; margin-left: 8px; }
-.pb-row { display: flex; gap: 6px; margin-top: 8px; }
-.pb-chip { background: #fff; color: var(--color-primary); border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
-
-/* 区块 */
-.pdp-blk { background: var(--color-bg-card); margin-top: 8px; padding: 14px 16px; }
-.pb-from { font-size: 12px; color: var(--color-text-secondary, #999); margin-right: 3px; align-self: flex-end; margin-bottom: 4px; }
-.pdp-specs { display: flex; flex-direction: column; gap: 14px; }
-.spec-dim { display: flex; flex-direction: column; gap: 8px; }
-.spec-name { font-size: 13px; color: var(--color-text-secondary, #888); font-weight: 600; }
-.spec-opts { display: flex; flex-wrap: wrap; gap: 8px; }
-.spec-opt {
-  border: 1px solid var(--color-border, #ddd); background: var(--color-bg-card, #fff);
-  color: var(--color-text, #222); border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer;
-  transition: all .15s;
+@media (min-width: 600px) {
+  .pdp-shell { padding-inline: var(--space-lg); }
+  .recommendation-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-md); }
 }
-.spec-opt.active { border-color: var(--color-primary); color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 8%, transparent); font-weight: 600; }
-.spec-unavail { font-size: 12px; color: #e33; }
-.pdp-title { font-size: 16px; font-weight: 700; line-height: 1.5; color: var(--color-text-primary); }
-.pdp-trust { display: flex; gap: 8px; margin-top: 10px; }
-.pdp-trust span { font-size: 11px; color: var(--color-primary); background: var(--color-primary-soft); padding: 3px 8px; border-radius: 4px; }
-.blk-title { font-size: 15px; font-weight: 700; color: var(--color-text-primary); margin-bottom: 8px; }
-.pdp-desc { font-size: 14px; line-height: 1.7; color: var(--color-text-secondary); white-space: pre-wrap; word-break: break-word; }
 
-/* ---- 评价区块 ---- */
-.pdp-rv-hd { display: flex; align-items: baseline; justify-content: space-between; }
-.pdp-rv-agg { font-size: 13px; font-weight: 600; color: #d9a441; }
-.pdp-rv-list { display: flex; flex-direction: column; gap: 14px; }
-.pdp-rv-item { border-bottom: 1px solid var(--color-border, rgba(0,0,0,.06)); padding-bottom: 12px; }
-.pdp-rv-item:last-child { border-bottom: 0; padding-bottom: 0; }
-.pdp-rv-top { display: flex; align-items: center; justify-content: space-between; }
-.pdp-rv-user { font-size: 13px; color: var(--color-text-secondary); }
-.pdp-rv-stars { font-size: 13px; color: #e3ba7d; letter-spacing: 1px; }
-.pdp-rv-off { color: var(--color-border, rgba(0,0,0,.15)); }
-.pdp-rv-content { font-size: 14px; line-height: 1.6; color: var(--color-text-primary); margin-top: 7px; word-break: break-word; }
-.pdp-rv-images { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-top: 9px; }
-.pdp-rv-images :deep(.van-image) { aspect-ratio: 1; border-radius: 8px; overflow: hidden; }
-.pdp-rv-reply { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; padding: 10px 12px; border-left: 2px solid #d5ac6d; background: rgba(213,172,109,.08); color: var(--color-text-secondary); font-size: 13px; line-height: 1.5; }
-.pdp-rv-reply strong { color: #b18444; font-size: 11px; }
-.pdp-rv-time { font-size: 11px; color: var(--color-text-secondary); margin-top: 6px; opacity: .7; }
-.pdp-rv-empty { font-size: 13px; color: var(--color-text-secondary); text-align: center; padding: 12px 0; }
-
-.cell { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--color-border); font-size: 14px; }
-.cell:last-child { border-bottom: 0; }
-.cell .k { color: var(--color-text-tertiary); width: 56px; flex: 0 0 56px; }
-.cell .v { flex: 1; color: var(--color-text-primary); }
-.cell .arr { color: var(--color-text-tertiary); }
-
-/* 猜你喜欢 */
-.pdp-reco { padding: 14px 12px; }
-.reco-title { text-align: center; font-size: 14px; font-weight: 700; color: var(--color-text-secondary); margin-bottom: 12px; }
-.reco-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.rcard { background: var(--color-bg-card); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,.04); }
-.rcard-img { width: 100%; aspect-ratio: 1/1; display: block; background: var(--color-bg-page); }
-.rcard-body { padding: 8px 10px 10px; }
-.rcard-title { font-size: 13px; line-height: 1.4; color: var(--color-text-primary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
-.rcard-price { color: var(--color-price); font-weight: 800; margin-top: 4px; }
-.pp-cur { font-size: 12px; } .pp-int { font-size: 18px; }
-
-/* 底部双 CTA */
-.pdp-bar {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px; height: 58px;
-  display: flex; align-items: center; padding: 0 12px; gap: 10px;
-  background: var(--color-bg-card); border-top: 1px solid var(--color-border); z-index: 100;
-}
-.bar-ic { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--color-text-secondary); width: 44px; }
-.bar-ic svg { width: 20px; height: 20px; fill: var(--color-text-secondary); }
-.btn-cart, .btn-buy { flex: 1; height: 42px; border: 0; font-weight: 800; font-size: 15px; }
-.btn-cart { border-radius: 21px 0 0 21px; color: var(--color-primary-dark);
-  background: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-page));
-  border: 1px solid color-mix(in srgb, var(--color-primary) 40%, transparent); }
-.btn-buy { border-radius: 0 21px 21px 0; color: #2a1f0a;
-  background: linear-gradient(135deg, #e6cd8f, #c9a24c 52%, #a9822f);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 40%, transparent); }
-.btn-cart:active, .btn-buy:active { transform: scale(.98); opacity: .92; }
-
-/* 购物车图标弹跳 */
-.bar-ic.bump { animation: cartBump .42s cubic-bezier(.34,1.56,.64,1); }
-.bar-ic.bump svg { fill: var(--color-primary); }
-@keyframes cartBump {
-  0%, 100% { transform: scale(1); }
-  35% { transform: scale(1.38) translateY(-2px); }
+@media (min-width: 900px) {
+  .pdp-page { padding-bottom: 0; }
+  .pdp-nav { height: 72px; grid-template-columns: 44px auto 1fr 44px; padding-inline: max(var(--space-lg), calc((100vw - var(--page-max)) / 2)); }
+  .nav-brand { display: flex; }
+  .nav-title { text-align: right; padding-right: var(--space-sm); }
+  .pdp-shell { padding-top: var(--space-xl); padding-bottom: var(--space-3xl); }
+  .product-primary { grid-template-columns: minmax(0, 1.12fr) minmax(360px, .88fr); gap: var(--space-xl); align-items: start; }
+  .product-gallery { position: sticky; top: 104px; }
+  .purchase-panel { padding: clamp(28px, 3vw, 44px); }
+  .purchase-panel h1 { font-size: clamp(30px, 3vw, 42px); }
+  .trust-list li { min-height: 76px; font-size: 12px; }
+  .desktop-purchase-actions { display: grid; }
+  .details-layout { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: var(--space-xl); margin-top: var(--space-xl); }
+  .detail-section { padding: var(--space-xl); }
+  .mobile-purchase-bar { display: none; }
+  .pdp-loading { grid-template-columns: 1fr .85fr; gap: var(--space-xl); }
 }
 </style>

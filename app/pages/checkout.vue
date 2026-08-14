@@ -271,17 +271,26 @@ async function submit() {
 .ck-bar-price i { font-size: 14px; font-style: normal; opacity: .85; }
 .ck-bar-count { font-size: 12px; color: var(--lux-text-3); }
 .ck-submit {
-  flex: 0 0 auto; min-width: 148px; height: 50px; border: 0; border-radius: 999px;
-  color: #1a0d05; font-size: 16px; font-weight: 700; letter-spacing: 2px;
-  background: linear-gradient(135deg, var(--lux-gold), var(--lux-accent-2) 45%, var(--lux-accent));
-  box-shadow: 0 8px 24px rgba(224,190,120,.5), inset 0 1px 0 rgba(255,255,255,.35);
+  flex: 0 0 auto; min-width: 148px; height: 50px; border: 0; border-radius: var(--radius-md);
+  color: var(--color-text-inverse); font-size: 16px; font-weight: 700;
+  background: var(--color-accent-ink);
+  box-shadow: none;
   display: grid; place-items: center;
   transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
 }
-.ck-submit:active { transform: translateY(1px) scale(.99); filter: brightness(.96); box-shadow: 0 4px 14px rgba(224,190,120,.42); }
+.ck-submit:active { transform: translateY(1px) scale(.99); }
 .ck-submit:disabled { opacity: .85; }
 .ck-spin { width: 20px; height: 20px; border: 2.5px solid rgba(26,13,5,.35); border-top-color: #1a0d05; border-radius: 50%; animation: ck-rot .7s linear infinite; }
 @keyframes ck-rot { to { transform: rotate(360deg); } }
+
+@media (max-width: 767px) {
+  .ck-bar { bottom: calc(64px + env(safe-area-inset-bottom)); }
+}
+
+@media (min-width: 768px) {
+  .ck-scroll { width: min(100%, 960px); margin-inline: auto; padding-inline: var(--space-lg); }
+  .ck-bar { max-width: 960px; }
+}
 
 @media (prefers-reduced-motion: reduce) { .ck-submit, .ck-spin { transition: none; animation: none; } }
 </style>

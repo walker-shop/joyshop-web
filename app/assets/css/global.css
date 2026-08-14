@@ -4,320 +4,234 @@
   box-sizing: border-box;
 }
 
-/* ========== Theme Variables ========== */
 :root {
-  /* Primary — Lux 香槟金主色（与交易/登录页统一） */
-  --color-primary: #a9822f;
-  --color-primary-dark: #8a6412;
-  --color-primary-light: #c9a24c;
-  --color-primary-soft: #f3ecdd; /* 浅金底：标签/选中背景 */
+  color-scheme: light;
+  --color-primary: oklch(0.56 0.105 75);
+  --color-primary-dark: oklch(0.43 0.085 73);
+  --color-primary-light: oklch(0.72 0.09 78);
+  --color-primary-soft: oklch(0.94 0.035 82);
+  --color-accent-ink: oklch(0.25 0.025 66);
 
-  /* 把设计 token 灌进 Vant，统一所有组件主色（消除默认蓝/紫） */
+  --color-bg-viewport: oklch(0.965 0.012 84);
+  --color-bg-page: oklch(0.975 0.01 84);
+  --color-bg-card: oklch(0.995 0.006 84);
+  --color-bg-sidebar: oklch(0.95 0.012 84);
+  --color-search-bg: oklch(0.945 0.012 84);
+  --color-navbar-bg: oklch(0.99 0.007 84);
+  --color-tabbar-bg: oklch(0.99 0.007 84);
+
+  --color-text-primary: oklch(0.22 0.018 64);
+  --color-text-secondary: oklch(0.43 0.018 64);
+  --color-text-tertiary: oklch(0.55 0.015 64);
+  --color-text-inverse: oklch(0.98 0.008 84);
+  --color-border: oklch(0.84 0.018 78);
+  --color-border-strong: oklch(0.72 0.025 75);
+  --color-price: oklch(0.48 0.12 45);
+  --color-coupon: var(--color-price);
+  --color-header-gradient-start: var(--color-primary-light);
+  --color-header-gradient-end: var(--color-primary);
+
+  --font-display: 'Archivo Variable', 'Noto Sans SC Variable', sans-serif;
+  --font-body: 'Noto Sans SC Variable', 'Noto Sans Thai Variable', sans-serif;
+
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --shadow-soft: 0 12px 36px oklch(0.26 0.02 64 / 0.08);
+  --shadow-float: 0 20px 60px oklch(0.2 0.02 64 / 0.12);
+  --page-max: 1600px;
+  --theme-transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+
   --van-primary-color: var(--color-primary);
   --van-button-primary-background: var(--color-primary);
   --van-button-primary-border-color: var(--color-primary);
-  --van-tabbar-item-active-color: var(--color-primary);
-  --van-tabbar-item-active-background: transparent;
-  --van-sidebar-selected-color: var(--color-primary);
+  --van-tabbar-item-active-color: var(--color-primary-dark);
+  --van-sidebar-selected-color: var(--color-primary-dark);
   --van-tag-primary-color: var(--color-primary);
   --van-price-color: var(--color-price);
-
-  /* Background — 暖砂燕麦（Lux 浅色） */
-  --color-bg-page: #e9e0d3;
-  --color-bg-card: #f6f1e8;
-  --color-bg-sidebar: #e9e0d3;
-  --color-bg-viewport: #ded3c2;
-
-  /* Text — Lux 深咖阶梯 */
-  --color-text-primary: #241f18;
-  --color-text-secondary: #6a6157;
-  --color-text-tertiary: #a09788;
-  --color-text-inverse: #ffffff;
-
-  /* Border & Divider */
-  --color-border: rgba(38, 28, 16, 0.12);
-
-  /* Component specific — 金价 + 香槟渐变 */
-  --color-price: #8a6412;
-  --color-coupon: #a9822f;
-  --color-header-gradient-start: #c9a24c;
-  --color-header-gradient-end: #a9822f;
-  --color-navbar-bg: #f6f1e8;
-  --color-tabbar-bg: #f6f1e8;
-  --color-search-bg: #ede6da;
-
-  /* PC 端手机框外的大背景（浅色：香槟丝绸）+ 柔化蒙版 */
-  --bg-desktop: url('/auth-bg-light.jpg');
-  --bg-scrim: radial-gradient(80% 90% at 50% 42%, rgba(233, 224, 211, 0.28), rgba(214, 201, 182, 0.62));
-
-  /* Shadow */
-  --shadow-app: 0 0 40px rgba(0, 0, 0, 0.15);
-
-  /* Transition */
-  --theme-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 html.dark {
-  --color-primary: #e3ba7d;
-  --color-primary-dark: #c39f52;
-  --color-primary-light: #ecd39a;
-  --color-primary-soft: #2a2015;
-  --van-primary-color: var(--color-primary);
-  --van-button-primary-background: var(--color-primary);
-  --van-button-primary-border-color: var(--color-primary);
-  --van-tabbar-item-active-color: var(--color-primary);
-  --van-sidebar-selected-color: var(--color-primary);
-
-  --color-bg-page: #0b0b0d;
-  --color-bg-card: #161619;
-  --color-bg-sidebar: #101013;
-  --color-bg-viewport: #000000;
-
-  --color-text-primary: #f4f4f6;
-  --color-text-secondary: #9b9ba6;
-  --color-text-tertiary: #63636e;
-  --color-text-inverse: #ffffff;
-
-  --color-border: rgba(255, 255, 255, 0.09);
-
-  --color-price: #e8cf9a;
-  --color-header-gradient-start: #dcbd76;
-  --color-header-gradient-end: #b8963f;
-  --color-navbar-bg: #161619;
-  --color-tabbar-bg: #161619;
-  --color-search-bg: #1d1d22;
-
-  /* PC 端大背景（深色：液态金 on 墨黑）+ 加深蒙版 */
-  --bg-desktop: url('/auth-bg-dark.jpg');
-  --bg-scrim: radial-gradient(80% 90% at 50% 42%, rgba(10, 10, 13, 0.42), rgba(4, 4, 6, 0.7));
-
-  --shadow-app: 0 0 40px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+  --color-primary: oklch(0.74 0.09 78);
+  --color-primary-dark: oklch(0.82 0.075 80);
+  --color-primary-light: oklch(0.66 0.08 76);
+  --color-primary-soft: oklch(0.3 0.035 70);
+  --color-accent-ink: oklch(0.94 0.016 82);
+  --color-bg-viewport: oklch(0.17 0.01 66);
+  --color-bg-page: oklch(0.19 0.012 66);
+  --color-bg-card: oklch(0.23 0.012 66);
+  --color-bg-sidebar: oklch(0.205 0.012 66);
+  --color-search-bg: oklch(0.27 0.012 66);
+  --color-navbar-bg: oklch(0.205 0.012 66);
+  --color-tabbar-bg: oklch(0.205 0.012 66);
+  --color-text-primary: oklch(0.94 0.008 82);
+  --color-text-secondary: oklch(0.75 0.012 78);
+  --color-text-tertiary: oklch(0.64 0.012 76);
+  --color-text-inverse: oklch(0.19 0.012 66);
+  --color-border: oklch(0.36 0.014 70);
+  --color-border-strong: oklch(0.48 0.02 72);
+  --color-price: oklch(0.79 0.105 65);
+  --shadow-soft: 0 12px 36px oklch(0.08 0.01 66 / 0.24);
+  --shadow-float: 0 20px 60px oklch(0.08 0.01 66 / 0.34);
 }
 
-/* 兜底：确保 Vant 主色组件用暖橙（不同版本变量名不一，强制覆盖） */
-.van-button--primary {
-  background: var(--color-primary) !important;
-  border-color: var(--color-primary) !important;
-}
-.van-tag--primary {
-  background: var(--color-primary) !important;
-}
-.van-tabbar-item--active {
-  color: var(--color-primary) !important;
-}
-.van-swipe__indicator--active {
-  background-color: var(--color-primary) !important;
-}
-.van-sidebar-item--select,
-.van-sidebar-item--select:active {
-  color: var(--color-primary) !important;
-}
-.van-sidebar-item--select::before {
-  background-color: var(--color-primary) !important;
+html {
+  min-width: 320px;
+  background: var(--color-bg-viewport);
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
 }
 
-/* 快速加购：购物车 tab 弹跳 */
-.van-tabbar-item.cart-bumped .van-tabbar-item__icon {
-  animation: tabCartBump 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes tabCartBump {
-  0%, 100% { transform: scale(1); }
-  35% { transform: scale(1.45) translateY(-3px); }
-}
-
-html, body {
+body {
   margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial,
-    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  background-color: var(--color-bg-viewport);
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-bg-viewport);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: var(--theme-transition);
 }
 
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+}
+
 #__nuxt {
-  max-width: 480px;
-  margin: 0 auto;
-  background-color: var(--color-bg-page);
   min-height: 100vh;
-  position: relative;
-  box-shadow: var(--shadow-app);
+  background: var(--color-bg-page);
   transition: var(--theme-transition);
 }
 
-/* ===== PC 端（宽于手机列）：手机框浮在品牌大背景上 ===== */
-@media (min-width: 600px) {
-  /* 品牌大图（随主题切换）+ 轻模糊，固定铺满视口，置于最底层 */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: -16px;
-    z-index: 0;
-    background: var(--bg-desktop) center / cover no-repeat;
-    filter: blur(2px) saturate(1.04);
-  }
-  /* 柔化蒙版：压住大图、把视觉焦点收回中间的 App */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    background: var(--bg-scrim);
-  }
-  /* App 列浮在大背景之上，强化投影 + 一条描边勾出手机边界 */
-  #__nuxt {
-    z-index: 1;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--color-border);
-  }
+:focus-visible {
+  outline: 3px solid color-mix(in oklch, var(--color-primary) 75%, white);
+  outline-offset: 3px;
 }
 
-/* 固定定位元素限制在手机宽度内 */
+::selection {
+  background: var(--color-primary-soft);
+  color: var(--color-text-primary);
+}
+
+.van-button--primary,
+.van-tag--primary {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.van-tabbar-item--active,
+.van-swipe__indicator--active,
+.van-sidebar-item--select {
+  color: var(--color-primary-dark) !important;
+}
+
+.van-swipe__indicator--active,
+.van-sidebar-item--select::before {
+  background-color: var(--color-primary) !important;
+}
+
 .van-tabbar,
 .van-action-bar,
 .van-nav-bar--fixed {
   width: 100% !important;
-  max-width: 480px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  right: auto !important;
+  inset-inline: 0 !important;
 }
 
-/* ========== Vant Dark Mode Overrides ========== */
-/* 暗色 tabbar：半透明底让 backdrop-filter 真正起作用（不透明底会让毛玻璃完全失效），
-   不画顶边分割线 —— 靠模糊与明度差自然分层，是 One UI 的处理方式 */
-html.dark .van-tabbar {
-  background-color: color-mix(in srgb, var(--color-tabbar-bg) 72%, transparent) !important;
-  border-top: none !important;
+.van-tabbar-item.cart-bumped .van-tabbar-item__icon {
+  animation: cart-feedback 280ms cubic-bezier(.2, .8, .2, 1);
 }
 
-/* 不支持 backdrop-filter 时退回不透明底，避免内容透上来压住文字 */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  html.dark .van-tabbar {
-    background-color: var(--color-tabbar-bg) !important;
-  }
+@keyframes cart-feedback {
+  50% { transform: translateY(-3px) scale(1.08); }
 }
 
-html.dark .van-tabbar-item {
-  color: var(--color-text-tertiary) !important;
-  background-color: transparent !important;
-}
-
-html.dark .van-tabbar-item--active {
-  color: var(--color-primary) !important;
-  background-color: transparent !important;
-}
-
-html.dark .van-tabbar-item__icon {
-  color: inherit !important;
-}
-
-html.dark .van-tabbar-item__text {
-  color: inherit !important;
-}
-
-html.dark .van-nav-bar {
-  background-color: var(--color-navbar-bg);
-  border-bottom-color: var(--color-border);
-}
-
-html.dark .van-nav-bar__title {
+html.dark .van-tabbar,
+html.dark .van-nav-bar,
+html.dark .van-action-bar,
+html.dark .van-cell,
+html.dark .van-cell-group--inset,
+html.dark .van-grid-item__content,
+html.dark .van-card {
+  background-color: var(--color-bg-card) !important;
   color: var(--color-text-primary);
 }
 
+html.dark .van-tabbar-item,
+html.dark .van-action-bar-icon,
+html.dark .van-cell__label,
+html.dark .van-empty__description {
+  color: var(--color-text-secondary) !important;
+}
+
+html.dark .van-cell::after,
+html.dark .van-action-bar,
+html.dark .van-nav-bar {
+  border-color: var(--color-border) !important;
+}
+
+html.dark .van-search,
+html.dark .van-pull-refresh {
+  background: var(--color-bg-page);
+  color: var(--color-text-secondary);
+}
+
+html.dark .van-search__content {
+  background: var(--color-search-bg);
+}
+
+html.dark .van-search__field .van-field__control,
+html.dark .van-cell__title,
+html.dark .van-card__title,
+html.dark .van-nav-bar__title,
 html.dark .van-nav-bar__arrow {
   color: var(--color-text-primary);
 }
 
-html.dark .van-cell {
-  background-color: var(--color-bg-card);
-  color: var(--color-text-primary);
+@media (max-width: 767px) {
+  body { font-size: 15px; }
 }
 
-html.dark .van-cell::after {
-  border-color: var(--color-border);
-}
-
-html.dark .van-cell__title {
-  color: var(--color-text-primary);
-}
-
-html.dark .van-cell__right-icon {
-  color: var(--color-text-tertiary);
-}
-
-html.dark .van-cell-group--inset {
-  background-color: var(--color-bg-card);
-}
-
-html.dark .van-search {
-  background-color: var(--color-bg-page);
-}
-
-html.dark .van-search__content {
-  background-color: var(--color-search-bg);
-}
-
-html.dark .van-search__field .van-field__control {
-  color: var(--color-text-primary);
-}
-
-html.dark .van-grid-item__content {
-  background-color: var(--color-bg-card);
-}
-
-html.dark .van-grid-item__text {
-  color: var(--color-text-primary);
-}
-
-html.dark .van-grid-item__icon {
-  color: var(--color-text-secondary);
-}
-
-html.dark .van-sidebar {
-  background-color: var(--color-bg-sidebar);
-}
-
-html.dark .van-sidebar-item {
-  background-color: var(--color-bg-sidebar);
-  color: var(--color-text-secondary);
-}
-
-html.dark .van-sidebar-item--select {
-  background-color: var(--color-bg-card);
-  color: var(--color-primary);
-}
-
-html.dark .van-sidebar-item--select::before {
-  background-color: var(--color-primary);
-}
-
-html.dark .van-empty__description {
-  color: var(--color-text-tertiary);
-}
-
-html.dark .van-card {
-  background-color: var(--color-bg-card);
-  color: var(--color-text-primary);
-}
-
-html.dark .van-card__title {
-  color: var(--color-text-primary);
-}
-
-html.dark .van-action-bar {
-  background-color: var(--color-bg-card);
-  border-top-color: var(--color-border);
-}
-
-html.dark .van-action-bar-icon {
-  color: var(--color-text-secondary);
-}
-
-html.dark .van-pull-refresh {
-  color: var(--color-text-secondary);
-}
-
-html.dark .van-cell__label {
-  color: var(--color-text-tertiary);
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -11,6 +11,8 @@ const messages: MessageSchema = {
     back: 'กลับ',
     confirm: 'ยืนยัน',
     cancel: 'ยกเลิก',
+    retry: 'ลองใหม่',
+    loadFailed: 'ไม่สามารถโหลดได้ในขณะนี้ กรุณาลองใหม่',
   },
   nav: {
     home: 'หน้าแรก',
@@ -71,6 +73,12 @@ const messages: MessageSchema = {
     success: 'สมัครสมาชิกสำเร็จ',
     failed: 'สมัครสมาชิกไม่สำเร็จ',
   },
+  socialAuth: {
+    orContinueWith: 'หรือดำเนินการต่อด้วย',
+    continueTelegram: 'ดำเนินการต่อด้วย Telegram',
+    popupBlocked: 'หน้าต่างป๊อปอัปถูกบล็อก กรุณาอนุญาตแล้วลองใหม่อีกครั้ง',
+    failed: 'เข้าสู่ระบบไม่สำเร็จ',
+  },
   address: {
     listTitle: 'ที่อยู่จัดส่ง',
     empty: 'ยังไม่มีที่อยู่จัดส่ง',
@@ -102,6 +110,9 @@ const messages: MessageSchema = {
     subCount: '{n} หมวดย่อย',
     goods: 'สินค้า',
     empty: 'ยังไม่มีสินค้าในหมวดนี้',
+    recommended: 'แนะนำ',
+    priceLow: 'ราคาจากต่ำไปสูง',
+    priceHigh: 'ราคาจากสูงไปต่ำ',
   },
   review: {
     sectionTitle: 'รีวิว',

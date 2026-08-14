@@ -10,6 +10,8 @@ const messages: MessageSchema = {
     back: '返回',
     confirm: '确定',
     cancel: '取消',
+    retry: '重试',
+    loadFailed: '暂时无法加载，请稍后重试',
   },
   nav: {
     home: '首页',
@@ -70,6 +72,12 @@ const messages: MessageSchema = {
     success: '注册成功',
     failed: '注册失败',
   },
+  socialAuth: {
+    orContinueWith: '或使用以下方式继续',
+    continueTelegram: '使用 Telegram 继续',
+    popupBlocked: '弹窗被拦截，请允许弹窗后重试',
+    failed: '登录失败',
+  },
   address: {
     listTitle: '收货地址',
     empty: '还没有收货地址',
@@ -101,6 +109,9 @@ const messages: MessageSchema = {
     subCount: '{n} 个子类',
     goods: '商品',
     empty: '该分类暂无好物',
+    recommended: '综合排序',
+    priceLow: '价格从低到高',
+    priceHigh: '价格从高到低',
   },
   review: {
     sectionTitle: '用户评价',

@@ -10,6 +10,8 @@ const messages: MessageSchema = {
     back: '返回',
     confirm: '確定',
     cancel: '取消',
+    retry: '重試',
+    loadFailed: '暫時無法載入，請稍後重試',
   },
   nav: {
     home: '首頁',
@@ -70,6 +72,12 @@ const messages: MessageSchema = {
     success: '註冊成功',
     failed: '註冊失敗',
   },
+  socialAuth: {
+    orContinueWith: '或使用以下方式繼續',
+    continueTelegram: '使用 Telegram 繼續',
+    popupBlocked: '彈窗被攔截，請允許彈窗後重試',
+    failed: '登入失敗',
+  },
   address: {
     listTitle: '收貨地址',
     empty: '還沒有收貨地址',
@@ -101,6 +109,9 @@ const messages: MessageSchema = {
     subCount: '{n} 個子類',
     goods: '商品',
     empty: '該分類暫無好物',
+    recommended: '綜合排序',
+    priceLow: '價格由低到高',
+    priceHigh: '價格由高到低',
   },
   review: {
     sectionTitle: '用戶評價',

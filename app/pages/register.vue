@@ -6,24 +6,27 @@
       <span class="orb orb-3" />
     </div>
 
-    <header class="auth-head">
-      <button class="lux-back" :aria-label="$t('common.back')" @click="navigateTo('/login')">
-        <svg viewBox="0 0 24 24"><path d="M15.5 4.5 8 12l7.5 7.5-1.4 1.4L5.2 12l8.9-8.9z" /></svg>
-      </button>
-    </header>
+    <div class="auth-visual">
+      <header class="auth-head">
+        <button class="lux-back" :aria-label="$t('common.back')" @click="navigateTo('/login')">
+          <svg viewBox="0 0 24 24"><path d="M15.5 4.5 8 12l7.5 7.5-1.4 1.4L5.2 12l8.9-8.9z" /></svg>
+        </button>
+      </header>
 
-    <section class="auth-hero">
-      <div class="auth-mark">
-        <span class="auth-mark-glow" />
-        <img class="auth-logo-img" src="/logo.png" alt="ZShop" width="80" height="80">
-      </div>
-      <div class="auth-brand">ZShop</div>
-      <div class="auth-rule"><span class="auth-rule-dot" /></div>
-      <h1 class="auth-title">{{ $t('register.title') }}</h1>
-      <p class="auth-sub">{{ $t('register.subtitle') }}</p>
-    </section>
+      <section class="auth-hero">
+        <div class="auth-mark">
+          <span class="auth-mark-glow" />
+          <img class="auth-logo-img" src="/logo.png" alt="ZShop" width="80" height="80">
+        </div>
+        <div class="auth-brand">ZShop</div>
+        <div class="auth-rule"><span class="auth-rule-dot" /></div>
+        <h1 class="auth-title">{{ $t('register.title') }}</h1>
+        <p class="auth-sub">{{ $t('register.subtitle') }}</p>
+      </section>
+    </div>
 
-    <section class="auth-card">
+    <main class="auth-form-panel">
+      <section class="auth-card">
       <label class="auth-field">
         <span class="auth-label">{{ $t('register.email') }}</span>
         <div class="auth-inwrap">
@@ -59,7 +62,10 @@
       </button>
 
       <div class="auth-alt">{{ $t('register.haveAccount') }}<span @click="toLogin">{{ $t('register.toLogin') }}</span></div>
-    </section>
+
+      <SocialAuthButtons @authenticated="onSocialAuthenticated" @error="onSocialError" />
+      </section>
+    </main>
   </div>
 </template>
 
@@ -97,11 +103,18 @@ async function onSubmit() {
 function toLogin() {
   navigateTo(`/login?redirect=${encodeURIComponent(redirectTarget())}`)
 }
+function onSocialAuthenticated() {
+  showToast(t('register.success'))
+  navigateTo(redirectTarget())
+}
+function onSocialError(message: string) {
+  showToast(message)
+}
 </script>
 
 <style scoped>
 .auth-page {
-  min-height: 100vh; position: relative; overflow: hidden;
+  min-height: 100vh; position: relative;
   background: var(--lux-auth-bg) center top / cover no-repeat, var(--lux-bg);
 }
 .auth-page::before {
@@ -113,7 +126,10 @@ function toLogin() {
 }
 .auth-amb { display: none; }
 
-.auth-head, .auth-hero, .auth-card { position: relative; z-index: 1; }
+.auth-visual, .auth-form-panel { position: relative; z-index: 1; }
+.auth-visual { display: contents; }
+.auth-form-panel { display: block; }
+.auth-head, .auth-hero, .auth-card { position: relative; }
 .auth-head { height: 54px; display: flex; align-items: center; padding: 0 12px; }
 .auth-head .lux-back { position: static; }
 
@@ -130,8 +146,7 @@ function toLogin() {
 }
 .auth-brand {
   font-size: 20px; font-weight: 700; letter-spacing: 4px; line-height: 1;
-  background: linear-gradient(135deg, var(--lux-gold), var(--lux-accent-2) 55%, var(--lux-accent));
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  color: var(--lux-gold);
 }
 .auth-rule { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0 14px; }
 .auth-rule::before, .auth-rule::after { content: ''; width: 42px; height: 1px; background: linear-gradient(90deg, transparent, var(--lux-gold)); }
@@ -173,4 +188,48 @@ function toLogin() {
 .auth-submit { margin-top: 28px; }
 .auth-alt { margin-top: 22px; text-align: center; color: var(--lux-text-2); font-size: 14px; letter-spacing: .3px; }
 .auth-alt span { color: var(--lux-gold); font-weight: 600; cursor: pointer; }
+
+@media (min-width: 1024px) {
+  .auth-page {
+    display: grid;
+    grid-template-columns: minmax(420px, .9fr) minmax(520px, 1.1fr);
+    background-position: left center;
+  }
+  .auth-page::before {
+    background: linear-gradient(90deg,
+      color-mix(in srgb, var(--lux-bg) 20%, transparent) 0%,
+      color-mix(in srgb, var(--lux-bg) 38%, transparent) 42%,
+      color-mix(in srgb, var(--lux-bg) 96%, transparent) 58% 100%);
+  }
+  .auth-visual {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: 72px 1fr;
+    padding-inline: clamp(44px, 5vw, 96px);
+  }
+  .auth-head { height: 72px; padding: 0; }
+  .auth-hero { align-self: center; padding: 0; text-align: left; }
+  .auth-mark { margin-bottom: 18px; }
+  .auth-logo-img { width: 96px; height: 96px; border-radius: 24px; }
+  .auth-brand { font-size: 25px; }
+  .auth-rule { justify-content: flex-start; margin-block: 18px 24px; }
+  .auth-title { margin: 0; font-size: clamp(34px, 3vw, 48px); letter-spacing: 0; }
+  .auth-sub { max-width: 34ch; margin-top: 12px; font-size: 16px; line-height: 1.7; }
+  .auth-form-panel {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 40px clamp(40px, 6vw, 112px);
+    border-left: 1px solid var(--lux-hair);
+    background: color-mix(in srgb, var(--lux-bg) 88%, transparent);
+    backdrop-filter: blur(26px) saturate(130%);
+  }
+  .auth-card {
+    width: min(100%, 540px);
+    margin: 0;
+    padding: clamp(28px, 2.5vw, 40px);
+    border-radius: 28px;
+  }
+  .auth-input { height: 54px; }
+}
 </style>

@@ -22,7 +22,7 @@ export default defineNuxtConfig({
     head: {
       charset: 'utf-8',
       title: 'ZShop',
-      viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
+      viewport: 'width=device-width, initial-scale=1',
       meta: [
         { name: 'format-detection', content: 'telephone=no' },
       ],
@@ -30,6 +30,9 @@ export default defineNuxtConfig({
   },
 
   css: [
+    '@fontsource-variable/archivo',
+    '@fontsource-variable/noto-sans-sc',
+    '@fontsource-variable/noto-sans-thai',
     '~/assets/css/global.css',
     '~/assets/css/lux.css',
   ],
@@ -51,6 +54,7 @@ export default defineNuxtConfig({
       tenantCode: process.env.NUXT_PUBLIC_TENANT_CODE || 'joyshop',
       tenantId: process.env.NUXT_PUBLIC_TENANT_ID || '3',
       iamBase: process.env.NUXT_PUBLIC_IAM_BASE || 'https://iam-api.walker-learn.xyz',
+      googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '',
     },
   },
 
@@ -89,9 +93,9 @@ export default defineNuxtConfig({
     manifest: {
       name: 'ZShop',
       short_name: 'ZShop',
-      description: 'ZShop Mobile Store',
-      theme_color: '#0ea5a0',
-      background_color: '#ffffff',
+      description: 'ZShop curated online store',
+      theme_color: '#f7f4ed',
+      background_color: '#f7f4ed',
       display: 'standalone',
       icons: [
         {

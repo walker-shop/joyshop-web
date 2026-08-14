@@ -1,33 +1,55 @@
 <template>
   <div class="layout">
-    <div class="layout-content">
+    <header class="desktop-header">
+      <div class="desktop-header__inner">
+        <NuxtLink to="/" class="desktop-brand" aria-label="ZShop">
+          <img src="/logo.png" alt="" width="36" height="36">
+          <span>ZShop</span>
+        </NuxtLink>
+
+        <nav class="desktop-nav" :aria-label="$t('nav.home')">
+          <NuxtLink to="/">{{ $t('nav.home') }}</NuxtLink>
+          <NuxtLink to="/category">{{ $t('nav.category') }}</NuxtLink>
+        </nav>
+
+        <NuxtLink to="/search" class="desktop-search">
+          <PhMagnifyingGlass :size="20" />
+          <span>{{ $t('home.searchPlaceholder') }}</span>
+        </NuxtLink>
+
+        <nav class="desktop-actions" :aria-label="$t('nav.mine')">
+          <NuxtLink to="/cart" class="desktop-action">
+            <PhShoppingBag :size="22" />
+            <span>{{ $t('nav.cart') }}</span>
+            <b v-if="cartCount > 0">{{ cartCount > 99 ? '99+' : cartCount }}</b>
+          </NuxtLink>
+          <NuxtLink to="/user" class="desktop-action">
+            <PhUserCircle :size="22" />
+            <span>{{ $t('nav.mine') }}</span>
+          </NuxtLink>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content" class="layout-content">
       <slot />
-    </div>
-    <!-- :border="false" 关掉 Vant 自带的 van-hairline--top-bottom
-         （它用 ::after 伪元素画 1px #EBEDF0 顶边，纯 CSS 的 border-top:none 盖不掉） -->
+    </main>
+
     <van-tabbar v-model="activeTab" route :border="false" class="app-tabbar">
       <van-tabbar-item to="/">
-        <template #icon="{ active }">
-          <PhStorefront :weight="active ? 'fill' : 'regular'" :size="24" />
-        </template>
+        <template #icon="{ active }"><PhStorefront :weight="active ? 'fill' : 'regular'" :size="24" /></template>
         {{ $t('nav.home') }}
       </van-tabbar-item>
       <van-tabbar-item to="/category">
-        <template #icon="{ active }">
-          <PhSquaresFour :weight="active ? 'fill' : 'regular'" :size="24" />
-        </template>
+        <template #icon="{ active }"><PhSquaresFour :weight="active ? 'fill' : 'regular'" :size="24" /></template>
         {{ $t('nav.category') }}
       </van-tabbar-item>
       <van-tabbar-item to="/cart" :badge="cartCount > 0 ? cartCount : ''">
-        <template #icon="{ active }">
-          <PhShoppingBag :weight="active ? 'fill' : 'regular'" :size="24" />
-        </template>
+        <template #icon="{ active }"><PhShoppingBag :weight="active ? 'fill' : 'regular'" :size="24" /></template>
         {{ $t('nav.cart') }}
       </van-tabbar-item>
       <van-tabbar-item to="/user">
-        <template #icon="{ active }">
-          <PhUserCircle :weight="active ? 'fill' : 'regular'" :size="24" />
-        </template>
+        <template #icon="{ active }"><PhUserCircle :weight="active ? 'fill' : 'regular'" :size="24" /></template>
         {{ $t('nav.mine') }}
       </van-tabbar-item>
     </van-tabbar>
@@ -35,7 +57,13 @@
 </template>
 
 <script setup lang="ts">
-import { PhStorefront, PhSquaresFour, PhShoppingBag, PhUserCircle } from '@phosphor-icons/vue'
+import {
+  PhMagnifyingGlass,
+  PhShoppingBag,
+  PhSquaresFour,
+  PhStorefront,
+  PhUserCircle,
+} from '@phosphor-icons/vue'
 
 const activeTab = ref(0)
 const { count: cartCount, refresh: refreshCart } = useCartCount()
@@ -44,77 +72,169 @@ onMounted(refreshCart)
 
 <style scoped>
 .layout {
+  --app-tabbar-height: 64px;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--color-bg-page);
-  transition: var(--theme-transition);
-  /* tabbar 高度单一来源：内容让位和 tabbar 自身都引用它，避免两处各写一个数字漂移 */
-  --app-tabbar-height: 62px;
+  background: var(--color-bg-page);
 }
 
-/* 让位高度必须等于 tabbar 实高 + 安全区。
-   原来写死 50px 而 tabbar 是 62px，底部 12px 内容一直被压在 bar 下面 ——
-   过去 bar 不透明所以看不出来，改成毛玻璃后会直接透出来。 */
 .layout-content {
-  flex: 1;
+  min-height: 100vh;
   padding-bottom: calc(var(--app-tabbar-height) + env(safe-area-inset-bottom));
 }
 
-/* tabbar：One UI 风格 —— 毛玻璃基底，无分割线、无阴影、无高亮块。
-   选中态只靠「图标填充 + 主色 + 字重」表达，不给图标套底块也不打光：
-   给图标戴金色小方块再加发光，是廉价机 UI 的典型手法，去掉才干净。
-   注意 .app-tabbar 就是 .van-tabbar 根元素本身，不能用 :deep 后代选择器。 */
+.desktop-header { display: none; }
+
 .app-tabbar {
-  max-width: 480px;
-  left: 50% !important;
-  transform: translateX(-50%);
-  right: auto !important;
-  --van-tabbar-height: var(--app-tabbar-height);
   height: var(--app-tabbar-height);
   padding-bottom: env(safe-area-inset-bottom);
-  /* 暗色下的底色由 global.css 的 html.dark 规则以 !important 接管，此处为亮色态 */
-  background: color-mix(in srgb, var(--color-tabbar-bg) 72%, transparent);
-  backdrop-filter: saturate(150%) blur(20px);
-  -webkit-backdrop-filter: saturate(150%) blur(20px);
+  background: color-mix(in oklch, var(--color-bg-card) 94%, transparent);
+  border-top: 1px solid var(--color-border);
+  backdrop-filter: blur(16px);
 }
+
 .app-tabbar :deep(.van-tabbar-item) {
+  min-width: 44px;
   color: var(--color-text-tertiary);
   background: transparent;
-  padding-top: 4px;
-  transition: color .2s ease;
 }
-/* One UI 的标签是安静的：中等字重、无字距微调（CJK 加字距只会显松散） */
+
 .app-tabbar :deep(.van-tabbar-item__text) {
-  font-size: 11px;
-  font-weight: 500;
   margin-top: 3px;
-}
-.app-tabbar :deep(.van-tabbar-item--active) { color: var(--color-primary); background: transparent; }
-.app-tabbar :deep(.van-tabbar-item--active .van-tabbar-item__text) { font-weight: 600; }
-.app-tabbar :deep(.van-tabbar-item__icon) {
-  margin-bottom: 0;
-  transition: transform .22s cubic-bezier(.34, 1.56, .64, 1), color .2s ease;
-}
-/* 选中态：仅极轻微放大，配合 Phosphor 图标从 regular 变 fill 的形变 */
-.app-tabbar :deep(.van-tabbar-item--active .van-tabbar-item__icon) {
-  transform: scale(1.04);
-}
-@media (prefers-reduced-motion: reduce) {
-  .app-tabbar :deep(.van-tabbar-item__icon) { transition: none; }
-  .app-tabbar :deep(.van-tabbar-item--active .van-tabbar-item__icon) { transform: none; }
-}
-/* 角标：One UI 的角标是纯色小圆点式，不用渐变也不用超粗字重 —— 渐变+800 会让
-   一个 16px 的小圆看起来发脏、发挤。改纯色主色 + 深色字，收字重、收字号。 */
-.app-tabbar :deep(.van-badge) {
-  background: var(--color-primary) !important;
-  border: none !important;
-  color: #2a1f0a !important;
+  font-size: 11px;
   font-weight: 600;
-  font-size: 10px;
-  line-height: 1;
+}
+
+.app-tabbar :deep(.van-tabbar-item--active) {
+  color: var(--color-primary-dark) !important;
+  background: transparent;
+}
+
+.app-tabbar :deep(.van-badge) {
+  min-width: 17px;
   padding: 2px 5px;
-  min-width: 16px;
-  box-shadow: none !important;
+  border: 2px solid var(--color-bg-card) !important;
+  background: var(--color-price) !important;
+  color: var(--color-text-inverse) !important;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .desktop-header {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    display: block;
+    border-bottom: 1px solid var(--color-border);
+    background: color-mix(in oklch, var(--color-bg-card) 94%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .desktop-header__inner {
+    width: min(calc(100% - 48px), var(--page-max));
+    height: 72px;
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: auto minmax(220px, 1fr) auto;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .desktop-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 780;
+    letter-spacing: -0.02em;
+  }
+
+  .desktop-brand img {
+    border-radius: 10px;
+    box-shadow: 0 4px 14px oklch(0.3 0.04 70 / 0.14);
+  }
+
+  .desktop-nav { display: none; }
+  .desktop-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .desktop-nav a,
+  .desktop-action {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding-inline: 13px;
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-weight: 650;
+    transition: background 160ms ease, color 160ms ease;
+  }
+
+  .desktop-nav a:hover,
+  .desktop-action:hover,
+  .desktop-nav a.router-link-exact-active,
+  .desktop-action.router-link-active {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+  }
+
+  .desktop-search {
+    min-width: 0;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-inline: 15px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-search-bg);
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    transition: border-color 160ms ease, background 160ms ease;
+  }
+
+  .desktop-search:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-bg-card);
+  }
+
+  .desktop-search span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .desktop-action { position: relative; }
+  .desktop-action > span { display: none; }
+  .desktop-action b {
+    min-width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    padding-inline: 4px;
+    border-radius: 9px;
+    background: var(--color-price);
+    color: var(--color-text-inverse);
+    font-size: 10px;
+  }
+
+  .layout-content {
+    min-height: calc(100vh - 72px);
+    padding-bottom: 0;
+  }
+
+  .app-tabbar { display: none; }
+}
+
+@media (min-width: 1024px) {
+  .desktop-header__inner { grid-template-columns: auto auto minmax(320px, 1fr) auto; }
+  .desktop-nav { display: flex; }
+  .desktop-action > span { display: inline; }
 }
 </style>
