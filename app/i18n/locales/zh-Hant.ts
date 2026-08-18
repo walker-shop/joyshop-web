@@ -317,6 +317,10 @@ const messages: MessageSchema = {
     avatarUpdated: '頭像已更新',
     avatarLocalPreview: '已本地預覽（上傳服務未就緒）',
     language: '語言',
+    creatorLabel: '這個商城由 Walker 設計與開發',
+    remoteWork: '正在尋找遠程工作',
+    remoteWorkBody: '全棧、前端、Go、Node.js 與 Flutter',
+    jobTelegram: 'Telegram 求職專用號',
   },
 }
 

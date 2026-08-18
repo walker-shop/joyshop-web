@@ -317,6 +317,10 @@ const messages: MessageSchema = {
     avatarUpdated: 'Avatar updated',
     avatarLocalPreview: 'Local preview (upload service unavailable)',
     language: 'Language',
+    creatorLabel: 'Designed and built by Walker',
+    remoteWork: 'Open to remote work',
+    remoteWorkBody: 'Full-stack, frontend, Go, Node.js, and Flutter',
+    jobTelegram: 'Telegram for job enquiries',
   },
 }
 

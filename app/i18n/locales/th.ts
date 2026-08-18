@@ -318,6 +318,10 @@ const messages: MessageSchema = {
     avatarUpdated: 'อัปเดตรูปโปรไฟล์แล้ว',
     avatarLocalPreview: 'แสดงตัวอย่างในเครื่อง (บริการอัปโหลดยังไม่พร้อม)',
     language: 'ภาษา',
+    creatorLabel: 'ออกแบบและพัฒนาโดย Walker',
+    remoteWork: 'เปิดรับงานรีโมต',
+    remoteWorkBody: 'Full-stack, Frontend, Go, Node.js และ Flutter',
+    jobTelegram: 'Telegram สำหรับติดต่อเรื่องงาน',
   },
 }
 

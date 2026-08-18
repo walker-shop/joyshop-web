@@ -128,6 +128,19 @@
         </div>
       </section>
 
+      <a class="uz-maker" href="https://t.me/petterZZ" target="_blank" rel="noopener noreferrer">
+        <span class="uz-maker-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M21.6 3.2 18.4 20c-.2 1.2-.9 1.5-1.9.9l-4.8-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.9 8.9-8c.4-.3-.1-.5-.6-.2L6 13.9l-4.7-1.5c-1-.3-1-1 .2-1.5L20 3.8c.9-.3 1.8.2 1.6-.6z" /></svg>
+        </span>
+        <span class="uz-maker-copy">
+          <small>{{ $t('user.creatorLabel') }}</small>
+          <strong>{{ $t('user.remoteWork') }}</strong>
+          <span>{{ $t('user.remoteWorkBody') }}</span>
+        </span>
+        <span class="uz-maker-contact"><small>{{ $t('user.jobTelegram') }}</small><b>@petterZZ</b></span>
+        <span class="uz-maker-arrow" aria-hidden="true">↗</span>
+      </a>
+
       <!-- 退出登录 -->
       <button v-if="isLoggedIn" class="lux-btn-ghost uz-logout" @click="onLogout">{{ $t('user.logout') }}</button>
     </div>
@@ -356,6 +369,39 @@ function onLogout() { logout(); showToast(t('user.loggedOut')) }
   color: var(--color-text-inverse); font-weight: 700;
   background: var(--color-primary-dark);
   box-shadow: 0 4px 12px color-mix(in oklch, var(--color-primary) 30%, transparent);
+}
+
+.uz-maker {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto 18px;
+  align-items: center;
+  gap: 12px;
+  min-height: 76px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in oklch, var(--color-primary) 28%, var(--lux-divider));
+  border-radius: 14px;
+  background: color-mix(in oklch, var(--lux-card-bg) 94%, var(--color-primary-light));
+  color: var(--lux-text);
+  text-decoration: none;
+  transition: border-color .18s ease, transform .18s cubic-bezier(.22, 1, .36, 1);
+}
+.uz-maker:hover { border-color: color-mix(in oklch, var(--color-primary) 58%, var(--lux-divider)); transform: translateY(-1px); }
+.uz-maker:focus-visible { outline: 3px solid color-mix(in oklch, var(--color-primary) 48%, transparent); outline-offset: 2px; }
+.uz-maker-mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #29a9eb; color: #f6fbff; }
+.uz-maker-mark svg { width: 20px; height: 20px; fill: currentColor; transform: translate(-1px, 1px); }
+.uz-maker-copy { display: grid; gap: 3px; min-width: 0; }
+.uz-maker-copy small, .uz-maker-contact small { color: var(--lux-muted); font-size: 10px; line-height: 1.2; }
+.uz-maker-copy strong { color: var(--lux-text); font-size: 15px; line-height: 1.2; }
+.uz-maker-copy > span { overflow: hidden; color: var(--lux-muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.uz-maker-contact { display: grid; justify-items: end; gap: 3px; }
+.uz-maker-contact b { color: var(--color-primary); font-size: 13px; }
+.uz-maker-arrow { color: var(--color-primary); font-size: 18px; }
+
+@media (max-width: 520px) {
+  .uz-maker { grid-template-columns: 40px minmax(0, 1fr) 18px; }
+  .uz-maker-contact { grid-column: 2 / 3; justify-items: start; }
+  .uz-maker-arrow { grid-column: 3; grid-row: 1 / span 2; }
 }
 
 /* ---- Logout ---- */

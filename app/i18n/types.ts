@@ -316,5 +316,9 @@ export interface MessageSchema {
     avatarUpdated: string
     avatarLocalPreview: string
     language: string
+    creatorLabel: string
+    remoteWork: string
+    remoteWorkBody: string
+    jobTelegram: string
   }
 }
