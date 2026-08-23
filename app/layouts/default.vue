@@ -10,6 +10,7 @@
         <nav class="desktop-nav" :aria-label="$t('nav.home')">
           <NuxtLink to="/">{{ $t('nav.home') }}</NuxtLink>
           <NuxtLink to="/category">{{ $t('nav.category') }}</NuxtLink>
+          <NuxtLink to="/creative-studio">广告出片</NuxtLink>
         </nav>
 
         <NuxtLink to="/search" class="desktop-search">
