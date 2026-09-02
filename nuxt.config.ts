@@ -50,7 +50,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE ?? 'https://zshop-admin.zwlab.app/api',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://zshop-admin.zwlab.app/api',
       tenantCode: process.env.NUXT_PUBLIC_TENANT_CODE || 'joyshop',
       tenantId: process.env.NUXT_PUBLIC_TENANT_ID || '3',
       iamBase: process.env.NUXT_PUBLIC_IAM_BASE || 'https://iam-api.walker-learn.xyz',
