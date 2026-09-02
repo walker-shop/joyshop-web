@@ -19,6 +19,24 @@
         </NuxtLink>
 
         <nav class="desktop-actions" :aria-label="$t('nav.mine')">
+          <div class="lang-switch" :class="{ open: langOpen }">
+            <button type="button" class="desktop-action lang-trigger" @click="langOpen = !langOpen">
+              <PhGlobe :size="22" />
+              <span>{{ currentLocaleLabel }}</span>
+            </button>
+            <div v-if="langOpen" class="lang-menu">
+              <button
+                v-for="l in SUPPORTED_LOCALES"
+                :key="l.code"
+                type="button"
+                class="lang-menu-opt"
+                :class="{ active: locale === l.code }"
+                @click="pickLocale(l.code)"
+              >
+                {{ l.label }}
+              </button>
+            </div>
+          </div>
           <NuxtLink to="/cart" class="desktop-action">
             <PhShoppingBag :size="22" />
             <span>{{ $t('nav.cart') }}</span>
@@ -31,6 +49,25 @@
         </nav>
       </div>
     </header>
+
+    <div class="mobile-lang-switch" :class="{ open: langOpen }">
+      <button type="button" class="mobile-lang-trigger" @click="langOpen = !langOpen">
+        <PhGlobe :size="18" />
+        <span>{{ currentLocaleLabel }}</span>
+      </button>
+      <div v-if="langOpen" class="lang-menu">
+        <button
+          v-for="l in SUPPORTED_LOCALES"
+          :key="l.code"
+          type="button"
+          class="lang-menu-opt"
+          :class="{ active: locale === l.code }"
+          @click="pickLocale(l.code)"
+        >
+          {{ l.label }}
+        </button>
+      </div>
+    </div>
 
     <main id="main-content" class="layout-content">
       <slot />
@@ -59,16 +96,28 @@
 
 <script setup lang="ts">
 import {
+  PhGlobe,
   PhMagnifyingGlass,
   PhShoppingBag,
   PhSquaresFour,
   PhStorefront,
   PhUserCircle,
 } from '@phosphor-icons/vue'
+import { SUPPORTED_LOCALES, type LocaleCode } from '~/i18n/constants'
 
 const activeTab = ref(0)
 const { count: cartCount, refresh: refreshCart } = useCartCount()
 onMounted(refreshCart)
+
+const { $setAppLocale } = useNuxtApp()
+const { locale } = useI18n()
+const langOpen = ref(false)
+const currentLocaleLabel = computed(() => SUPPORTED_LOCALES.find(l => l.code === locale.value)?.label ?? SUPPORTED_LOCALES[0].label)
+
+function pickLocale(code: LocaleCode) {
+  $setAppLocale(code)
+  langOpen.value = false
+}
 </script>
 
 <style scoped>
@@ -81,6 +130,62 @@ onMounted(refreshCart)
 .layout-content {
   min-height: 100vh;
   padding-bottom: calc(var(--app-tabbar-height) + env(safe-area-inset-bottom));
+}
+
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  min-width: 96px;
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  box-shadow: 0 12px 28px oklch(0.2 0.03 70 / 0.16);
+}
+
+.lang-menu-opt {
+  padding: 8px 10px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.lang-menu-opt:hover { background: var(--color-primary-soft); color: var(--color-primary-dark); }
+.lang-menu-opt.active { background: var(--color-primary-soft); color: var(--color-primary-dark); }
+
+.mobile-lang-switch {
+  position: fixed;
+  top: max(env(safe-area-inset-top), 10px);
+  right: 10px;
+  z-index: 85;
+}
+
+.mobile-lang-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding-inline: 10px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--color-bg-card) 92%, transparent);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px oklch(0.2 0.03 70 / 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.mobile-lang-switch .lang-menu { min-width: 88px; }
+
+@media (min-width: 768px) {
+  .mobile-lang-switch { display: none; }
 }
 
 .desktop-header { display: none; }
@@ -162,6 +267,8 @@ onMounted(refreshCart)
     align-items: center;
     gap: var(--space-xs);
   }
+
+  .lang-switch { position: relative; }
 
   .desktop-nav a,
   .desktop-action {
