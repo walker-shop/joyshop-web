@@ -148,6 +148,12 @@ function pickLocale(code: LocaleCode) {
 }
 
 .lang-menu-opt {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  background: none;
   padding: 8px 10px;
   border-radius: 8px;
   text-align: left;
@@ -164,6 +170,22 @@ function pickLocale(code: LocaleCode) {
   top: max(env(safe-area-inset-top), 10px);
   right: 10px;
   z-index: 85;
+}
+
+.lang-trigger,
+.mobile-lang-trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.lang-trigger:focus-visible,
+.mobile-lang-trigger:focus-visible,
+.lang-menu-opt:focus-visible {
+  outline: 2px solid var(--color-primary-dark);
+  outline-offset: 2px;
 }
 
 .mobile-lang-trigger {
