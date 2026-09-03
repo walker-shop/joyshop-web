@@ -2,6 +2,12 @@
 
 ZShop is a multilingual storefront where a shopper and an AI agent work in the same live catalog and signed-in session. Its WebMCP site tools let an agent set a shared shopping goal, search and inspect products, read the cart, and add simple products without guessing through the UI.
 
+**Live demo:** https://zshop.zwlab.app/
+
+## Challenge extension
+
+ZShop existed before the WebMCP Challenge. The WebMCP integration was added during the submission period in the dated commits beginning with `feat: add WebMCP shopping companion`. The challenge work adds the five registered site tools below, the shared human-agent companion UI, typed schemas and annotations, focused utility tests, and this public documentation. The existing catalog, authentication, and cart remain the underlying application.
+
 ## WebMCP tools
 
 | Tool | Effect |
