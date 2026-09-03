@@ -141,6 +141,13 @@
         </aside>
       </section>
 
+      <NuxtLink to="/creative-studio" class="creative-entry">
+        <span class="creative-entry__eyebrow">ZSHOP CREATIVE STUDIO</span>
+        <strong>给商品做一支能投放的短视频广告</strong>
+        <small>商品上新、活动促销、门店引流，从方案到竖版成片。</small>
+        <i>开始出片 →</i>
+      </NuxtLink>
+
       <section class="recommend-section">
         <div class="section-heading">
           <div>
@@ -205,7 +212,7 @@
                   type="button"
                   class="quick-add"
                   :aria-label="item.hasSku ? $t('pdp.selectSpec') : $t('common.addToCart')"
-                  @click="quickAdd(item)"
+                  @click="quickAdd(item, $event)"
                 >
                   <PhArrowRight v-if="item.hasSku" :size="18" />
                   <PhPlus v-else :size="18" weight="bold" />
@@ -331,9 +338,9 @@ async function onRefresh() {
 
 const { apiFetch } = useApi()
 const { isLoggedIn } = useAuth()
-const { refresh: refreshCart } = useCartCount()
+const { refresh: refreshCart, flyToCart } = useCartCount()
 
-async function quickAdd(item: any) {
+async function quickAdd(item: any, e?: MouseEvent) {
   if (item.hasSku) {
     navigateTo(`/goods/${item.id}`)
     return
@@ -343,9 +350,11 @@ async function quickAdd(item: any) {
     navigateTo('/login?redirect=/')
     return
   }
+  const btn = (e?.currentTarget as HTMLElement)?.getBoundingClientRect()
   try {
     await apiFetch('/v1/cart', { method: 'POST', body: { goodsId: Number(item.id), nums: 1, checked: true } })
     await refreshCart()
+    if (btn) flyToCart(btn.left + btn.width / 2, btn.top + btn.height / 2, item.goodsFrontImage)
     showToast(t('common.addedToCart'))
   } catch (error: any) {
     showToast(error?.data?.msg || error?.message || t('common.addToCartFailed'))
@@ -744,4 +753,7 @@ onMounted(() => {
   .desktop-commerce { grid-template-columns: 230px minmax(0, 1fr) 280px; gap: var(--space-md); }
   .product-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
+.creative-entry { position: relative; display: grid; gap: 9px; overflow: hidden; margin-top: var(--space-xl); padding: 26px 24px; border-radius: var(--radius-lg); background: linear-gradient(125deg, #21150d, #5b3516); color: #fff; box-shadow: 0 14px 30px rgb(70 39 11 / .16); }
+.creative-entry::after { content: ''; position: absolute; top: -100px; right: -32px; width: 230px; height: 230px; border: 1px solid rgb(255 255 255 / .2); border-radius: 50%; box-shadow: 0 0 0 28px rgb(255 255 255 / .05), 0 0 0 56px rgb(255 255 255 / .04); }
+.creative-entry__eyebrow, .creative-entry strong, .creative-entry small, .creative-entry i { position: relative; z-index: 1; }.creative-entry__eyebrow { color: #f7d795; font-family: var(--font-display); font-size: 11px; font-weight: 800; letter-spacing: .12em; }.creative-entry strong { max-width: 18ch; font-family: var(--font-display); font-size: clamp(23px, 5vw, 34px); line-height: 1.14; }.creative-entry small { color: rgb(255 255 255 / .72); font-size: 14px; }.creative-entry i { width: fit-content; margin-top: 7px; color: #f7d795; font-style: normal; font-size: 14px; font-weight: 800; }
 </style>
