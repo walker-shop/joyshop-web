@@ -19,6 +19,10 @@
       >
         <PhHeart :size="21" :weight="faved ? 'fill' : 'regular'" />
       </button>
+      <NuxtLink to="/cart" class="nav-button nav-cart" :aria-label="$t('nav.cart')">
+        <PhShoppingBag :size="21" />
+        <b v-if="cartCount > 0">{{ cartCount > 99 ? '99+' : cartCount }}</b>
+      </NuxtLink>
     </header>
 
     <main class="pdp-shell">
@@ -270,7 +274,8 @@ useSeoMeta({
 
 const { apiFetch } = useApi()
 const { isLoggedIn } = useAuth()
-const { refresh: refreshCart } = useCartCount()
+const { count: cartCount, refresh: refreshCart } = useCartCount()
+onMounted(refreshCart)
 const { check: checkFav, add: addFav, remove: removeFav } = useFav()
 const faved = ref(false)
 
@@ -359,7 +364,7 @@ onMounted(async () => {
   z-index: 60;
   height: 60px;
   display: grid;
-  grid-template-columns: 44px auto 1fr 44px;
+  grid-template-columns: 44px auto 1fr 44px 44px;
   align-items: center;
   gap: var(--space-xs);
   padding-inline: var(--space-sm);
@@ -367,7 +372,22 @@ onMounted(async () => {
   background: color-mix(in oklch, var(--color-bg-card) 94%, transparent);
   backdrop-filter: blur(16px);
 }
-.nav-button { width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid var(--color-border); border-radius: 50%; background: var(--color-bg-card); color: var(--color-text-primary); cursor: pointer; }
+.nav-button { position: relative; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid var(--color-border); border-radius: 50%; background: var(--color-bg-card); color: var(--color-text-primary); cursor: pointer; }
+.nav-cart b {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 17px;
+  height: 17px;
+  display: grid;
+  place-items: center;
+  padding-inline: 4px;
+  border-radius: 9px;
+  background: var(--color-price);
+  color: var(--color-text-inverse);
+  font-size: 10px;
+  font-weight: 700;
+}
 .nav-button.active { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-primary-dark); }
 .nav-brand { display: none; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 760; }
 .nav-brand img { border-radius: 9px; }
@@ -461,7 +481,7 @@ onMounted(async () => {
 
 @media (min-width: 900px) {
   .pdp-page { padding-bottom: 0; }
-  .pdp-nav { height: 72px; grid-template-columns: 44px auto 1fr 44px; padding-inline: max(var(--space-lg), calc((100vw - var(--page-max)) / 2)); }
+  .pdp-nav { height: 72px; grid-template-columns: 44px auto 1fr 44px 44px; padding-inline: max(var(--space-lg), calc((100vw - var(--page-max)) / 2)); }
   .nav-brand { display: flex; }
   .nav-title { text-align: right; padding-right: var(--space-sm); }
   .pdp-shell { padding-top: var(--space-xl); padding-bottom: var(--space-3xl); }
