@@ -212,7 +212,7 @@
                   type="button"
                   class="quick-add"
                   :aria-label="item.hasSku ? $t('pdp.selectSpec') : $t('common.addToCart')"
-                  @click="quickAdd(item)"
+                  @click="quickAdd(item, $event)"
                 >
                   <PhArrowRight v-if="item.hasSku" :size="18" />
                   <PhPlus v-else :size="18" weight="bold" />
@@ -338,9 +338,9 @@ async function onRefresh() {
 
 const { apiFetch } = useApi()
 const { isLoggedIn } = useAuth()
-const { refresh: refreshCart } = useCartCount()
+const { refresh: refreshCart, flyToCart } = useCartCount()
 
-async function quickAdd(item: any) {
+async function quickAdd(item: any, e?: MouseEvent) {
   if (item.hasSku) {
     navigateTo(`/goods/${item.id}`)
     return
@@ -350,9 +350,11 @@ async function quickAdd(item: any) {
     navigateTo('/login?redirect=/')
     return
   }
+  const btn = (e?.currentTarget as HTMLElement)?.getBoundingClientRect()
   try {
     await apiFetch('/v1/cart', { method: 'POST', body: { goodsId: Number(item.id), nums: 1, checked: true } })
     await refreshCart()
+    if (btn) flyToCart(btn.left + btn.width / 2, btn.top + btn.height / 2, item.goodsFrontImage)
     showToast(t('common.addedToCart'))
   } catch (error: any) {
     showToast(error?.data?.msg || error?.message || t('common.addToCartFailed'))

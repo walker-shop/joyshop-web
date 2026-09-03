@@ -175,7 +175,9 @@ img {
   inset-inline: 0 !important;
 }
 
-.van-tabbar-item.cart-bumped .van-tabbar-item__icon {
+.van-tabbar-item.cart-bumped .van-tabbar-item__icon,
+.desktop-action.cart-bumped,
+.nav-cart.cart-bumped {
   animation: cart-feedback 280ms cubic-bezier(.2, .8, .2, 1);
 }
 

@@ -97,7 +97,7 @@
             </dl>
 
             <div class="desktop-purchase-actions">
-              <button type="button" class="button-secondary" @click="onAddCart">{{ $t('common.addToCart') }}</button>
+              <button type="button" class="button-secondary" @click="onAddCart($event)">{{ $t('common.addToCart') }}</button>
               <button type="button" class="button-primary" @click="onBuyNow">{{ $t('pdp.buyNow') }}</button>
             </div>
           </div>
@@ -167,7 +167,7 @@
 
     <div v-if="goods.name" class="mobile-purchase-bar">
       <NuxtLink to="/cart" class="cart-link" :aria-label="$t('nav.cart')"><PhShoppingBag :size="22" /><span>{{ $t('nav.cart') }}</span></NuxtLink>
-      <button type="button" class="button-secondary" @click="onAddCart">{{ $t('common.addToCart') }}</button>
+      <button type="button" class="button-secondary" @click="onAddCart($event)">{{ $t('common.addToCart') }}</button>
       <button type="button" class="button-primary" @click="onBuyNow">{{ $t('pdp.buyNow') }}</button>
     </div>
   </div>
@@ -274,7 +274,7 @@ useSeoMeta({
 
 const { apiFetch } = useApi()
 const { isLoggedIn } = useAuth()
-const { count: cartCount, refresh: refreshCart } = useCartCount()
+const { count: cartCount, refresh: refreshCart, flyToCart } = useCartCount()
 onMounted(refreshCart)
 const { check: checkFav, add: addFav, remove: removeFav } = useFav()
 const faved = ref(false)
@@ -325,9 +325,13 @@ async function addToCart(): Promise<boolean> {
   }
 }
 
-async function onAddCart() {
+async function onAddCart(e?: MouseEvent) {
   if (!requireLogin()) return
-  if (await addToCart()) showToast(t('common.addedToCart'))
+  const btn = (e?.currentTarget as HTMLElement)?.getBoundingClientRect()
+  if (await addToCart()) {
+    if (btn) flyToCart(btn.left + btn.width / 2, btn.top + btn.height / 2, heroImages.value[0])
+    showToast(t('common.addedToCart'))
+  }
 }
 async function onBuyNow() {
   if (!requireLogin()) return

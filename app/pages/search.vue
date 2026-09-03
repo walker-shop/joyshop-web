@@ -192,7 +192,7 @@ async function submit(term: string) {
 // 快速加购 + 飞入 tabbar 购物车（与首页/分类一致）
 const { apiFetch } = useApi()
 const { isLoggedIn } = useAuth()
-const { refresh: refreshCart } = useCartCount()
+const { refresh: refreshCart, flyToCart } = useCartCount()
 async function quickAdd(e: MouseEvent, item: any) {
   if (!isLoggedIn.value) { showToast(t('common.loginRequired')); navigateTo('/login?redirect=/search'); return }
   const btn = (e.currentTarget as HTMLElement)?.getBoundingClientRect()
@@ -202,27 +202,6 @@ async function quickAdd(e: MouseEvent, item: any) {
     if (btn) flyToCart(btn.left + btn.width / 2, btn.top + btn.height / 2, item.goodsFrontImage)
     showToast(t('common.addedToCart'))
   } catch (err: any) { showToast(err?.data?.msg || err?.message || t('common.addToCartFailed')) }
-}
-function flyToCart(sx: number, sy: number, img?: string) {
-  if (!import.meta.client) return
-  const cartTab = document.querySelectorAll('.van-tabbar .van-tabbar-item')[2] as HTMLElement
-  const cart = cartTab?.getBoundingClientRect()
-  if (!cart) return
-  const dx = (cart.left + cart.width / 2) - sx
-  const dy = (cart.top + cart.height / 2 - 8) - sy
-  const ball = document.createElement('div')
-  ball.style.cssText = `position:fixed;left:${sx}px;top:${sy}px;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;z-index:9999;pointer-events:none;overflow:hidden;box-shadow:0 5px 16px color-mix(in oklch,var(--color-primary) 48%,transparent);${img ? `background:#000 center/cover url('${img}')` : 'background:var(--color-primary)'};border:2px solid var(--color-primary-light);`
-  document.body.appendChild(ball)
-  const anim = ball.animate([
-    { transform: 'translate(0,0) scale(1)', opacity: 1, offset: 0 },
-    { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 100}px) scale(.9)`, opacity: 1, offset: 0.55 },
-    { transform: `translate(${dx}px,${dy}px) scale(.2)`, opacity: .3, offset: 1 },
-  ], { duration: 520, easing: 'cubic-bezier(.22,.72,.24,1)' })
-  anim.onfinish = () => {
-    ball.remove()
-    cartTab?.classList.add('cart-bumped')
-    setTimeout(() => cartTab?.classList.remove('cart-bumped'), 450)
-  }
 }
 
 onMounted(() => {
