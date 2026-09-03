@@ -2,6 +2,7 @@
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <WebMcpCompanion />
 </template>
 
 <script setup lang="ts">
