@@ -322,7 +322,7 @@ async function fetchProducts() {
       `${config.public.apiBase}/v1/goods`,
       { params: { page: 1, pageSize: 12, isHot: true, tenant_id: tenantId } },
     )
-    if (res.code === 200 && res.data?.data) products.value = res.data.data
+    if (res.code === 200) products.value = res.data?.data ?? []
     else loadError.value = true
   } catch {
     loadError.value = true
