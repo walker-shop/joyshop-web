@@ -3,7 +3,7 @@
     <header class="desktop-header">
       <div class="desktop-header__inner">
         <NuxtLink to="/" class="desktop-brand" aria-label="ZShop">
-          <img src="/logo.png" alt="" width="36" height="36">
+          <img src="/logo.png?v=20260926" alt="" width="36" height="36">
           <span>ZShop</span>
         </NuxtLink>
 

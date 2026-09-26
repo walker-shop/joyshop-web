@@ -2,7 +2,7 @@
   <div class="home-page">
     <header class="mobile-topbar">
       <NuxtLink to="/" class="mobile-brand" aria-label="ZShop">
-        <img src="/logo.png" alt="" width="34" height="34">
+        <img src="/logo.png?v=20260926" alt="" width="34" height="34">
         <span>ZShop</span>
       </NuxtLink>
       <NuxtLink to="/search" class="mobile-search">

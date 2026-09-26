@@ -7,7 +7,7 @@ export default defineNuxtPlugin(() => {
       || document.createElement('link')
     link.rel = 'icon'
     link.type = 'image/x-icon'
-    link.href = `/icons/favicon-${theme}.ico`
+    link.href = `/icons/favicon-${theme}.ico?v=20260926`
     if (!link.parentNode) document.head.appendChild(link)
 
     const link32 = document.querySelector<HTMLLinkElement>('link[rel="icon"][sizes="32x32"]')
@@ -15,13 +15,13 @@ export default defineNuxtPlugin(() => {
     link32.rel = 'icon'
     link32.type = 'image/png'
     link32.sizes = '32x32' as any
-    link32.href = `/icons/favicon-32x32-${theme}.png`
+    link32.href = `/icons/favicon-32x32-${theme}.png?v=20260926`
     if (!link32.parentNode) document.head.appendChild(link32)
 
     const apple = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]')
       || document.createElement('link')
     apple.rel = 'apple-touch-icon'
-    apple.href = `/icons/apple-touch-icon-${theme}.png`
+    apple.href = `/icons/apple-touch-icon-${theme}.png?v=20260926`
     if (!apple.parentNode) document.head.appendChild(apple)
   }
 

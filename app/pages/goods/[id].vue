@@ -5,7 +5,7 @@
         <PhArrowLeft :size="21" />
       </button>
       <NuxtLink to="/" class="nav-brand">
-        <img src="/logo.png" alt="" width="30" height="30">
+        <img src="/logo.png?v=20260926" alt="" width="30" height="30">
         <span>ZShop</span>
       </NuxtLink>
       <span class="nav-title">{{ $t('pdp.navTitle') }}</span>
