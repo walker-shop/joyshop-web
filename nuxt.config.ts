@@ -30,9 +30,6 @@ export default defineNuxtConfig({
   },
 
   css: [
-    '@fontsource-variable/archivo',
-    '@fontsource-variable/noto-sans-sc',
-    '@fontsource-variable/noto-sans-thai',
     '~/assets/css/global.css',
     '~/assets/css/lux.css',
   ],
