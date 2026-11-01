@@ -264,12 +264,12 @@ interface Banner { id: number; image: string; url: string; index: number }
 interface Category { id: number; name: string; parentId: number; level: number; icon?: string }
 
 const { data: storefront, refresh: refreshBanners } = await useAsyncData(`public-storefront-${tenantId}`, () =>
-  $fetch<{ banners: Banner[]; catalog: { id: number; name: string }[] }>('/api/storefront'),
-  { default: () => ({ banners: [], catalog: [] }) },
+  $fetch<{ banners: Banner[]; categories: Category[]; catalog: { id: number; name: string }[] }>('/api/storefront'),
+  { default: () => ({ banners: [], categories: [], catalog: [] }) },
 )
 const banners = computed(() => storefront.value?.banners || [])
 useHead(() => ({ link: banners.value[0] ? [{ rel: 'preload', as: 'image', href: bannerImage(banners.value[0].image), fetchpriority: 'high' }] : [] }))
-const allCategories = ref<Category[]>([])
+const allCategories = ref<Category[]>(storefront.value?.categories || [])
 const products = ref<any[]>([])
 const featuredProducts = computed(() => products.value.slice(0, 12))
 const { getIconDef } = useCategoryIcon()
@@ -369,7 +369,7 @@ async function quickAdd(item: any, e?: MouseEvent) {
 
 onMounted(() => {
   heroReady.value = true
-  void Promise.all([fetchCategories(), fetchProducts()])
+  void fetchProducts()
 })
 </script>
 
