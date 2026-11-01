@@ -1,5 +1,6 @@
 export default defineNuxtPlugin(() => {
   const route = useRoute()
+  const pageError = useError()
   // The app uses a custom vue-i18n plugin, not Nuxt's $i18n injection.
   const locale = useCookie<string>('zshop_lang', { default: () => 'zh-CN' })
   const origin = 'https://zshop.zwlab.app'
@@ -13,7 +14,7 @@ export default defineNuxtPlugin(() => {
     link: [{ rel: 'canonical', href: canonical.value }],
     meta: [
       { name: 'description', content: description },
-      { name: 'robots', content: privatePage.value ? 'noindex, follow' : 'index, follow, max-image-preview:large' },
+      { name: 'robots', content: (privatePage.value || pageError.value) ? 'noindex, follow' : 'index, follow, max-image-preview:large' },
       { property: 'og:title', content: title.value },
       { property: 'og:description', content: description },
       { property: 'og:url', content: canonical.value },
@@ -21,6 +22,6 @@ export default defineNuxtPlugin(() => {
       { property: 'og:site_name', content: 'ZShop' },
       { name: 'twitter:card', content: 'summary' },
     ],
-    script: privatePage.value ? [] : [{ key: 'store-schema', type: 'application/ld+json', innerHTML: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'ZShop', url: origin + '/' }).replace(/</g, '\\u003c') }],
+    script: (privatePage.value || pageError.value) ? [] : [{ key: 'store-schema', type: 'application/ld+json', innerHTML: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'ZShop', url: origin + '/' }).replace(/</g, '\\u003c') }],
   }))
 })

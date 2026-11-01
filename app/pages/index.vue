@@ -24,12 +24,15 @@
         </div>
 
         <div class="hero-media">
-          <van-swipe v-if="banners.length" :autoplay="5000" lazy-render class="hero-swipe" indicator-color="#ffffff">
+          <NuxtLink v-if="!heroReady && banners.length" :to="bannerTarget(banners[0].url)" class="hero-link">
+              <img class="hero-initial-image" :src="bannerImage(banners[0].image)" :alt="`${$t('home.heroTitle1')}${$t('home.heroTitle2')}`" width="1200" height="675" fetchpriority="high" />
+            </NuxtLink>
+            <van-swipe v-else-if="banners.length" :autoplay="5000" lazy-render class="hero-swipe" indicator-color="#ffffff">
             <van-swipe-item v-for="item in banners" :key="item.id">
               <NuxtLink :to="bannerTarget(item.url)" class="hero-link">
                 <van-image
                   class="hero-image"
-                  :src="item.image"
+                  :src="bannerImage(item.image)"
                   fit="cover"
                   :alt="`${$t('home.heroTitle1')}${$t('home.heroTitle2')}`"
                 >
@@ -100,10 +103,13 @@
 
         <div class="desktop-hero">
           <div class="desktop-hero__media">
-            <van-swipe v-if="banners.length" :autoplay="5000" lazy-render class="desktop-swipe" indicator-color="#ffffff">
+            <NuxtLink v-if="!heroReady && banners.length" :to="bannerTarget(banners[0].url)" class="desktop-hero__link">
+              <img class="hero-initial-image" :src="bannerImage(banners[0].image)" :alt="`${$t('home.heroTitle1')}${$t('home.heroTitle2')}`" width="1200" height="675" fetchpriority="high" />
+            </NuxtLink>
+            <van-swipe v-else-if="banners.length" :autoplay="5000" lazy-render class="desktop-swipe" indicator-color="#ffffff">
               <van-swipe-item v-for="item in banners" :key="item.id">
                 <NuxtLink :to="bannerTarget(item.url)" class="desktop-hero__link">
-                  <van-image :src="item.image" fit="cover" :alt="`${$t('home.heroTitle1')}${$t('home.heroTitle2')}`">
+                  <van-image :src="bannerImage(item.image)" fit="cover" :alt="`${$t('home.heroTitle1')}${$t('home.heroTitle2')}`">
                     <template #loading><div class="image-skeleton" /></template>
                     <template #error><div class="hero-fallback">ZShop</div></template>
                   </van-image>
@@ -244,18 +250,24 @@ import {
   PhTruck,
 } from '@phosphor-icons/vue'
 import { showToast } from 'vant'
+import { bannerImage } from '~/utils/bannerImages'
 
 const { t } = useI18n()
 const config = useRuntimeConfig()
 const { tenantId } = useTenant()
 const refreshing = ref(false)
+const heroReady = ref(false)
 const loading = ref(true)
 const loadError = ref(false)
 
 interface Banner { id: number; image: string; url: string; index: number }
 interface Category { id: number; name: string; parentId: number; level: number; icon?: string }
 
-const banners = ref<Banner[]>([])
+const { data: banners, refresh: refreshBanners } = await useAsyncData(`home-banners-${tenantId}`, async () => {
+  const res = await $fetch<{ code: number; data: { data: Banner[] } }>(`${config.public.apiBase}/v1/banners`, { params: { tenant_id: tenantId }, timeout: 8000 })
+  return res.code === 200 ? (res.data?.data || []) : []
+}, { default: () => [] })
+useHead(() => ({ link: banners.value[0] ? [{ rel: 'preload', as: 'image', href: bannerImage(banners.value[0].image), fetchpriority: 'high' }] : [] }))
 const allCategories = ref<Category[]>([])
 const products = ref<any[]>([])
 const featuredProducts = computed(() => products.value.slice(0, 12))
@@ -291,15 +303,7 @@ function bannerTarget(url: string): string {
 }
 
 async function fetchBanners() {
-  try {
-    const res = await $fetch<{ code: number; data: { data: Banner[] } }>(
-      `${config.public.apiBase}/v1/banners`,
-      { params: { tenant_id: tenantId } },
-    )
-    if (res.code === 200 && res.data?.data) banners.value = res.data.data
-  } catch {
-    banners.value = []
-  }
+  await refreshBanners()
 }
 
 async function fetchCategories() {
@@ -363,7 +367,8 @@ async function quickAdd(item: any, e?: MouseEvent) {
 }
 
 onMounted(() => {
-  void Promise.all([fetchBanners(), fetchCategories(), fetchProducts()])
+  heroReady.value = true
+  void Promise.all([fetchCategories(), fetchProducts()])
 })
 </script>
 
@@ -457,6 +462,7 @@ onMounted(() => {
   font-weight: 680;
 }
 
+.hero-initial-image { display: block; width: 100%; height: 100%; object-fit: cover; }
 .hero-media { min-width: 0; overflow: hidden; border-radius: var(--radius-lg); background: var(--color-search-bg); }
 .hero-swipe,
 .hero-link,
