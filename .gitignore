@@ -5,3 +5,6 @@ dist
 *.local
 .env
 app/components.d.ts
+
+# Generated from the installed Vant version at build time
+public/_fonts/

@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url'
+import { externalizeVantFont } from './build/vant-font'
 import Components from 'unplugin-vue-components/vite'
 import { VantResolver } from '@vant/auto-import-resolver'
 
@@ -57,6 +59,7 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [
+      externalizeVantFont(fileURLToPath(new URL('.', import.meta.url))),
       Components({
         resolvers: [VantResolver()],
       }),
