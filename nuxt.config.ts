@@ -60,6 +60,15 @@ export default defineNuxtConfig({
   vite: {
     plugins: [
       externalizeVantFont(fileURLToPath(new URL('.', import.meta.url))),
+      {
+        name: 'optional-brand-fonts',
+        enforce: 'pre',
+        transform(code, id) {
+          if (id.includes('/@fontsource-variable/') && id.split('?')[0]?.endsWith('.css')) {
+            return { code: code.replace(/font-display:\s*swap/g, 'font-display: optional'), map: null }
+          }
+        },
+      },
       Components({
         resolvers: [VantResolver()],
       }),
