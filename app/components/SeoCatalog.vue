@@ -1,8 +1,5 @@
 <script setup lang="ts">
-const config = useRuntimeConfig()
-const { tenantId } = useTenant()
-const { data } = await useAsyncData('seo-catalog', () => $fetch<any>(`${config.public.apiBase}/v1/goods`, { params: { page: 1, pageSize: 12, tenant_id: tenantId }, timeout: 10000 }), { default: () => null })
-const products = computed(() => data.value?.data?.data || [])
+defineProps<{ products: { id: number; name: string }[] }>()
 </script>
 <template>
   <section v-if="products.length" class="seo-catalog" aria-label="商品目录">

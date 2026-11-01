@@ -228,7 +228,7 @@
           </div>
         </van-pull-refresh>
       </section>
-      <SeoCatalog />
+      <SeoCatalog :products="storefront?.catalog || []" />
     </main>
   </div>
 </template>
@@ -263,10 +263,11 @@ const loadError = ref(false)
 interface Banner { id: number; image: string; url: string; index: number }
 interface Category { id: number; name: string; parentId: number; level: number; icon?: string }
 
-const { data: banners, refresh: refreshBanners } = await useAsyncData(`home-banners-${tenantId}`, async () => {
-  const res = await $fetch<{ code: number; data: { data: Banner[] } }>(`${config.public.apiBase}/v1/banners`, { params: { tenant_id: tenantId }, timeout: 8000 })
-  return res.code === 200 ? (res.data?.data || []) : []
-}, { default: () => [] })
+const { data: storefront, refresh: refreshBanners } = await useAsyncData(`public-storefront-${tenantId}`, () =>
+  $fetch<{ banners: Banner[]; catalog: { id: number; name: string }[] }>('/api/storefront'),
+  { default: () => ({ banners: [], catalog: [] }) },
+)
+const banners = computed(() => storefront.value?.banners || [])
 useHead(() => ({ link: banners.value[0] ? [{ rel: 'preload', as: 'image', href: bannerImage(banners.value[0].image), fetchpriority: 'high' }] : [] }))
 const allCategories = ref<Category[]>([])
 const products = ref<any[]>([])
