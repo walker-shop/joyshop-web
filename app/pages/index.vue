@@ -222,6 +222,7 @@
           </div>
         </van-pull-refresh>
       </section>
+      <SeoCatalog />
     </main>
   </div>
 </template>

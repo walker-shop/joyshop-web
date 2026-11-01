@@ -199,17 +199,42 @@ function priceParts(value: number) {
   return { int, dec }
 }
 
-const { data: goods, status, refresh } = await useAsyncData(`goods-${route.params.id}`, async () => {
+const { data: goods, status, refresh, error: goodsError } = await useAsyncData(`goods-${route.params.id}`, async () => {
   const res = await $fetch<{ code: number; data: any }>(
     `${config.public.apiBase}/v1/goods/${route.params.id}`,
     { params: { tenant_id: tenantId } },
   )
   if (res.code === 200 && res.data) return res.data
-  throw new Error('Product unavailable')
+  throw createError({ statusCode: res.code === 404 ? 404 : 503, statusMessage: 'Product unavailable' })
 }, {
-  server: false,
+  server: true,
   default: () => ({ name: '', shopPrice: 0, marketPrice: 0, images: [], goodsFrontImage: '' }),
 })
+
+// Product content and metadata must be present in the initial server response.
+if (goodsError.value && import.meta.server) {
+  const missing = [404, 400].includes(Number((goodsError.value as any)?.statusCode))
+  throw createError({ statusCode: missing ? 404 : 503, statusMessage: missing ? 'Product not found' : 'Product temporarily unavailable' })
+}
+const seoDescription = computed(() => String(goods.value?.goodsBrief || goods.value?.goodsDesc || `${goods.value?.name || '商品'}：查看商品图片、价格和规格。`).replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').slice(0, 160))
+useSeoMeta({
+  title: () => `${goods.value?.name || '商品详情'} · ZShop`,
+  description: () => seoDescription.value,
+  ogTitle: () => `${goods.value?.name || '商品详情'} · ZShop`,
+  ogDescription: () => seoDescription.value,
+  ogImage: () => goods.value?.goodsFrontImage || undefined,
+  twitterCard: 'summary_large_image',
+})
+useHead(() => ({ script: goods.value?.name ? [{
+  key: 'product-schema', type: 'application/ld+json',
+  innerHTML: JSON.stringify({ '@context': 'https://schema.org', '@graph': [
+    { '@type': 'Product', name: goods.value.name, description: seoDescription.value, image: goods.value.images?.length ? goods.value.images : [goods.value.goodsFrontImage].filter(Boolean), sku: String(route.params.id), url: `https://zshop.zwlab.app/goods/${route.params.id}` },
+    { '@type': 'BreadcrumbList', itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'ZShop', item: 'https://zshop.zwlab.app/' },
+      { '@type': 'ListItem', position: 2, name: goods.value.name, item: `https://zshop.zwlab.app/goods/${route.params.id}` }
+    ] }
+  ] }).replace(/</g, '\\u003c'),
+}] : [] }))
 
 const heroImages = computed(() => {
   const images = (goods.value?.images || []).filter(Boolean)
@@ -267,10 +292,6 @@ function showReviewImages(images: string[], current: string) {
   showImagePreview({ images, startPosition: Math.max(0, images.indexOf(current)), closeable: true })
 }
 
-useSeoMeta({
-  title: () => `${goods.value?.name || t('pdp.navTitle')} - ZShop`,
-  ogImage: () => heroImages.value[0] ?? '',
-})
 
 const { apiFetch } = useApi()
 const { isLoggedIn } = useAuth()
