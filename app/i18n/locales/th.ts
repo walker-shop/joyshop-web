@@ -1,7 +1,5 @@
 // ⚠️ 泰文为 AI 翻译，待母语者复核（AI-translated Thai, pending native review）
-import type { MessageSchema } from '../types'
-
-const messages: MessageSchema = {
+export default {
   common: {
     loading: 'กำลังโหลด…',
     loginRequired: 'กรุณาเข้าสู่ระบบก่อน',
@@ -324,5 +322,3 @@ const messages: MessageSchema = {
     jobTelegram: 'Telegram สำหรับติดต่อเรื่องงาน',
   },
 }
-
-export default messages

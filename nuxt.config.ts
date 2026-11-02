@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import { externalizeVantFont } from './build/vant-font'
 import Components from 'unplugin-vue-components/vite'
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import { VantResolver } from '@vant/auto-import-resolver'
 
 // dev-only：去掉浏览器 Origin/Referer 头，避免本地后端 CORS 403
@@ -61,7 +62,19 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    define: {
+      __INTLIFY_JIT_COMPILATION__: true,
+      __INTLIFY_DROP_MESSAGE_COMPILER__: true,
+    },
+    ssr: { noExternal: ['vue-i18n', /@intlify\//] },
     plugins: [
+      VueI18nPlugin({
+        include: fileURLToPath(new URL('./app/i18n/locales/*.ts', import.meta.url)),
+        runtimeOnly: true,
+        jitCompilation: true,
+        dropMessageCompiler: true,
+        ssr: true,
+      }),
       externalizeVantFont(fileURLToPath(new URL('.', import.meta.url))),
       {
         name: 'optional-brand-fonts',

@@ -24,7 +24,7 @@
         </div>
 
         <div class="hero-media">
-          <NuxtLink v-if="!heroReady && banners.length" :to="bannerTarget(banners[0].url)" class="hero-link">
+          <NuxtLink v-if="(!heroReady || isDesktop) && banners.length" :to="bannerTarget(banners[0].url)" class="hero-link">
               <img class="hero-initial-image" :src="bannerImage(banners[0].image)" :alt="`${$t('home.heroTitle1')}${$t('home.heroTitle2')}`" width="1200" height="675" fetchpriority="high" />
             </NuxtLink>
             <van-swipe v-else-if="banners.length" :autoplay="5000" lazy-render class="hero-swipe" indicator-color="#ffffff">
@@ -103,7 +103,7 @@
 
         <div class="desktop-hero">
           <div class="desktop-hero__media">
-            <NuxtLink v-if="!heroReady && banners.length" :to="bannerTarget(banners[0].url)" class="desktop-hero__link">
+            <NuxtLink v-if="(!heroReady || !isDesktop) && banners.length" :to="bannerTarget(banners[0].url)" class="desktop-hero__link">
               <img class="hero-initial-image" :src="bannerImage(banners[0].image)" :alt="`${$t('home.heroTitle1')}${$t('home.heroTitle2')}`" width="1200" height="675" fetchpriority="high" />
             </NuxtLink>
             <van-swipe v-else-if="banners.length" :autoplay="5000" lazy-render class="desktop-swipe" indicator-color="#ffffff">
@@ -154,7 +154,7 @@
         <i>开始出片 →</i>
       </NuxtLink>
 
-      <section class="recommend-section">
+      <section ref="recommendSection" class="recommend-section">
         <div class="section-heading">
           <div>
             <span class="section-eyebrow">CURATED FOR YOU</span>
@@ -257,6 +257,11 @@ const config = useRuntimeConfig()
 const { tenantId } = useTenant()
 const refreshing = ref(false)
 const heroReady = ref(false)
+const isDesktop = ref(false)
+let desktopQuery: MediaQueryList | undefined
+const updateDesktop = () => { isDesktop.value = desktopQuery?.matches ?? false }
+const recommendSection = ref<HTMLElement | null>(null)
+let productObserver: IntersectionObserver | undefined
 const loading = ref(true)
 const loadError = ref(false)
 
@@ -368,8 +373,27 @@ async function quickAdd(item: any, e?: MouseEvent) {
 }
 
 onMounted(() => {
+  desktopQuery = window.matchMedia('(min-width: 1024px)')
+  updateDesktop()
+  desktopQuery.addEventListener('change', updateDesktop)
   heroReady.value = true
-  void fetchProducts()
+  // The product grid is below the mobile fold. Initialize it near the viewport.
+  // The server-rendered SeoCatalog still exposes product names and links to crawlers.
+  if (recommendSection.value && 'IntersectionObserver' in window) {
+    productObserver = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) {
+        productObserver?.disconnect()
+        void fetchProducts()
+      }
+    }, { rootMargin: '200px' })
+    productObserver.observe(recommendSection.value)
+  } else {
+    void fetchProducts()
+  }
+})
+onBeforeUnmount(() => {
+  desktopQuery?.removeEventListener('change', updateDesktop)
+  productObserver?.disconnect()
 })
 </script>
 

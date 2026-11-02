@@ -31,6 +31,7 @@
                 type="button"
                 class="lang-menu-opt"
                 :class="{ active: locale === l.code }"
+                :disabled="localeSwitching"
                 @click="pickLocale(l.code)"
               >
                 {{ l.label }}
@@ -62,6 +63,7 @@
           type="button"
           class="lang-menu-opt"
           :class="{ active: locale === l.code }"
+                :disabled="localeSwitching"
           @click="pickLocale(l.code)"
         >
           {{ l.label }}
@@ -103,6 +105,7 @@ import {
   PhStorefront,
   PhUserCircle,
 } from '@phosphor-icons/vue'
+import { showToast } from 'vant'
 import { SUPPORTED_LOCALES, type LocaleCode } from '~/i18n/constants'
 
 const activeTab = ref(0)
@@ -110,13 +113,22 @@ const { count: cartCount, refresh: refreshCart } = useCartCount()
 onMounted(refreshCart)
 
 const { $setAppLocale } = useNuxtApp()
-const { locale } = useI18n()
+const { locale, t } = useI18n()
+const localeSwitching = ref(false)
 const langOpen = ref(false)
 const currentLocaleLabel = computed(() => SUPPORTED_LOCALES.find(l => l.code === locale.value)?.label ?? SUPPORTED_LOCALES[0].label)
 
-function pickLocale(code: LocaleCode) {
-  $setAppLocale(code)
-  langOpen.value = false
+async function pickLocale(code: LocaleCode) {
+  if (localeSwitching.value) return
+  localeSwitching.value = true
+  try {
+    await $setAppLocale(code)
+    langOpen.value = false
+  } catch {
+    showToast(t('common.loadFailed'))
+  } finally {
+    localeSwitching.value = false
+  }
 }
 </script>
 

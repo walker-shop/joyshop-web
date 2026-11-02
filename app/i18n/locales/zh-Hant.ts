@@ -1,6 +1,4 @@
-import type { MessageSchema } from '../types'
-
-const messages: MessageSchema = {
+export default {
   common: {
     loading: '載入中…',
     loginRequired: '請先登入',
@@ -323,5 +321,3 @@ const messages: MessageSchema = {
     jobTelegram: 'Telegram 求職專用號',
   },
 }
-
-export default messages

@@ -1,6 +1,4 @@
-import type { MessageSchema } from '../types'
-
-const messages: MessageSchema = {
+export default {
   common: {
     loading: 'Loading…',
     loginRequired: 'Please sign in first',
@@ -323,5 +321,3 @@ const messages: MessageSchema = {
     jobTelegram: 'Telegram for job enquiries',
   },
 }
-
-export default messages

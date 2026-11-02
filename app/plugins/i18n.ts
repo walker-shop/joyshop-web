@@ -16,7 +16,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   const locale = resolveLocale(cookie.value, acceptLang, navLang)
   if (!cookie.value) cookie.value = locale // 首访落 cookie，后续稳定
 
-  const i18n = createAppI18n(locale)
+  const i18n = await createAppI18n(locale)
   nuxtApp.vueApp.use(i18n)
   await setLocale(i18n, locale)
 
@@ -24,8 +24,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
   return {
     provide: {
       setAppLocale: async (code: LocaleCode) => {
-        cookie.value = code
-        await setLocale(i18n, code)
+        if (await setLocale(i18n, code)) cookie.value = code
       },
     },
   }
