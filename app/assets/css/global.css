@@ -34,8 +34,8 @@
   --color-header-gradient-start: var(--color-primary-light);
   --color-header-gradient-end: var(--color-primary);
 
-  --font-display: 'Archivo Variable', 'Noto Sans SC Variable', sans-serif;
-  --font-body: 'Noto Sans SC Variable', 'Noto Sans Thai Variable', sans-serif;
+  --font-display: 'Archivo Variable', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-body: system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans Thai', sans-serif;
 
   --space-2xs: 4px;
   --space-xs: 8px;

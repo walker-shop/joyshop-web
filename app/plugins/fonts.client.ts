@@ -1,10 +1,7 @@
-// Keep fallback fonts readable on the first paint. Brand fonts load after hydration.
+// Use installed CJK/Thai fonts instead of downloading large web-font subsets.
+// Keep the small Latin display face as a progressive enhancement.
 export default defineNuxtPlugin(() => {
   onNuxtReady(() => {
-    void Promise.allSettled([
-      import('@fontsource-variable/archivo'),
-      import('@fontsource-variable/noto-sans-sc'),
-      import('@fontsource-variable/noto-sans-thai'),
-    ])
+    void import('@fontsource-variable/archivo').catch(() => {})
   })
 })

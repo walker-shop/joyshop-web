@@ -16,6 +16,9 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  // Include the initial page's CSS in SSR HTML instead of blocking on small files.
+  features: { inlineStyles: true },
+
   modules: [
     '@vite-pwa/nuxt',
   ],
