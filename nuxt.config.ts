@@ -19,6 +19,14 @@ export default defineNuxtConfig({
 
   // Include the initial page's CSS in SSR HTML instead of blocking on small files.
   features: { inlineStyles: true },
+  experimental: {
+    defaults: {
+      nuxtLink: {
+        // Keep route chunks out of startup until the shopper shows navigation intent.
+        prefetchOn: { interaction: true, visibility: false },
+      },
+    },
+  },
 
   modules: [
     '@vite-pwa/nuxt',
