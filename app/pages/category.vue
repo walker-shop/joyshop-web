@@ -100,10 +100,10 @@
               <article v-for="item in sortedProducts" :key="item.id" class="product-card">
                 <NuxtLink :to="`/goods/${item.id}`" class="product-link">
                   <div class="product-media">
-                    <van-image class="fill" :src="item.goodsFrontImage" fit="cover" :alt="item.name" lazy-load>
+                    <ProductImage class="fill" :src="item.goodsFrontImage" fit="cover" :alt="item.name">
                       <template #loading><div class="product-placeholder muted">{{ monogram(item.name) }}</div></template>
                       <template #error><div class="product-placeholder">{{ monogram(item.name) }}</div></template>
-                    </van-image>
+                    </ProductImage>
                     <span v-if="discountPercent(item)" class="discount">−{{ discountPercent(item) }}%</span>
                   </div>
                   <div class="product-copy">
